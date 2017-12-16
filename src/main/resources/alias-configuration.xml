@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <aliases>
-    <name>Alias name</name>
-    <description>Alias description</description>
+    <name>This alksdjas</name>
+    <description>asdaAAAlksjdlakjdsla</description>
     <alias>
-        <what>asdas</what>
         <name>Test env</name>
         <description>Something something pride and accomplishment</description>
         <url>jdbc:oracle:thin:@tst-host:1521:SOMESID</url>
@@ -12,7 +11,7 @@
     </alias>
     <alias>
         <name>Acceptance env</name>
-        <description>Something something pride and accomplishment</description>
+        <description>Hepr a derp something pride and accomplishment</description>
         <url>jdbc:oracle:thin:@acc-host:1521:SOMESID</url>
         <user>derpington</user>
         <password>boatymcboatface</password>

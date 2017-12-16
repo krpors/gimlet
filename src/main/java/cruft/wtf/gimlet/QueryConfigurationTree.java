@@ -3,19 +3,15 @@ package cruft.wtf.gimlet;
 import cruft.wtf.gimlet.conf.Item;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.conf.QueryConfiguration;
-import javafx.scene.control.Tooltip;
-import javafx.scene.control.TreeCell;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
-import javafx.util.Callback;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.TextFieldTreeCell;
+import javafx.util.StringConverter;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.List;
 
-public class ProjectTree extends TreeView<Item> {
+public class QueryConfigurationTree extends TreeView<Item> {
 
-    public ProjectTree() {
+    public QueryConfigurationTree() {
     }
 
     public void setQueryConfiguration(final QueryConfiguration configuration) {
@@ -23,13 +19,8 @@ public class ProjectTree extends TreeView<Item> {
 
         addQuery(root, configuration.getQueries());
 
-        super.setCellFactory(new Callback<TreeView<Item>, TreeCell<Item>>() {
-            @Override
-            public TreeCell<Item> call(TreeView<Item> param) {
-                ProjectTreeCell projectTreeCell = new ProjectTreeCell();
-                return projectTreeCell;
-            }
-        });
+        setEditable(true);
+        super.setCellFactory(param -> new QueryConfigurationTreeCell());
 
         setRoot(root);
     }
@@ -52,16 +43,25 @@ public class ProjectTree extends TreeView<Item> {
         }
     }
 
-    private class ProjectTreeCell extends TreeCell<Item> {
+    /**
+     * Contains rendering logic for {@link Item} objects used throughout Gimlet.
+     */
+    private class QueryConfigurationTreeCell extends TextFieldTreeCell<Item> {
 
-        public ProjectTreeCell() {
-            setText("www");
+        private ContextMenu menu = new ContextMenu();
 
-
+        public QueryConfigurationTreeCell() {
+            super(new ItemConverter());
+            // TODO: set item converter.
+            MenuItem renameItem = new MenuItem("Rename");
+            menu.getItems().add(renameItem);
+            renameItem.setOnAction(e -> {
+                startEdit();
+            });
         }
 
         @Override
-        protected void updateItem(Item item, boolean empty) {
+        public void updateItem(Item item, boolean empty) {
             // super call is required, see documentation.
             super.updateItem(item, empty);
             if (empty) {
@@ -70,12 +70,30 @@ public class ProjectTree extends TreeView<Item> {
                 return;
             }
 
+            if (!isEditing()) {
+                this.setContextMenu(menu);
+            }
+
             if (item instanceof QueryConfiguration) {
                 setText("CONFIG: " + item.getName());
             } else {
                 setText(item.getName());
                 setTooltip(new Tooltip(item.getDescription()));
             }
+        }
+
+    }
+
+    private class ItemConverter extends StringConverter<Item> {
+
+        @Override
+        public String toString(Item object) {
+            return object.getName();
+        }
+
+        @Override
+        public Item fromString(String string) {
+            return new Query();
         }
     }
 }

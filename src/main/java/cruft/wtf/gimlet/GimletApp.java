@@ -1,12 +1,16 @@
 package cruft.wtf.gimlet;
 
+import cruft.wtf.gimlet.conf.AliasConfiguration;
 import cruft.wtf.gimlet.conf.QueryConfiguration;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.Orientation;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SplitPane;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
@@ -28,16 +32,7 @@ public class GimletApp extends Application {
         fileItemOne.setAccelerator(KeyCombination.keyCombination("Ctrl+Q"));
         fileItemOne.setOnAction(event -> Platform.exit());
 
-        MenuItem fileItemTwo = new MenuItem("Add item");
-        fileItemTwo.setAccelerator(KeyCombination.keyCombination("Ctrl+L"));
-        fileItemTwo.setOnAction(event -> {
-            AddEvent e = new AddEvent();
-            e.setName("Kevin!");
-            EventDispatcher.getInstance().post(e);
-        });
-
         menuFile.getItems().add(fileItemOne);
-        menuFile.getItems().add(fileItemTwo);
 
         Menu menuHelp = new Menu("Help");
 
@@ -46,11 +41,12 @@ public class GimletApp extends Application {
         return menuBar;
     }
 
-    @Override
-    public void start(Stage primaryStage) throws IOException {
-        BorderPane pane = new BorderPane();
+    private Node createLeft() {
+        SplitPane splitPane = new SplitPane();
+        splitPane.setOrientation(Orientation.VERTICAL);
+        splitPane.setDividerPosition(0, 0.5);
 
-        ProjectTree tree = new ProjectTree();
+        QueryConfigurationTree tree = new QueryConfigurationTree();
         try {
             QueryConfiguration c = QueryConfiguration.read(GimletApp.class.getResourceAsStream("/query-configuration.xml"));
             tree.setQueryConfiguration(c);
@@ -59,15 +55,34 @@ public class GimletApp extends Application {
             Platform.exit();
         }
 
+        AliasTable tbl = new AliasTable();
+        try {
+            AliasConfiguration ac = AliasConfiguration.read(GimletApp.class.getResourceAsStream("/alias-configuration.xml"));
+            tbl.setAliases(ac);
+        } catch (JAXBException e) {
+            e.printStackTrace();
+            Platform.exit();
+        }
+
+        splitPane.getItems().addAll(tbl, tree);
+
+        splitPane.setPrefWidth(300);
+
+        return splitPane;
+    }
+
+    @Override
+    public void start(Stage primaryStage) throws IOException {
+        BorderPane pane = new BorderPane();
 
         pane.setTop(createMenuBar());
-        pane.setCenter(tree);
+        pane.setLeft(createLeft());
 
         Scene scene = new Scene(pane);
 
         primaryStage.setScene(scene);
-        primaryStage.setWidth(320);
-        primaryStage.setHeight(240);
+        primaryStage.setWidth(640);
+        primaryStage.setHeight(480);
         primaryStage.setTitle("Gimlet");
         primaryStage.show();
     }

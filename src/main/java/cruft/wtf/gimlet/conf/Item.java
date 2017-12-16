@@ -1,5 +1,7 @@
 package cruft.wtf.gimlet.conf;
 
+import javafx.beans.property.StringProperty;
+
 /**
  * Created by krpors on 15-12-17.
  */
