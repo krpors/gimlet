@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<aliases>
+    <alias>
+        <name>Test env</name>
+        <description>Something something pride and accomplishment</description>
+        <url>jdbc:oracle:thin:@tst-host:1521:SOMESID</url>
+        <user>yoyoma</user>
+        <password>rolfzor</password>
+    </alias>
+    <alias>
+        <name>Acceptance env</name>
+        <description>Something something pride and accomplishment</description>
+        <url>jdbc:oracle:thin:@acc-host:1521:SOMESID</url>
+        <user>derpington</user>
+        <password>boatymcboatface</password>
+    </alias>
+</aliases>

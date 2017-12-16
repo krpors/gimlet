@@ -2,9 +2,10 @@ package cruft.wtf.gimlet.conf;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
+import java.util.ArrayList;
 import java.util.List;
 
-public class Query {
+public class Query implements Item {
 
     private String name;
 
@@ -14,8 +15,9 @@ public class Query {
 
     private List<String> columnSelectors;
 
-    private List<Query> subQueries;
+    private List<Query> subQueries = new ArrayList<>();
 
+    @Override
     public String getName() {
         return name;
     }
@@ -42,6 +44,7 @@ public class Query {
         this.columnSelectors = columnSelectors;
     }
 
+    @Override
     public String getDescription() {
         return description;
     }
@@ -58,5 +61,10 @@ public class Query {
 
     public void setSubQueries(List<Query> subQueries) {
         this.subQueries = subQueries;
+    }
+
+    @Override
+    public String toString() {
+        return "Query{name='" + name + "}";
     }
 }

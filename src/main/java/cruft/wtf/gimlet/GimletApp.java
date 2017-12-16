@@ -1,5 +1,6 @@
 package cruft.wtf.gimlet;
 
+import cruft.wtf.gimlet.conf.QueryConfiguration;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -10,9 +11,10 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
+import javax.xml.bind.JAXBException;
 import java.io.IOException;
 
-public class EreshkigalApp extends Application {
+public class GimletApp extends Application {
 
     public static void main(String[] args) {
         launch(args);
@@ -48,17 +50,25 @@ public class EreshkigalApp extends Application {
     public void start(Stage primaryStage) throws IOException {
         BorderPane pane = new BorderPane();
 
-        ProjectTree list = new ProjectTree();
+        ProjectTree tree = new ProjectTree();
+        try {
+            QueryConfiguration c = QueryConfiguration.read(GimletApp.class.getResourceAsStream("/query-configuration.xml"));
+            tree.setQueryConfiguration(c);
+        } catch (JAXBException e) {
+            e.printStackTrace();
+            Platform.exit();
+        }
+
 
         pane.setTop(createMenuBar());
-        pane.setCenter(list);
+        pane.setCenter(tree);
 
         Scene scene = new Scene(pane);
 
         primaryStage.setScene(scene);
         primaryStage.setWidth(320);
         primaryStage.setHeight(240);
-        primaryStage.setTitle("Ereshkigal");
+        primaryStage.setTitle("Gimlet");
         primaryStage.show();
     }
 
