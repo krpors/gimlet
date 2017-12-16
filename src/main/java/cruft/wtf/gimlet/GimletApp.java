@@ -48,7 +48,7 @@ public class GimletApp extends Application {
 
         QueryConfigurationTree tree = new QueryConfigurationTree();
         try {
-            QueryConfiguration c = QueryConfiguration.read(GimletApp.class.getResourceAsStream("/query-configuration.xml"));
+            QueryConfiguration c = QueryConfiguration.read(GimletApp.class.getResourceAsStream("/queries.xml"));
             tree.setQueryConfiguration(c);
         } catch (JAXBException e) {
             e.printStackTrace();

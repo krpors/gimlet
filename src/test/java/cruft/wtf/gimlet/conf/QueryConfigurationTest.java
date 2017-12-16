@@ -8,10 +8,8 @@ import static org.junit.Assert.assertNotNull;
 public class QueryConfigurationTest {
     @Test
     public void read() throws Exception {
-        QueryConfiguration c = QueryConfiguration.read(QueryConfigurationTest.class.getResourceAsStream("/query-configuration.xml"));
+        QueryConfiguration c = QueryConfiguration.read(QueryConfigurationTest.class.getResourceAsStream("/queries.xml"));
 
-        assertEquals("Some configuration", c.getName());
-        assertEquals("This collection contains queries for the system xxx", c.getDescription());
         assertNotNull(c.getQueries());
         assertEquals(1, c.getQueries().size());
 

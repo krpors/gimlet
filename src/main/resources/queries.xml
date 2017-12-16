@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- This configuration file contains sets of queries, which can be 'loaded' into an alias. -->
+<queries>
+    <query>
+        <!-- Some meta (display) data for the query. -->
+        <name>Select all addresses.</name>
+        <description>This query selects all the main addresses.</description>
+        <!-- The actual query to run -->
+        <content>select * from address</content>
+        <!-- Column selectors are the columns which are supposed to be input for the
+             next query. Not sure yet how, but we'll see. -->
+        <column-selectors>
+            <column>post_code</column>
+            <column>street</column>
+        </column-selectors>
+
+        <!-- 'Sub'-queries. -->
+        <queries>
+            <query>
+                <name>This query drills down on other_address.</name>
+                <description>Drills further down into whatever.</description>
+                <content>select * from other_address where street = :street and zipcode = :post_code</content>
+            </query>
+            <query>
+                <name>Some other query</name>
+                <content>select derp from w00t;</content>
+                <description>Something, something, darkside.</description>
+                <queries>
+                    <query>
+                        <name>Yo</name>
+                        <content>select * from cruft;</content>
+                    </query>
+                </queries>
+            </query>
+        </queries>
+    </query>
+    <query>
+        <name>Another one!</name>
+        <description>This is a bogus query.</description>
+        <content>select * from dpodf;</content>
+    </query>
+</queries>

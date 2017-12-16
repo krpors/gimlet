@@ -5,22 +5,33 @@ import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.conf.QueryConfiguration;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeCell;
+import javafx.scene.input.KeyCode;
 import javafx.util.StringConverter;
 
 import java.util.List;
 
-public class QueryConfigurationTree extends TreeView<Item> {
+public class QueryConfigurationTree extends TreeView<Query> {
 
     public QueryConfigurationTree() {
     }
 
     public void setQueryConfiguration(final QueryConfiguration configuration) {
-        TreeItem<Item> root = new TreeItem<>(configuration);
+        TreeItem<Query> root = new TreeItem<>();
 
         addQuery(root, configuration.getQueries());
 
-        setEditable(true);
-        super.setCellFactory(param -> new QueryConfigurationTreeCell());
+        setShowRoot(false);
+        setCellFactory(param -> new QueryConfigurationTreeCell());
+        setOnMouseClicked(e -> {
+            if (e.getClickCount() == 2) {
+                System.out.println("Selected " + getSelectionModel().getSelectedItem().getValue().getName());
+            }
+        });
+        setOnKeyPressed(e -> {
+            if (e.getCode() == KeyCode.ENTER) {
+                System.out.println("Entered " + getSelectionModel().getSelectedItem().getValue().getName());
+            }
+        });
 
         setRoot(root);
     }
@@ -31,13 +42,13 @@ public class QueryConfigurationTree extends TreeView<Item> {
      * @param root
      * @param queryList
      */
-    private void addQuery(final TreeItem<Item> root, List<Query> queryList) {
+    private void addQuery(final TreeItem<Query> root, List<Query> queryList) {
         if (queryList == null || queryList.size() == 0) {
             return;
         }
 
         for (Query q : queryList) {
-            TreeItem<Item> qitem = new TreeItem<>(q);
+            TreeItem<Query> qitem = new TreeItem<>(q);
             root.getChildren().add(qitem);
             addQuery(qitem, q.getSubQueries());
         }
@@ -46,12 +57,12 @@ public class QueryConfigurationTree extends TreeView<Item> {
     /**
      * Contains rendering logic for {@link Item} objects used throughout Gimlet.
      */
-    private class QueryConfigurationTreeCell extends TextFieldTreeCell<Item> {
+    private class QueryConfigurationTreeCell extends TextFieldTreeCell<Query> {
 
         private ContextMenu menu = new ContextMenu();
 
         public QueryConfigurationTreeCell() {
-            super(new ItemConverter());
+//            super(new ItemConverter());
             // TODO: set item converter.
             MenuItem renameItem = new MenuItem("Rename");
             menu.getItems().add(renameItem);
@@ -61,7 +72,7 @@ public class QueryConfigurationTree extends TreeView<Item> {
         }
 
         @Override
-        public void updateItem(Item item, boolean empty) {
+        public void updateItem(Query item, boolean empty) {
             // super call is required, see documentation.
             super.updateItem(item, empty);
             if (empty) {
@@ -74,26 +85,9 @@ public class QueryConfigurationTree extends TreeView<Item> {
                 this.setContextMenu(menu);
             }
 
-            if (item instanceof QueryConfiguration) {
-                setText("CONFIG: " + item.getName());
-            } else {
-                setText(item.getName());
-                setTooltip(new Tooltip(item.getDescription()));
-            }
-        }
+            setText(item.getName());
+            setTooltip(new Tooltip(item.getDescription()));
 
-    }
-
-    private class ItemConverter extends StringConverter<Item> {
-
-        @Override
-        public String toString(Item object) {
-            return object.getName();
-        }
-
-        @Override
-        public Item fromString(String string) {
-            return new Query();
         }
     }
 }
