@@ -17,8 +17,13 @@ import javafx.stage.Stage;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 public class GimletApp extends Application {
+
+    public static Connection sqlConnection;
 
     public static void main(String[] args) {
         launch(args);
@@ -73,6 +78,14 @@ public class GimletApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
+        try {
+            Class.forName("org.hsqldb.jdbc.JDBCDriver");
+            sqlConnection = DriverManager.getConnection("jdbc:hsqldb:file:/home/krpors/Development/hsql", "admin", "admin");
+        } catch (ClassNotFoundException | SQLException e) {
+            e.printStackTrace();
+        }
+
+
         BorderPane pane = new BorderPane();
 
         pane.setTop(createMenuBar());
