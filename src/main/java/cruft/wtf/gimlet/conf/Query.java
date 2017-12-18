@@ -1,5 +1,8 @@
 package cruft.wtf.gimlet.conf;
 
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import java.util.ArrayList;
@@ -7,31 +10,40 @@ import java.util.List;
 
 public class Query implements Item {
 
-    private String name;
+    private StringProperty name = new SimpleStringProperty();
 
-    private String description;
+    private StringProperty description = new SimpleStringProperty();
 
-    private String content;
+    private StringProperty content = new SimpleStringProperty();
 
-    private List<String> columnSelectors;
+    private List<String> columnSelectors = new ArrayList<>();
+
 
     private List<Query> subQueries = new ArrayList<>();
 
     @Override
     public String getName() {
+        return name.get();
+    }
+
+    public StringProperty nameProperty() {
         return name;
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.name.set(name);
     }
 
     public String getContent() {
+        return content.get();
+    }
+
+    public StringProperty contentProperty() {
         return content;
     }
 
     public void setContent(String content) {
-        this.content = content;
+        this.content.set(content);
     }
 
     @XmlElementWrapper(name = "column-selectors")
@@ -46,11 +58,15 @@ public class Query implements Item {
 
     @Override
     public String getDescription() {
+        return description.get();
+    }
+
+    public StringProperty descriptionProperty() {
         return description;
     }
 
     public void setDescription(String description) {
-        this.description = description;
+        this.description.set(description);
     }
 
     @XmlElementWrapper(name = "queries")

@@ -7,10 +7,7 @@ import javafx.application.Platform;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SplitPane;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
@@ -46,19 +43,8 @@ public class GimletApp extends Application {
         return menuBar;
     }
 
-    private Node createLeft() {
-        SplitPane splitPane = new SplitPane();
-        splitPane.setOrientation(Orientation.VERTICAL);
-        splitPane.setDividerPosition(0, 0.5);
-
-        QueryConfigurationTree tree = new QueryConfigurationTree();
-        try {
-            QueryConfiguration c = QueryConfiguration.read(GimletApp.class.getResourceAsStream("/queries.xml"));
-            tree.setQueryConfiguration(c);
-        } catch (JAXBException e) {
-            e.printStackTrace();
-            Platform.exit();
-        }
+    private Node createAccordion() {
+        Accordion accordion = new Accordion();
 
         AliasTable tbl = new AliasTable();
         try {
@@ -69,11 +55,22 @@ public class GimletApp extends Application {
             Platform.exit();
         }
 
-        splitPane.getItems().addAll(tbl, tree);
+        QueryConfigurationTree tree = new QueryConfigurationTree();
+        try {
+            QueryConfiguration c = QueryConfiguration.read(GimletApp.class.getResourceAsStream("/queries.xml"));
+            tree.setQueryConfiguration(c);
+        } catch (JAXBException e) {
+            e.printStackTrace();
+            Platform.exit();
+        }
 
-        splitPane.setPrefWidth(300);
+        TitledPane pane1 = new TitledPane("Aliases", tbl);
+        TitledPane pane2 = new TitledPane("Queries", tree);
 
-        return splitPane;
+        accordion.getPanes().addAll(pane1, pane2);
+
+
+        return accordion;
     }
 
     @Override
@@ -85,11 +82,11 @@ public class GimletApp extends Application {
             e.printStackTrace();
         }
 
-
         BorderPane pane = new BorderPane();
 
         pane.setTop(createMenuBar());
-        pane.setLeft(createLeft());
+        pane.setLeft(createAccordion());
+        pane.setCenter(new EditorTabView());
 
         Scene scene = new Scene(pane);
 

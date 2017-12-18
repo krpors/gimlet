@@ -3,6 +3,7 @@ package cruft.wtf.gimlet;
 import cruft.wtf.gimlet.conf.Item;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.conf.QueryConfiguration;
+import cruft.wtf.gimlet.event.QueryEditEvent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.input.KeyCode;
@@ -28,8 +29,12 @@ public class QueryConfigurationTree extends TreeView<Query> {
         });
         setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ENTER) {
-                Query q = getSelectionModel().getSelectedItem().getValue();
+                TreeItem<Query> selectedItem = getSelectionModel().getSelectedItem();
+                if (selectedItem == null) {
+                    return;
+                }
 
+                EventDispatcher.getInstance().post(new QueryEditEvent(selectedItem.getValue()));
             }
         });
 
