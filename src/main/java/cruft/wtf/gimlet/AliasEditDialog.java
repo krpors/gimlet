@@ -30,7 +30,7 @@ public class AliasEditDialog extends Stage {
     private TextField txtUsername;
     private PasswordField txtPassword;
 
-    private Button btnSave;
+    private Button btnOK;
     private Button btnCancel;
     private Button btnTestConnection;
 
@@ -47,7 +47,9 @@ public class AliasEditDialog extends Stage {
         this.aliasToEdit = aliasToEdit;
 
         Parent content = createContent();
+
         Scene scene = new Scene(content);
+        setResizable(false);
         setScene(scene);
         setTitle("Edit alias");
         setWidth(320);
@@ -103,8 +105,8 @@ public class AliasEditDialog extends Stage {
         pane.add(new Label("Password:"), 0, 4);
         pane.add(txtPassword, 1, 4);
 
-        btnSave = new Button("Save");
-        btnSave.setOnAction(eventSave);
+        btnOK = new Button("OK");
+        btnOK.setOnAction(eventSave);
         btnCancel = new Button("Cancel");
         btnCancel.setOnAction(event -> close());
         btnTestConnection = new Button("Test");
@@ -117,13 +119,14 @@ public class AliasEditDialog extends Stage {
                 alert.showAndWait();
             } catch (SQLException e1) {
                 e1.printStackTrace();
-                Alert alert = new Alert(Alert.AlertType.ERROR, "Fix it!", ButtonType.OK);
+                Alert alert = new Alert(Alert.AlertType.ERROR, e1.getMessage(), ButtonType.OK);
+                // TODO: Alert box is quite small to contain the error message.
                 alert.setHeaderText("Connection test failed!");
                 alert.showAndWait();
             }
         });
 
-        HBox box = new HBox(5, btnSave, btnCancel, btnTestConnection);
+        HBox box = new HBox(5, btnOK, btnCancel, btnTestConnection);
         box.setAlignment(Pos.CENTER_RIGHT);
         pane.add(box, 1, 5);
 

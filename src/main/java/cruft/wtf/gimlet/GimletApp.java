@@ -114,13 +114,13 @@ public class GimletApp extends Application {
     }
 
     /**
-     * Creates the {@link Accordion} on the left-hand side of the application space. This accordion contains
-     * titled panes to configure queries and aliases.
+     * Creates the left-hand side of the application space. This contains the parts to configure queries and aliases.
      *
-     * @return The {@link Accordion}.
+     * @return The {@link Node} containing the left portion of the application.
      */
-    private Node createAccordion() {
-        Accordion accordion = new Accordion();
+    private Node createLeft() {
+        TabPane tabPane = new TabPane();
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
         aliasTable = new AliasTable();
         aliasTable.setAliases(gimletProject.getAliases());
@@ -128,14 +128,10 @@ public class GimletApp extends Application {
         queryConfigurationTree = new QueryTree();
         queryConfigurationTree.setQueryConfiguration(gimletProject.getQueries());
 
-        TitledPane pane1 = new TitledPane("Aliases", aliasTable);
-        TitledPane pane2 = new TitledPane("Queries", queryConfigurationTree);
+        tabPane.getTabs().add(new Tab("Aliases", aliasTable));
+        tabPane.getTabs().add(new Tab("Queries", queryConfigurationTree));
 
-        accordion.setExpandedPane(pane1);
-        accordion.getPanes().addAll(pane1, pane2);
-        accordion.setMinWidth(300);
-
-        return accordion;
+        return tabPane;
     }
 
     @Override
@@ -143,14 +139,12 @@ public class GimletApp extends Application {
         initConfigs();
 
         BorderPane pane = new BorderPane();
-        // TODO: set center to a SplitPane instead? E.g.:
-        // |     |        |
-        // |     |        |
-        // ------^
+
+        SplitPane centerPane = new SplitPane(createLeft(), new EditorTabView());
+        centerPane.setDividerPosition(0, 0.25);
 
         pane.setTop(createMenuBar());
-        pane.setLeft(createAccordion());
-        pane.setCenter(new EditorTabView());
+        pane.setCenter(centerPane);
 
         Scene scene = new Scene(pane);
 
