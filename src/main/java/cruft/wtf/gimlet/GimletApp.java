@@ -4,13 +4,13 @@ import cruft.wtf.gimlet.conf.AliasConfiguration;
 import cruft.wtf.gimlet.conf.QueryConfiguration;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import javax.xml.bind.JAXBException;
 import java.io.IOException;
@@ -22,8 +22,23 @@ public class GimletApp extends Application {
 
     public static Connection sqlConnection;
 
+    public static Window mainWindow;
+
+    private AliasConfiguration aliasConfiguration;
+    private QueryConfiguration queryConfiguration;
+
     public static void main(String[] args) {
         launch(args);
+    }
+
+    public void initConfigs() {
+        try {
+            this.aliasConfiguration = AliasConfiguration.read(GimletApp.class.getResourceAsStream("/alias-configuration.xml"));
+            this.queryConfiguration =  QueryConfiguration.read(GimletApp.class.getResourceAsStream("/queries.xml"));
+        } catch (JAXBException e) {
+            e.printStackTrace();
+            Platform.exit();
+        }
     }
 
     public MenuBar createMenuBar() {
@@ -47,28 +62,16 @@ public class GimletApp extends Application {
         Accordion accordion = new Accordion();
 
         AliasTable tbl = new AliasTable();
-        try {
-            AliasConfiguration ac = AliasConfiguration.read(GimletApp.class.getResourceAsStream("/alias-configuration.xml"));
-            tbl.setAliases(ac);
-        } catch (JAXBException e) {
-            e.printStackTrace();
-            Platform.exit();
-        }
+        tbl.setAliases(aliasConfiguration);
 
         QueryConfigurationTree tree = new QueryConfigurationTree();
-        try {
-            QueryConfiguration c = QueryConfiguration.read(GimletApp.class.getResourceAsStream("/queries.xml"));
-            tree.setQueryConfiguration(c);
-        } catch (JAXBException e) {
-            e.printStackTrace();
-            Platform.exit();
-        }
+        tree.setQueryConfiguration(queryConfiguration);
 
         TitledPane pane1 = new TitledPane("Aliases", tbl);
         TitledPane pane2 = new TitledPane("Queries", tree);
 
+        accordion.setExpandedPane(pane1);
         accordion.getPanes().addAll(pane1, pane2);
-
 
         return accordion;
     }
@@ -82,6 +85,8 @@ public class GimletApp extends Application {
             e.printStackTrace();
         }
 
+        initConfigs();
+
         BorderPane pane = new BorderPane();
 
         pane.setTop(createMenuBar());
@@ -89,12 +94,16 @@ public class GimletApp extends Application {
         pane.setCenter(new EditorTabView());
 
         Scene scene = new Scene(pane);
+        mainWindow = primaryStage.getOwner();
 
         primaryStage.setScene(scene);
-        primaryStage.setWidth(640);
-        primaryStage.setHeight(480);
+        primaryStage.setWidth(800);
+        primaryStage.setHeight(600);
         primaryStage.setTitle("Gimlet");
         primaryStage.show();
+
+        AliasEditDialog aes = new AliasEditDialog(aliasConfiguration.getAliases().get(0));
+        aes.show();
     }
 
 }

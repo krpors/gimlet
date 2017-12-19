@@ -3,7 +3,6 @@ package cruft.wtf.gimlet;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.QueryEditEvent;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.geometry.VPos;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
@@ -31,6 +30,7 @@ public class QueryTab extends Tab {
 
         ColumnConstraints col1 = new ColumnConstraints();
         ColumnConstraints col2 = new ColumnConstraints();
+        col1.setMinWidth(50);
         col2.setHgrow(Priority.ALWAYS);
         pane.getColumnConstraints().addAll(col1, col2);
 

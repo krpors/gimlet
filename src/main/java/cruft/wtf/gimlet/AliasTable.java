@@ -16,6 +16,11 @@ public class AliasTable extends TableView<Alias> {
         columnTwo.setCellValueFactory(new PropertyValueFactory<>("description"));
 
         getColumns().setAll(columnOne, columnTwo);
+
+        setOnMouseClicked(e -> {
+            AliasEditDialog stage = new AliasEditDialog(getSelectionModel().getSelectedItem());
+            stage.showAndWait();
+        });
     }
 
     public void setAliases(final AliasConfiguration aliasConfiguration) {

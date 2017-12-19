@@ -5,9 +5,9 @@
     <alias>
         <name>Test env</name>
         <description>Something something pride and accomplishment</description>
-        <url>jdbc:oracle:thin:@tst-host:1521:SOMESID</url>
-        <user>yoyoma</user>
-        <password>rolfzor</password>
+        <url>jdbc:hsqldb:file:/home/krpors/Development/hsql</url>
+        <user>admin</user>
+        <password>admin</password>
     </alias>
     <alias>
         <name>Acceptance env</name>
