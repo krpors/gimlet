@@ -10,12 +10,14 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
+import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 
-@XmlRootElement(name = "aliases")
-public class AliasConfiguration implements Item {
+@XmlRootElement(name = "gimlet-project")
+public class GimletProject {
 
     private StringProperty name = new SimpleStringProperty();
 
@@ -23,6 +25,14 @@ public class AliasConfiguration implements Item {
 
     private SimpleListProperty<Alias> aliases = new SimpleListProperty<>(FXCollections.observableArrayList());
 
+    private SimpleListProperty<Query> queries = new SimpleListProperty<>(FXCollections.observableArrayList());
+
+    /**
+     * The filename which was used to unmarshal from. Can be null if this is a clean project.
+     */
+    private File filename;
+
+    @XmlElementWrapper(name = "aliases")
     @XmlElement(name = "alias")
     public List<Alias> getAliases() {
         return aliases.get();
@@ -40,7 +50,6 @@ public class AliasConfiguration implements Item {
         this.aliases = new SimpleListProperty<>(FXCollections.observableArrayList(aliases));
     }
 
-    @Override
     public String getName() {
         return name.get();
     }
@@ -53,7 +62,6 @@ public class AliasConfiguration implements Item {
         this.name.set(name);
     }
 
-    @Override
     public String getDescription() {
         return description.get();
     }
@@ -66,18 +74,46 @@ public class AliasConfiguration implements Item {
         this.description.set(description);
     }
 
-    public static AliasConfiguration read(InputStream is) throws JAXBException {
-        JAXBContext ctx = JAXBContext.newInstance(AliasConfiguration.class, Alias.class);
-        Unmarshaller unmarshaller = ctx.createUnmarshaller();
-        AliasConfiguration p = (AliasConfiguration) unmarshaller.unmarshal(is);
-        return p;
+    @XmlElementWrapper(name = "queries")
+    @XmlElement(name = "query")
+    public List<Query> getQueries() {
+        return queries.get();
     }
 
-    @Override
-    public String toString() {
-        return "AliasConfiguration{" +
-                "name='" + name.get() + '\'' +
-                ", description='" + description.get() + '\'' +
-                '}';
+    public SimpleListProperty<Query> queriesProperty() {
+        return queries;
+    }
+
+    public void setQueries(ObservableList<Query> queries) {
+        this.queries.set(queries);
+    }
+
+    public File getFile() {
+        return filename;
+    }
+
+    public void setFile(File file) {
+        this.filename = file;
+    }
+
+    /**
+     * Reads from an {@link InputStream} and returns an unmarshalled {@link GimletProject}.
+     *
+     * @param is The {@link InputStream}.
+     * @return The {@link GimletProject}.
+     * @throws JAXBException When unmarshalling failed.
+     */
+    public static GimletProject read(InputStream is) throws JAXBException {
+        JAXBContext ctx = JAXBContext.newInstance(GimletProject.class);
+        Unmarshaller unmarshaller = ctx.createUnmarshaller();
+        return (GimletProject) unmarshaller.unmarshal(is);
+    }
+
+    public static GimletProject read(final File file) throws JAXBException {
+        JAXBContext ctx = JAXBContext.newInstance(GimletProject.class);
+        Unmarshaller unmarshaller = ctx.createUnmarshaller();
+        GimletProject gp = (GimletProject)unmarshaller.unmarshal(file);
+        gp.setFile(file);
+        return gp;
     }
 }

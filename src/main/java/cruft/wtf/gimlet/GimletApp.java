@@ -1,7 +1,6 @@
 package cruft.wtf.gimlet;
 
-import cruft.wtf.gimlet.conf.AliasConfiguration;
-import cruft.wtf.gimlet.conf.QueryConfiguration;
+import cruft.wtf.gimlet.conf.GimletProject;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Node;
@@ -9,23 +8,27 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
 import javax.xml.bind.JAXBException;
+import java.io.File;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 
 public class GimletApp extends Application {
 
-    public static Connection sqlConnection;
-
+    /**
+     * Reference to the main window. This should never be null, and is a reference to the top-level window.
+     * This reference can be used to keep certain other windows in a modal state.
+     */
     public static Window mainWindow;
 
-    private AliasConfiguration aliasConfiguration;
-    private QueryConfiguration queryConfiguration;
+    private AliasTable aliasTable;
+
+    private QueryTree queryConfigurationTree;
+
+    private GimletProject gimletProject;
 
     public static void main(String[] args) {
         launch(args);
@@ -33,23 +36,75 @@ public class GimletApp extends Application {
 
     public void initConfigs() {
         try {
-            this.aliasConfiguration = AliasConfiguration.read(GimletApp.class.getResourceAsStream("/alias-configuration.xml"));
-            this.queryConfiguration =  QueryConfiguration.read(GimletApp.class.getResourceAsStream("/queries.xml"));
+            this.gimletProject = GimletProject.read(GimletProject.class.getResourceAsStream("/project.xml"));
         } catch (JAXBException e) {
             e.printStackTrace();
             Platform.exit();
         }
     }
 
+    /**
+     * Load up a project file.
+     *
+     * @param file The file to (attempt) to open. When it fails, the user is notified.
+     */
+    public void loadProjectFile(final File file) {
+        try {
+            this.gimletProject = GimletProject.read(file);
+            aliasTable.setAliases(this.gimletProject.getAliases());
+            queryConfigurationTree.setQueryConfiguration(this.gimletProject.getQueries());
+
+        } catch (JAXBException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR, "Please try another one!", ButtonType.OK);
+            alert.setHeaderText("That wasn't a proper Gimlet file...");
+            alert.showAndWait();
+            // TODO: better notification.
+        }
+    }
+
+    /**
+     * Creates the menubar at the top of the application.
+     *
+     * @return The {@link MenuBar}.
+     */
     public MenuBar createMenuBar() {
         MenuBar menuBar = new MenuBar();
 
         Menu menuFile = new Menu("File");
-        MenuItem fileItemOne = new MenuItem("Exit");
-        fileItemOne.setAccelerator(KeyCombination.keyCombination("Ctrl+Q"));
-        fileItemOne.setOnAction(event -> Platform.exit());
+        MenuItem fileItemOpen = new MenuItem("Open...");
+        fileItemOpen.setAccelerator(KeyCombination.keyCombination("Ctrl+O"));
+        fileItemOpen.setOnAction(event -> {
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Select Gimlet project file");
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Gimlet project files", "*.xml"));
+            File file = chooser.showOpenDialog(GimletApp.mainWindow);
+            if (file == null) {
+                // user pressed cancel.
+                return;
+            }
 
-        menuFile.getItems().add(fileItemOne);
+            loadProjectFile(file);
+            // TODO: invalidate UI, close tabs, connections, etc etc.
+        });
+
+        MenuItem fileItemSave = new MenuItem("Save");
+        fileItemSave.setAccelerator(KeyCombination.keyCombination("Ctrl+S"));
+        fileItemSave.setOnAction(event -> {
+            if (gimletProject != null && gimletProject.getFile() != null) {
+                // Save in place.
+                System.out.println("Saving in place!");
+            }
+        });
+
+        MenuItem fileItemExit = new MenuItem("Exit");
+        fileItemExit.setAccelerator(KeyCombination.keyCombination("Ctrl+Q"));
+        fileItemExit.setOnAction(event -> Platform.exit());
+
+        menuFile.getItems().add(fileItemOpen);
+        menuFile.getItems().add(fileItemSave);
+        menuFile.getItems().add(new SeparatorMenuItem());
+        menuFile.getItems().add(fileItemExit);
 
         Menu menuHelp = new Menu("Help");
 
@@ -58,42 +113,48 @@ public class GimletApp extends Application {
         return menuBar;
     }
 
+    /**
+     * Creates the {@link Accordion} on the left-hand side of the application space. This accordion contains
+     * titled panes to configure queries and aliases.
+     *
+     * @return The {@link Accordion}.
+     */
     private Node createAccordion() {
         Accordion accordion = new Accordion();
 
-        AliasTable tbl = new AliasTable();
-        tbl.setAliases(aliasConfiguration);
+        aliasTable = new AliasTable();
+        aliasTable.setAliases(gimletProject.getAliases());
 
-        QueryConfigurationTree tree = new QueryConfigurationTree();
-        tree.setQueryConfiguration(queryConfiguration);
+        queryConfigurationTree = new QueryTree();
+        queryConfigurationTree.setQueryConfiguration(gimletProject.getQueries());
 
-        TitledPane pane1 = new TitledPane("Aliases", tbl);
-        TitledPane pane2 = new TitledPane("Queries", tree);
+        TitledPane pane1 = new TitledPane("Aliases", aliasTable);
+        TitledPane pane2 = new TitledPane("Queries", queryConfigurationTree);
 
         accordion.setExpandedPane(pane1);
         accordion.getPanes().addAll(pane1, pane2);
+        accordion.setMinWidth(300);
 
         return accordion;
     }
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-        try {
-            Class.forName("org.hsqldb.jdbc.JDBCDriver");
-            sqlConnection = DriverManager.getConnection("jdbc:hsqldb:file:/home/krpors/Development/hsql", "admin", "admin");
-        } catch (ClassNotFoundException | SQLException e) {
-            e.printStackTrace();
-        }
-
         initConfigs();
 
         BorderPane pane = new BorderPane();
+        // TODO: set center to a SplitPane instead? E.g.:
+        // |     |        |
+        // |     |        |
+        // ------^
 
         pane.setTop(createMenuBar());
         pane.setLeft(createAccordion());
         pane.setCenter(new EditorTabView());
 
         Scene scene = new Scene(pane);
+
+        // We started, set our main window reference!
         mainWindow = primaryStage.getOwner();
 
         primaryStage.setScene(scene);
@@ -101,9 +162,6 @@ public class GimletApp extends Application {
         primaryStage.setHeight(600);
         primaryStage.setTitle("Gimlet");
         primaryStage.show();
-
-        AliasEditDialog aes = new AliasEditDialog(aliasConfiguration.getAliases().get(0));
-        aes.show();
     }
 
 }

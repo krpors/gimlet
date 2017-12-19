@@ -5,7 +5,7 @@ import javafx.beans.property.StringProperty;
 
 import javax.xml.bind.annotation.XmlElement;
 
-public class Alias implements Item {
+public class Alias {
 
     private StringProperty name = new SimpleStringProperty();
     private StringProperty description = new SimpleStringProperty();

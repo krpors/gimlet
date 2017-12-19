@@ -8,7 +8,7 @@ import javax.xml.bind.annotation.XmlElementWrapper;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Query implements Item {
+public class Query {
 
     private StringProperty name = new SimpleStringProperty();
 
@@ -21,7 +21,6 @@ public class Query implements Item {
 
     private List<Query> subQueries = new ArrayList<>();
 
-    @Override
     public String getName() {
         return name.get();
     }
@@ -56,7 +55,6 @@ public class Query implements Item {
         this.columnSelectors = columnSelectors;
     }
 
-    @Override
     public String getDescription() {
         return description.get();
     }

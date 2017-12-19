@@ -1,8 +1,6 @@
 package cruft.wtf.gimlet;
 
-import cruft.wtf.gimlet.conf.Item;
 import cruft.wtf.gimlet.conf.Query;
-import cruft.wtf.gimlet.conf.QueryConfiguration;
 import cruft.wtf.gimlet.event.QueryEditEvent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeCell;
@@ -10,15 +8,15 @@ import javafx.scene.input.KeyCode;
 
 import java.util.List;
 
-public class QueryConfigurationTree extends TreeView<Query> {
+public class QueryTree extends TreeView<Query> {
 
-    public QueryConfigurationTree() {
+    public QueryTree() {
     }
 
-    public void setQueryConfiguration(final QueryConfiguration configuration) {
+    public void setQueryConfiguration(final List<Query> queryList) {
         TreeItem<Query> root = new TreeItem<>();
 
-        addQuery(root, configuration.getQueries());
+        addQuery(root, queryList);
 
         setShowRoot(false);
         setCellFactory(param -> new QueryConfigurationTreeCell());
@@ -60,7 +58,7 @@ public class QueryConfigurationTree extends TreeView<Query> {
     }
 
     /**
-     * Contains rendering logic for {@link Item} objects used throughout Gimlet.
+     * Contains rendering logic for {@link Query} objects used throughout Gimlet.
      */
     private class QueryConfigurationTreeCell extends TextFieldTreeCell<Query> {
 
