@@ -5,9 +5,18 @@ import javafx.beans.property.StringProperty;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayList;
 import java.util.List;
 
+@XmlType(propOrder = {
+        "name",
+        "description",
+        "columnSelectors",
+        "content",
+        "subQueries"
+})
 public class Query {
 
     private StringProperty name = new SimpleStringProperty();
@@ -17,7 +26,6 @@ public class Query {
     private StringProperty content = new SimpleStringProperty();
 
     private List<String> columnSelectors = new ArrayList<>();
-
 
     private List<Query> subQueries = new ArrayList<>();
 

@@ -4,7 +4,15 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
 
+@XmlType(propOrder = {
+        "name",
+        "description",
+        "url",
+        "user",
+        "password"
+})
 public class Alias {
 
     private StringProperty name = new SimpleStringProperty();

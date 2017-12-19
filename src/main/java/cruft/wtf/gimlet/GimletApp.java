@@ -1,6 +1,7 @@
 package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.conf.GimletProject;
+import cruft.wtf.gimlet.event.FileSavedEvent;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Node;
@@ -72,6 +73,10 @@ public class GimletApp extends Application {
         MenuBar menuBar = new MenuBar();
 
         Menu menuFile = new Menu("File");
+
+        MenuItem fileItemNew = new MenuItem("New");
+        fileItemNew.setAccelerator(KeyCombination.keyCombination("Ctrl+N"));;
+
         MenuItem fileItemOpen = new MenuItem("Open...");
         fileItemOpen.setAccelerator(KeyCombination.keyCombination("Ctrl+O"));
         fileItemOpen.setOnAction(event -> {
@@ -94,6 +99,14 @@ public class GimletApp extends Application {
             if (gimletProject != null && gimletProject.getFile() != null) {
                 // Save in place.
                 System.out.println("Saving in place!");
+                try {
+                    gimletProject.writeToFile(gimletProject.getFile());
+                    EventDispatcher.getInstance().post(new FileSavedEvent(gimletProject.getFile()));
+                } catch (JAXBException e) {
+                    System.out.println("Writing fail0red");
+                }
+            } else {
+                // TODO: pop up save-as?
             }
         });
 
@@ -101,6 +114,7 @@ public class GimletApp extends Application {
         fileItemExit.setAccelerator(KeyCombination.keyCombination("Ctrl+Q"));
         fileItemExit.setOnAction(event -> Platform.exit());
 
+        menuFile.getItems().add(fileItemNew);
         menuFile.getItems().add(fileItemOpen);
         menuFile.getItems().add(fileItemSave);
         menuFile.getItems().add(new SeparatorMenuItem());
@@ -145,6 +159,7 @@ public class GimletApp extends Application {
 
         pane.setTop(createMenuBar());
         pane.setCenter(centerPane);
+        pane.setBottom(new StatusBar());
 
         Scene scene = new Scene(pane);
 

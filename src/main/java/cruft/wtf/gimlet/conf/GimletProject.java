@@ -8,15 +8,20 @@ import javafx.collections.ObservableList;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
+import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.*;
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 
 @XmlRootElement(name = "gimlet-project")
+@XmlType(propOrder = {
+        "name",
+        "description",
+        "aliases",
+        "queries"
+})
 public class GimletProject {
 
     private StringProperty name = new SimpleStringProperty();
@@ -88,6 +93,7 @@ public class GimletProject {
         this.queries.set(queries);
     }
 
+    @XmlTransient
     public File getFile() {
         return filename;
     }
@@ -115,5 +121,13 @@ public class GimletProject {
         GimletProject gp = (GimletProject)unmarshaller.unmarshal(file);
         gp.setFile(file);
         return gp;
+    }
+
+    public void writeToFile(final File file) throws JAXBException {
+        JAXBContext ctx = JAXBContext.newInstance(GimletProject.class);
+        Marshaller marshaller = ctx.createMarshaller();
+        marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
+        marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
+        marshaller.marshal(this, file);
     }
 }
