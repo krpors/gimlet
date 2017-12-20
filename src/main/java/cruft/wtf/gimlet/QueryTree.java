@@ -1,7 +1,8 @@
 package cruft.wtf.gimlet;
 
+import com.google.common.eventbus.Subscribe;
 import cruft.wtf.gimlet.conf.Query;
-import cruft.wtf.gimlet.event.QueryEditEvent;
+import cruft.wtf.gimlet.event.QuerySavedEvent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.input.KeyCode;
@@ -11,6 +12,7 @@ import java.util.List;
 public class QueryTree extends TreeView<Query> {
 
     public QueryTree() {
+        EventDispatcher.getInstance().register(this);
     }
 
     public void setQueryConfiguration(final List<Query> queryList) {
@@ -32,7 +34,8 @@ public class QueryTree extends TreeView<Query> {
                     return;
                 }
 
-                EventDispatcher.getInstance().post(new QueryEditEvent(selectedItem.getValue()));
+                QueryEditDialog qed = new QueryEditDialog(selectedItem.getValue());
+                qed.showAndWait();
             }
         });
 
@@ -55,6 +58,13 @@ public class QueryTree extends TreeView<Query> {
             root.getChildren().add(qitem);
             addQuery(qitem, q.getSubQueries());
         }
+
+        root.setExpanded(true);
+    }
+
+    @Subscribe
+    public void onQuerySaved(QuerySavedEvent event) {
+        refresh();
     }
 
     /**
@@ -90,7 +100,6 @@ public class QueryTree extends TreeView<Query> {
 
             setText(item.getName());
             setTooltip(new Tooltip(item.getDescription()));
-
         }
     }
 }

@@ -1,7 +1,7 @@
 package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.conf.Query;
-import cruft.wtf.gimlet.event.QueryEditEvent;
+import cruft.wtf.gimlet.event.QuerySavedEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;
 import javafx.scene.control.Label;
@@ -69,7 +69,7 @@ public class QueryTab extends Tab {
      * Used to determine whether to re-open an already opened tab.
      *
      * @return The {@link Query} that is assigned to this {@link QueryTab}.
-     * @see EditorTabView#onQueryEdit(QueryEditEvent)
+     * @see EditorTabView#onQueryEdit(QuerySavedEvent)
      */
     public Query getQuery() {
         return query;

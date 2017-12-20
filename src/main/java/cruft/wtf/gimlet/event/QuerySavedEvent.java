@@ -3,12 +3,12 @@ package cruft.wtf.gimlet.event;
 import cruft.wtf.gimlet.conf.Query;
 
 /**
- * Event emitted when a {@link cruft.wtf.gimlet.conf.Query} is being edited.
+ * Event emitted when a {@link cruft.wtf.gimlet.conf.Query} was saved via the {@link cruft.wtf.gimlet.QueryEditDialog}.
  */
-public class QueryEditEvent {
+public class QuerySavedEvent {
     private Query query;
 
-    public QueryEditEvent(Query query) {
+    public QuerySavedEvent(Query query) {
         this.query = query;
     }
 

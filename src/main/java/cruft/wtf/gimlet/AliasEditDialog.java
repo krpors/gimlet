@@ -52,8 +52,8 @@ public class AliasEditDialog extends Stage {
         setResizable(false);
         setScene(scene);
         setTitle("Edit alias");
-        setWidth(320);
-        setHeight(240);
+//        setWidth(320);
+//        setHeight(240);
         initModality(Modality.APPLICATION_MODAL);
         initOwner(GimletApp.mainWindow);
         centerOnScreen();
