@@ -37,6 +37,7 @@ public class QueryEditDialog extends Stage {
         query.nameProperty().set(txtName.getText());
         query.descriptionProperty().set(txtDescription.getText());
         query.contentProperty().set(txtQuery.getText());
+        query.setColumnSelectors(listColumnSelectors.getItems());
         QuerySavedEvent qse = new QuerySavedEvent(query);
         EventDispatcher.getInstance().post(qse);
         close();
@@ -80,6 +81,10 @@ public class QueryEditDialog extends Stage {
         listColumnSelectors.setMaxHeight(90);
         listColumnSelectors.getItems().addAll(query.getColumnSelectors());
         listColumnSelectors.setCellFactory(TextFieldListCell.forListView());
+        listColumnSelectors.setOnEditCommit(e -> {
+            listColumnSelectors.getItems().set(e.getIndex(), e.getNewValue());
+            listColumnSelectors.refresh();
+        });
         formPane.add("Column selectors:", listColumnSelectors);
 
         btnOK = new Button("OK");

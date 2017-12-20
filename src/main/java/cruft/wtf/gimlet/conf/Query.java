@@ -1,7 +1,9 @@
 package cruft.wtf.gimlet.conf;
 
+import javafx.beans.property.SimpleListProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
@@ -25,9 +27,9 @@ public class Query {
 
     private StringProperty content = new SimpleStringProperty();
 
-    private List<String> columnSelectors = new ArrayList<>();
+    private SimpleListProperty<String> columnSelectors = new SimpleListProperty<>(FXCollections.observableArrayList());
 
-    private List<Query> subQueries = new ArrayList<>();
+    private SimpleListProperty<Query> subQueries  = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     public String getName() {
         return name.get();
@@ -56,11 +58,15 @@ public class Query {
     @XmlElementWrapper(name = "column-selectors")
     @XmlElement(name = "column")
     public List<String> getColumnSelectors() {
+        return columnSelectors.get();
+    }
+
+    public SimpleListProperty<String> columnSelectorsProperty() {
         return columnSelectors;
     }
 
     public void setColumnSelectors(List<String> columnSelectors) {
-        this.columnSelectors = columnSelectors;
+        this.columnSelectors.setAll(columnSelectors);
     }
 
     public String getDescription() {
@@ -78,11 +84,15 @@ public class Query {
     @XmlElementWrapper(name = "queries")
     @XmlElement(name = "query")
     public List<Query> getSubQueries() {
+        return subQueries.get();
+    }
+
+    public SimpleListProperty<Query> subQueriesProperty() {
         return subQueries;
     }
 
     public void setSubQueries(List<Query> subQueries) {
-        this.subQueries = subQueries;
+        this.subQueries.setAll(subQueries);
     }
 
     @Override
