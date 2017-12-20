@@ -1,6 +1,7 @@
 package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.conf.GimletProject;
+import cruft.wtf.gimlet.event.FileOpenedEvent;
 import cruft.wtf.gimlet.event.FileSavedEvent;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -53,8 +54,10 @@ public class GimletApp extends Application {
         try {
             this.gimletProject = GimletProject.read(file);
             aliasTable.setAliases(this.gimletProject.getAliases());
-            queryConfigurationTree.setQueryConfiguration(this.gimletProject.getQueries());
+            queryConfigurationTree.setQueryList(this.gimletProject.getQueries());
 
+            // Notify our listeners.
+            EventDispatcher.getInstance().post(new FileOpenedEvent(file, this.gimletProject));
         } catch (JAXBException e) {
             e.printStackTrace();
             Alert alert = new Alert(Alert.AlertType.ERROR, "Please try another one!", ButtonType.OK);
@@ -140,7 +143,7 @@ public class GimletApp extends Application {
         aliasTable.setAliases(gimletProject.getAliases());
 
         queryConfigurationTree = new QueryTree();
-        queryConfigurationTree.setQueryConfiguration(gimletProject.getQueries());
+        queryConfigurationTree.setQueryList(gimletProject.getQueries());
 
         tabPane.getTabs().add(new Tab("Aliases", aliasTable));
         tabPane.getTabs().add(new Tab("Queries", queryConfigurationTree));

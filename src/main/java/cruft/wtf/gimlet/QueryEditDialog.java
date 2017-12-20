@@ -74,6 +74,7 @@ public class QueryEditDialog extends Stage {
         formPane.add("Description:", txtDescription);
 
         txtQuery = new TextArea(query.getContent());
+        // TODO: monospaced font for query
         formPane.add("Query:", txtQuery);
 
         listColumnSelectors = new ListView<>();

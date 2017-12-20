@@ -1,6 +1,7 @@
 package cruft.wtf.gimlet;
 
 import com.google.common.eventbus.Subscribe;
+import cruft.wtf.gimlet.event.FileOpenedEvent;
 import cruft.wtf.gimlet.event.FileSavedEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -27,5 +28,13 @@ public class StatusBar extends HBox {
     @Subscribe
     public void onFileSaved(final FileSavedEvent event) {
         lblStatus.setText("File saved: " + event.getFile().getAbsolutePath());
+    }
+
+    @Subscribe
+    public void onFileOpened(final FileOpenedEvent event) {
+        lblStatus.setText(
+                String.format("Opened '%s' (%s)",
+                        event.getGimletProject().getName(),
+                        event.getFile().getAbsolutePath()));
     }
 }

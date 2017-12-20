@@ -50,6 +50,11 @@
                 </query>
             </queries>
         </query>
+        <query>
+            <name>Query two</name>
+            <description>Some other rooted query</description>
+            <content>select cruft from LOLZ;</content>
+        </query>
     </queries>
 
 </gimlet-project>

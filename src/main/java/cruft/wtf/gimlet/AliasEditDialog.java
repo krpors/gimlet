@@ -81,6 +81,7 @@ public class AliasEditDialog extends Stage {
         pane.getColumnConstraints().addAll(col1, col2);
 
         txtName = new TextField();
+        txtName.setPrefColumnCount(40);
         txtName.setText(aliasToEdit.getName());
         pane.add(new Label("Name:"), 0, 0);
         pane.add(txtName, 1, 0);
@@ -109,7 +110,8 @@ public class AliasEditDialog extends Stage {
         btnOK.setOnAction(eventSave);
         btnCancel = new Button("Cancel");
         btnCancel.setOnAction(event -> close());
-        btnTestConnection = new Button("Test");
+        btnTestConnection = new Button("Test connection");
+        btnTestConnection.setTooltip(new Tooltip("Tests the connection to the given JDBC URL"));
         btnTestConnection.setOnAction(e -> {
             try {
                 Connection c = DriverManager.getConnection(txtJdbcUrl.getText(), txtUsername.getText(), txtPassword.getText());
