@@ -1,31 +1,24 @@
 package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.conf.Alias;
+import cruft.wtf.gimlet.event.ConnectEvent;
 import javafx.collections.FXCollections;
-import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.control.cell.TextFieldListCell;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 
 import java.util.List;
 
-public class AliasTable extends ListView<Alias> {
+public class AliasList extends ListView<Alias> {
 
 
-    public AliasTable() {
-//        TableColumn<Alias, String> columnOne = new TableColumn<>("Name");
-//        columnOne.setCellValueFactory(new PropertyValueFactory<>("name"));
-//        TableColumn<Alias, String> columnTwo = new TableColumn<>("Description");
-//        columnTwo.setCellValueFactory(new PropertyValueFactory<>("description"));
-
-
-//        getColumns().setAll(columnOne, columnTwo);
-
+    public AliasList() {
         setCellFactory(param -> new AliasListCell());
 
         setOnMouseClicked(e -> {
             if (e.getClickCount() == 2) {
-                openEditDialog();
+                EventDispatcher.getInstance().post(new ConnectEvent(getSelectionModel().getSelectedItem()));
             }
         });
         setOnKeyPressed(e -> {

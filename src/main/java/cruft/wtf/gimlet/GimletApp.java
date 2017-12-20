@@ -26,7 +26,7 @@ public class GimletApp extends Application {
      */
     public static Window mainWindow;
 
-    private AliasTable aliasTable;
+    private AliasList aliasList;
 
     private QueryTree queryConfigurationTree;
 
@@ -53,7 +53,7 @@ public class GimletApp extends Application {
     public void loadProjectFile(final File file) {
         try {
             this.gimletProject = GimletProject.read(file);
-            aliasTable.setAliases(this.gimletProject.getAliases());
+            aliasList.setAliases(this.gimletProject.getAliases());
             queryConfigurationTree.setQueryList(this.gimletProject.getQueries());
 
             // Notify our listeners.
@@ -139,13 +139,13 @@ public class GimletApp extends Application {
         TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
-        aliasTable = new AliasTable();
-        aliasTable.setAliases(gimletProject.getAliases());
+        aliasList = new AliasList();
+        aliasList.setAliases(gimletProject.getAliases());
 
         queryConfigurationTree = new QueryTree();
         queryConfigurationTree.setQueryList(gimletProject.getQueries());
 
-        tabPane.getTabs().add(new Tab("Aliases", aliasTable));
+        tabPane.getTabs().add(new Tab("Aliases", aliasList));
         tabPane.getTabs().add(new Tab("Queries", queryConfigurationTree));
 
         return tabPane;
