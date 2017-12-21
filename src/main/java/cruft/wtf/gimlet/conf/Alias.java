@@ -10,6 +10,7 @@ import javax.xml.bind.annotation.XmlType;
         "name",
         "description",
         "url",
+        "driverClass",
         "user",
         "password"
 })
@@ -18,6 +19,7 @@ public class Alias {
     private StringProperty name = new SimpleStringProperty();
     private StringProperty description = new SimpleStringProperty();
     private StringProperty url = new SimpleStringProperty();
+    private StringProperty driverClass = new SimpleStringProperty();
     private StringProperty user = new SimpleStringProperty();
     private StringProperty password = new SimpleStringProperty(); // TODO: byte array
 
@@ -56,6 +58,19 @@ public class Alias {
 
     public void setUrl(String url) {
         this.url.set(url);
+    }
+
+    @XmlElement(name = "driver-class")
+    public String getDriverClass() {
+        return driverClass.get();
+    }
+
+    public StringProperty driverClassProperty() {
+        return driverClass;
+    }
+
+    public void setDriverClass(String driverClass) {
+        this.driverClass.set(driverClass);
     }
 
     public String getUser() {

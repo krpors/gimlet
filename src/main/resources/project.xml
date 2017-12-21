@@ -10,6 +10,7 @@
             <name>Test env</name>
             <description>Something something pride and accomplishment</description>
             <url>jdbc:hsqldb:hsql://localhost/</url>
+            <driver-class>org.hsqldb.jdbc.JDBCDriver</driver-class>
             <user>SA</user>
             <password></password>
         </alias>

@@ -33,16 +33,6 @@ public class QueryTree extends TreeView<Query> {
 
         setShowRoot(false);
         setCellFactory(param -> new QueryConfigurationTreeCell());
-        setOnMouseClicked(e -> {
-            if (e.getClickCount() == 2) {
-                openQueryEditDialog();
-            }
-        });
-        setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ENTER) {
-                openQueryEditDialog();
-            }
-        });
 
         setRoot(root);
     }
