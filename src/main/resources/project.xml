@@ -6,7 +6,6 @@
         <name>Alias name</name>
         <description>Alias description</description>
         <alias>
-            <what>asdas</what>
             <name>Test env</name>
             <description>Something something pride and accomplishment</description>
             <url>jdbc:hsqldb:hsql://localhost/</url>

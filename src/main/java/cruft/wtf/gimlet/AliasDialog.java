@@ -1,14 +1,11 @@
 package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.conf.Alias;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -18,11 +15,10 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
- * The dialog to add/edit an alias in.
+ * The dialog to add/edit an alias in. Probably refactor because the method I used (see {@link #applyTo(Alias)}
+ * and {@link #setAliasContent(Alias)} is jus ugly as fuck.
  */
-public class AliasEditDialog extends Stage {
-
-    private Alias alias;
+public class AliasDialog extends Stage {
 
     private TextField txtName;
     private TextField txtDescription;
@@ -35,19 +31,9 @@ public class AliasEditDialog extends Stage {
     private Button btnCancel;
     private Button btnTestConnection;
 
-    private EventHandler<ActionEvent> eventSave = event -> {
-        alias.nameProperty().set(txtName.getText());
-        alias.descriptionProperty().set(txtDescription.getText());
-        alias.urlProperty().set(txtJdbcUrl.getText());
-        alias.urlProperty().set(txtDriverClass.getText());
-        alias.userProperty().set(txtUsername.getText());
-        alias.passwordProperty().set(txtPassword.getText());
-        close();
-    };
+    private ButtonType result;
 
-    public AliasEditDialog(Alias aliasToEdit) {
-        this.alias = aliasToEdit;
-
+    public AliasDialog() {
         Parent content = createContent();
 
         Scene scene = new Scene(content);
@@ -61,63 +47,55 @@ public class AliasEditDialog extends Stage {
         // Exit the window (close it) without saving changes.
         scene.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ESCAPE) {
+                result = ButtonType.CANCEL;
                 close();
             }
         });
     }
 
+    /**
+     * Creates the content of the Scene.
+     *
+     * @return The scene's content.
+     */
     private Parent createContent() {
-
-        BorderPane parentPane = new BorderPane();
-
         FormPane pane = new FormPane();
-
-//        GridPane pane = new GridPane();
-//        pane.setHgap(10);
-//        pane.setVgap(5);
-//        pane.setPadding(new Insets(10, 10, 10, 10));
-//
-//        ColumnConstraints col1 = new ColumnConstraints();
-//        ColumnConstraints col2 = new ColumnConstraints();
-//        col1.setMinWidth(50);
-//        col2.setHgrow(Priority.ALWAYS);
-//        pane.getColumnConstraints().addAll(col1, col2);
 
         txtName = new TextField();
         txtName.setPrefColumnCount(40);
-        txtName.setText(alias.getName());
         txtName.setPromptText("Name of this alias");
         pane.add("Name:", txtName);
 
         txtDescription = new TextField();
-        txtDescription.setText(alias.getDescription());
         txtDescription.setPromptText("Description of this alias (optional)");
         pane.add("Description:", txtDescription);
 
         txtJdbcUrl = new TextField();
-        txtJdbcUrl.setText(alias.getUrl());
         txtJdbcUrl.setPromptText("JDBC URL, differs per driver");
         pane.add("JDBC URL:", txtJdbcUrl);
 
         txtDriverClass = new TextField();
-        txtDriverClass.setText(alias.getDriverClass());
         txtDriverClass.setPromptText("JDBC driver class, e.g. org.hsqldb.jdbc.JDBCDriver");
         pane.add("JDBC driver:", txtDriverClass);
 
         txtUsername = new TextField();
-        txtUsername.setText(alias.getUser());
         txtUsername.setPromptText("The username to authenticate with");
         pane.add("Username:", txtUsername);
 
         txtPassword = new PasswordField();
-        txtPassword.setText(alias.getPassword());
         txtPassword.setPromptText("The password for the username");
         pane.add("Password:", txtPassword);
 
         btnOK = new Button("OK");
-        btnOK.setOnAction(eventSave);
+        btnOK.setOnAction(event -> {
+            result = ButtonType.OK;
+            close();
+        });
         btnCancel = new Button("Cancel");
-        btnCancel.setOnAction(event -> close());
+        btnCancel.setOnAction(event -> {
+            result = ButtonType.CANCEL;
+            close();
+        });
         btnTestConnection = new Button("Test connection");
         btnTestConnection.setTooltip(new Tooltip("Tests the connection to the given JDBC URL"));
         btnTestConnection.setOnAction(e -> {
@@ -152,9 +130,56 @@ public class AliasEditDialog extends Stage {
         box.setAlignment(Pos.CENTER_RIGHT);
         pane.add(box, 1, pane.rowCounter++);
 
-        parentPane.setCenter(pane);
+        return pane;
+    }
 
-        return parentPane;
+    public ButtonType getResult() {
+        return result;
+    }
+
+    /**
+     * Sets values of the controls based on the alias.
+     *
+     * @param alias The alias.
+     */
+    public void setAliasContent(final Alias alias) {
+        txtName.setText(alias.getName());
+        txtDescription.setText(alias.getDescription());
+        txtJdbcUrl.setText(alias.getUrl());
+        txtDriverClass.setText(alias.getDriverClass());
+        txtUsername.setText(alias.getUser());
+        txtPassword.setText(alias.getPassword());
+    }
+
+    /**
+     * Applies the values in the textfields to the given Alias object
+     *
+     * @param alias The Alias to change.
+     */
+    public void applyTo(Alias alias) {
+        alias.nameProperty().set(txtName.getText());
+        alias.descriptionProperty().set(txtDescription.getText());
+        alias.urlProperty().set(txtJdbcUrl.getText());
+        alias.driverClassProperty().set(txtDriverClass.getText());
+        alias.userProperty().set(txtUsername.getText());
+        alias.passwordProperty().set(txtPassword.getText());
+    }
+
+    /**
+     * Creates a new {@link Alias} object from the input fields, and returns it. This can be used
+     * when the dialog is used to add a new alias instead of editing one.
+     *
+     * @return The Alias created.
+     */
+    public Alias createAlias() {
+        Alias alias = new Alias();
+        alias.setName(txtName.getText());
+        alias.setDescription(txtDescription.getText());
+        alias.setUrl(txtJdbcUrl.getText());
+        alias.setDriverClass(txtDriverClass.getText());
+        alias.setUser(txtUsername.getText());
+        alias.setPassword(txtPassword.getText());
+        return alias;
     }
 }
 

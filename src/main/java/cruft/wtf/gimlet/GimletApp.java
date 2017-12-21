@@ -53,7 +53,7 @@ public class GimletApp extends Application {
     public void loadProjectFile(final File file) {
         try {
             this.gimletProject = GimletProject.read(file);
-            aliasList.setAliases(this.gimletProject.getAliases());
+            aliasList.setAliases(this.gimletProject.aliasesProperty());
             queryConfigurationTree.setQueryList(this.gimletProject.getQueries());
 
             // Notify our listeners.
@@ -140,7 +140,7 @@ public class GimletApp extends Application {
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
 
         aliasList = new AliasList();
-        aliasList.setAliases(gimletProject.getAliases());
+        aliasList.setAliases(gimletProject.aliasesProperty());
 
         queryConfigurationTree = new QueryTree();
         queryConfigurationTree.setQueryList(gimletProject.getQueries());

@@ -1,18 +1,18 @@
 package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.conf.Alias;
-import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 
 import java.util.List;
 
 public class AliasList extends ListView<Alias> {
 
+    private List<Alias> aliasList;
 
     public AliasList() {
         setCellFactory(param -> new AliasListCell());
     }
-
 
     private void openEditDialog() {
         Alias selected = getSelectionModel().getSelectedItem();
@@ -20,8 +20,23 @@ public class AliasList extends ListView<Alias> {
             return;
         }
 
-        AliasEditDialog stage = new AliasEditDialog(selected);
-        stage.showAndWait();
+        AliasDialog dialog = new AliasDialog();
+        dialog.setAliasContent(selected);
+        dialog.showAndWait();
+        if (dialog.getResult() == ButtonType.OK) {
+            dialog.applyTo(selected);
+            refresh();
+        }
+    }
+
+
+    private void openNewDialog() {
+        AliasDialog dialog = new AliasDialog();
+        dialog.showAndWait();
+        if (dialog.getResult() == ButtonType.OK) {
+            Alias a = dialog.createAlias();
+            getItems().add(a);
+        }
     }
 
     /**
@@ -36,9 +51,13 @@ public class AliasList extends ListView<Alias> {
         getItems().remove(selected);
     }
 
-    public void setAliases(final List<Alias> aliasList) {
-        getItems().clear();
-        getItems().addAll(aliasList);
+    /**
+     * Sets the Aliases content for this list.
+     *
+     * @param list
+     */
+    public void setAliases(final ObservableList<Alias> list) {
+        setItems(list);
     }
 
     /**
@@ -56,6 +75,7 @@ public class AliasList extends ListView<Alias> {
             MenuItem duplicateItem = new MenuItem("Duplicate");
             MenuItem deleteItem = new MenuItem("Delete");
 
+            newItem2.setOnAction(e -> openNewDialog());
             editItem.setOnAction(e -> openEditDialog());
             deleteItem.setOnAction(e -> deleteSelectedAlias());
 
@@ -67,6 +87,7 @@ public class AliasList extends ListView<Alias> {
 
             contextMenu2.getItems().add(newItem2);
         }
+
 
         @Override
         protected void updateItem(Alias item, boolean empty) {
