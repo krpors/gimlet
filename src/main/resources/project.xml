@@ -9,9 +9,9 @@
             <what>asdas</what>
             <name>Test env</name>
             <description>Something something pride and accomplishment</description>
-            <url>jdbc:hsqldb:file:/home/krpors/Development/hsql</url>
-            <user>admin</user>
-            <password>admin</password>
+            <url>jdbc:hsqldb:hsql://localhost/</url>
+            <user>SA</user>
+            <password></password>
         </alias>
         <alias>
             <name>Acceptance env</name>

@@ -25,6 +25,7 @@ public class EditorTabView extends TabPane {
         try {
             tab = new ConnectionTab(evt.getAlias());
             getTabs().add(tab);
+            getSelectionModel().select(tab);
         } catch (SQLException e) {
             e.printStackTrace();
             Alert alert = new Alert(Alert.AlertType.ERROR, "Unable to connect!");
