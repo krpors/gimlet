@@ -116,6 +116,7 @@ public class GimletApp extends Application {
         MenuItem fileItemExit = new MenuItem("Exit");
         fileItemExit.setAccelerator(KeyCombination.keyCombination("Ctrl+Q"));
         fileItemExit.setOnAction(event -> Platform.exit());
+        fileItemExit.setGraphic(Images.ACCOUNT_LOGOUT.imageView());
 
         menuFile.getItems().add(fileItemNew);
         menuFile.getItems().add(fileItemOpen);

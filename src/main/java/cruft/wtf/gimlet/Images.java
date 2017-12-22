@@ -3,6 +3,9 @@ package cruft.wtf.gimlet;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * Sort of factory enumeration, to create {@link ImageView} objects on the fly. Scenes in JavaFX cannot contain the
  * same Node twice, so we have to create them on the fly as needed, via the {@link #imageView()} method.
@@ -10,6 +13,7 @@ import javafx.scene.image.ImageView;
 public enum Images {
 
     ACCOUNT_LOGIN("/icons/account-login-2x.png"),
+    ACCOUNT_LOGOUT("/icons/account-logout-2x.png"),
     BOLT("/icons/bolt-2x.png"),
     COG("/icons/cog-2x.png"),
     DASHBOARD("/icons/dashboard-2x.png"),
@@ -28,8 +32,18 @@ public enum Images {
         this.path = path;
     }
 
+    private static Map<Images, Image> imageCache;
+
+    static {
+        imageCache = new HashMap<>();
+        for (Images img : Images.values()) {
+            Image image = new Image(Images.class.getResourceAsStream(img.path));
+            imageCache.put(img, image);
+        }
+    }
+
     public ImageView imageView() {
-        return new ImageView(new Image(Images.class.getResourceAsStream(path)));
+        return new ImageView(imageCache.get(this));
     }
 
 }
