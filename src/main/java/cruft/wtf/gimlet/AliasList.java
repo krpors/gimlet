@@ -1,6 +1,7 @@
 package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.conf.Alias;
+import cruft.wtf.gimlet.event.ConnectEvent;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 
@@ -70,17 +71,24 @@ public class AliasList extends ListView<Alias> {
 
         public AliasListCell() {
             // We require separate items for the two different context menu's.
+            MenuItem itemConnect = new MenuItem("Connect");
+            itemConnect.setGraphic(ImageCache.ACCOUNT_LOGIN.imageView());
             MenuItem newItem = new MenuItem("New");
+            newItem.setGraphic(ImageCache.PLUS.imageView());
             MenuItem editItem = new MenuItem("Edit");
+            editItem.setGraphic(ImageCache.PENCIL.imageView());
             MenuItem duplicateItem = new MenuItem("Duplicate");
             MenuItem deleteItem = new MenuItem("Delete");
+            deleteItem.setGraphic(ImageCache.TRASH.imageView());
 
+            itemConnect.setOnAction(e -> EventDispatcher.getInstance().post(new ConnectEvent(getItem())));
             newItem.setOnAction(e -> openNewDialog());
             editItem.setOnAction(e -> openEditDialog());
             deleteItem.setOnAction(e -> deleteSelectedAlias());
 
-            contextMenu.getItems().add(newItem);
+            contextMenu.getItems().add(itemConnect);
             contextMenu.getItems().add(new SeparatorMenuItem());
+            contextMenu.getItems().add(newItem);
             contextMenu.getItems().add(editItem);
             contextMenu.getItems().add(duplicateItem);
             contextMenu.getItems().add(new SeparatorMenuItem());
@@ -88,6 +96,7 @@ public class AliasList extends ListView<Alias> {
 
             // Second context menu. Pops up when right clicked on a null cell.
             MenuItem newItem2 = new MenuItem("New");
+            newItem2.setGraphic(ImageCache.PLUS.imageView());
             newItem2.setOnAction(e -> openNewDialog());
             contextMenu2.getItems().add(newItem2);
         }

@@ -5,7 +5,6 @@ import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.QuerySavedEvent;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeCell;
-import javafx.scene.input.KeyCode;
 
 import java.util.List;
 
@@ -22,6 +21,7 @@ public class QueryTree extends TreeView<Query> {
 
     /**
      * Sets the list of queries to display in the tree.
+     *
      * @param queryList The list of queries.
      */
     public void setQueryList(final List<Query> queryList) {
@@ -73,7 +73,7 @@ public class QueryTree extends TreeView<Query> {
     /**
      * Removes the selected query (and its children, ancestors and the whole shebang). This is done by updating the
      * model (the query list) and then forcefully refreshing the whole tree by re-adding the query list again.
-     *
+     * <p>
      * We'll see how this works out. It can also be done somewhat 'prettier' for the user by deleting the TreeItem, and
      * then also remove it from the backing query list. The improvement on this is that the tree isn't reinitialized
      * (and thus the expand levels are kept the same).

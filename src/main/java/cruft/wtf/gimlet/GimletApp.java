@@ -8,6 +8,7 @@ import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
@@ -145,8 +146,13 @@ public class GimletApp extends Application {
         queryConfigurationTree = new QueryTree();
         queryConfigurationTree.setQueryList(gimletProject.getQueries());
 
-        tabPane.getTabs().add(new Tab("Aliases", aliasList));
-        tabPane.getTabs().add(new Tab("Queries", queryConfigurationTree));
+        Tab tabAlias = new Tab("Aliases", aliasList);
+        tabAlias.setGraphic(ImageCache.BOLT.imageView());
+        tabPane.getTabs().add(tabAlias);
+
+        Tab tabQueries = new Tab("Queries", queryConfigurationTree);
+        tabQueries.setGraphic(ImageCache.DASHBOARD.imageView());
+        tabPane.getTabs().add(tabQueries);
 
         return tabPane;
     }
