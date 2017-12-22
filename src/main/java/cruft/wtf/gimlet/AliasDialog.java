@@ -39,7 +39,7 @@ public class AliasDialog extends Stage {
         Scene scene = new Scene(content);
         setResizable(false);
         setScene(scene);
-        setTitle("Edit alias");
+        setTitle("Add alias");
         initModality(Modality.APPLICATION_MODAL);
         initOwner(GimletApp.mainWindow);
         centerOnScreen();
@@ -143,6 +143,7 @@ public class AliasDialog extends Stage {
      * @param alias The alias.
      */
     public void setAliasContent(final Alias alias) {
+        setTitle("Edit alias");
         txtName.setText(alias.getName());
         txtDescription.setText(alias.getDescription());
         txtJdbcUrl.setText(alias.getUrl());

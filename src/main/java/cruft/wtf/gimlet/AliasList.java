@@ -69,22 +69,26 @@ public class AliasList extends ListView<Alias> {
         private ContextMenu contextMenu2 = new ContextMenu();
 
         public AliasListCell() {
-            MenuItem newItem = new MenuItem("New alias...");
-            MenuItem newItem2 = new MenuItem("New alias...");
+            // We require separate items for the two different context menu's.
+            MenuItem newItem = new MenuItem("New");
             MenuItem editItem = new MenuItem("Edit");
             MenuItem duplicateItem = new MenuItem("Duplicate");
             MenuItem deleteItem = new MenuItem("Delete");
 
-            newItem2.setOnAction(e -> openNewDialog());
+            newItem.setOnAction(e -> openNewDialog());
             editItem.setOnAction(e -> openEditDialog());
             deleteItem.setOnAction(e -> deleteSelectedAlias());
 
             contextMenu.getItems().add(newItem);
+            contextMenu.getItems().add(new SeparatorMenuItem());
             contextMenu.getItems().add(editItem);
             contextMenu.getItems().add(duplicateItem);
             contextMenu.getItems().add(new SeparatorMenuItem());
             contextMenu.getItems().add(deleteItem);
 
+            // Second context menu. Pops up when right clicked on a null cell.
+            MenuItem newItem2 = new MenuItem("New");
+            newItem2.setOnAction(e -> openNewDialog());
             contextMenu2.getItems().add(newItem2);
         }
 

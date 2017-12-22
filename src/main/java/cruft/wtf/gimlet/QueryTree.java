@@ -86,7 +86,7 @@ public class QueryTree extends TreeView<Query> {
 
         Alert alertConfirm = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure?");
         alertConfirm.setTitle("Confirm deletion");
-        alertConfirm.setHeaderText("Deletion of '" + selectedItem.getValue().getName() + "'?\nThis will delete all children nodes!");
+        alertConfirm.setHeaderText("Delete '" + selectedItem.getValue().getName() + "'?\nThis will delete all children nodes!");
         ((Button) alertConfirm.getDialogPane().lookupButton(ButtonType.OK)).setDefaultButton(false);
         ((Button) alertConfirm.getDialogPane().lookupButton(ButtonType.CANCEL)).setDefaultButton(true);
         alertConfirm.showAndWait().ifPresent(buttonType -> {
