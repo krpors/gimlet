@@ -15,7 +15,7 @@ public class ConnectionTab extends Tab {
     public ConnectionTab(final Alias alias) throws SQLException {
         this.alias = alias;
 
-        setGraphic(ImageCache.BOLT.imageView());
+        setGraphic(Images.BOLT.imageView());
         setText(alias.getName());
 
         connection = DriverManager.getConnection(alias.getUrl(), alias.getUser(), alias.getPassword());

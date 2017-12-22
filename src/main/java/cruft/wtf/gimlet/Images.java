@@ -7,7 +7,7 @@ import javafx.scene.image.ImageView;
  * Sort of factory enumeration, to create {@link ImageView} objects on the fly. Scenes in JavaFX cannot contain the
  * same Node twice, so we have to create them on the fly as needed, via the {@link #imageView()} method.
  */
-public enum ImageCache {
+public enum Images {
 
     ACCOUNT_LOGIN("/icons/account-login-2x.png"),
     BOLT("/icons/bolt-2x.png"),
@@ -24,12 +24,12 @@ public enum ImageCache {
 
     private String path;
 
-    ImageCache(String path) {
+    Images(String path) {
         this.path = path;
     }
 
     public ImageView imageView() {
-        return new ImageView(new Image(ImageCache.class.getResourceAsStream(path)));
+        return new ImageView(new Image(Images.class.getResourceAsStream(path)));
     }
 
 }

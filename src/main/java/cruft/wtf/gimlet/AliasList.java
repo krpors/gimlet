@@ -72,14 +72,14 @@ public class AliasList extends ListView<Alias> {
         public AliasListCell() {
             // We require separate items for the two different context menu's.
             MenuItem itemConnect = new MenuItem("Connect");
-            itemConnect.setGraphic(ImageCache.ACCOUNT_LOGIN.imageView());
+            itemConnect.setGraphic(Images.ACCOUNT_LOGIN.imageView());
             MenuItem newItem = new MenuItem("New");
-            newItem.setGraphic(ImageCache.PLUS.imageView());
+            newItem.setGraphic(Images.PLUS.imageView());
             MenuItem editItem = new MenuItem("Edit");
-            editItem.setGraphic(ImageCache.PENCIL.imageView());
+            editItem.setGraphic(Images.PENCIL.imageView());
             MenuItem duplicateItem = new MenuItem("Duplicate");
             MenuItem deleteItem = new MenuItem("Delete");
-            deleteItem.setGraphic(ImageCache.TRASH.imageView());
+            deleteItem.setGraphic(Images.TRASH.imageView());
 
             itemConnect.setOnAction(e -> EventDispatcher.getInstance().post(new ConnectEvent(getItem())));
             newItem.setOnAction(e -> openNewDialog());
@@ -96,7 +96,7 @@ public class AliasList extends ListView<Alias> {
 
             // Second context menu. Pops up when right clicked on a null cell.
             MenuItem newItem2 = new MenuItem("New");
-            newItem2.setGraphic(ImageCache.PLUS.imageView());
+            newItem2.setGraphic(Images.PLUS.imageView());
             newItem2.setOnAction(e -> openNewDialog());
             contextMenu2.getItems().add(newItem2);
         }
