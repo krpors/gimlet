@@ -17,6 +17,7 @@ public enum Images {
     BOLT("/icons/bolt-2x.png"),
     COG("/icons/cog-2x.png"),
     DASHBOARD("/icons/dashboard-2x.png"),
+    DIALOG_ERROR("/icons/dialog-error.png"),
     DOCUMENT("/icons/document-2x.png"),
     FILE("/icons/file-2x.png"),
     FOLDER("/icons/folder-2x.png"),

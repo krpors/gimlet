@@ -5,10 +5,14 @@ import cruft.wtf.gimlet.event.ConnectEvent;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 
 public class EditorTabView extends TabPane {
+
+    private Logger logger = LoggerFactory.getLogger(EditorTabView.class);
 
     public EditorTabView() {
         EventDispatcher.getInstance().register(this);
@@ -27,10 +31,11 @@ public class EditorTabView extends TabPane {
             getTabs().add(tab);
             getSelectionModel().select(tab);
         } catch (SQLException e) {
-            e.printStackTrace();
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Unable to connect!");
-            alert.setHeaderText("Unable to connect to '" + evt.getAlias().getName() + "'");
-            alert.showAndWait();
+            logger.error("Could not connect to '{}'", evt.getAlias().getName());
+            Utils.showExceptionDialog(
+                    String.format("Unable to connect to '%s'", evt.getAlias().getName()),
+                    String.format("Failed to connect to '%s'", evt.getAlias().getUrl()),
+                    e);
         }
     }
 }

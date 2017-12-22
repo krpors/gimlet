@@ -3,6 +3,7 @@ package cruft.wtf.gimlet;
 import com.google.common.eventbus.Subscribe;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.QuerySavedEvent;
+import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeCell;
 
@@ -13,7 +14,7 @@ public class QueryTree extends TreeView<Query> {
     /**
      * The original assigned query list.
      */
-    private List<Query> queryList;
+    private ObservableList<Query> queryList;
 
     public QueryTree() {
         EventDispatcher.getInstance().register(this);
@@ -24,7 +25,7 @@ public class QueryTree extends TreeView<Query> {
      *
      * @param queryList The list of queries.
      */
-    public void setQueryList(final List<Query> queryList) {
+    public void setQueryList(final ObservableList<Query> queryList) {
         this.queryList = queryList;
 
         TreeItem<Query> root = new TreeItem<>();
@@ -98,18 +99,11 @@ public class QueryTree extends TreeView<Query> {
                 } else {
                     parent.getSubQueries().remove(selectedItem.getValue());
                 }
-                refreshFull();
+                refresh();
             }
         });
     }
 
-    private void refreshFull() {
-        // Remove all children.
-        getRoot().getChildren().clear();
-        setQueryList(this.queryList);
-        super.refresh();
-
-    }
 
     /**
      * When a {@link Query} is saved through a {@link QueryEditDialog}, the {@link EventDispatcher} will notify this

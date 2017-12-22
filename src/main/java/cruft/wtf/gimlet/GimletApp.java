@@ -13,12 +13,17 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class GimletApp extends Application {
+
+    private static Logger logger = LoggerFactory.getLogger(GimletApp.class);
 
     /**
      * Reference to the main window. This should never be null, and is a reference to the top-level window.
@@ -30,7 +35,10 @@ public class GimletApp extends Application {
 
     private QueryTree queryConfigurationTree;
 
-    private GimletProject gimletProject;
+    /**
+     * The global reference to the opened GimletProject. Can be null if none is opened... Is there a better way?
+     */
+    public static GimletProject gimletProject;
 
     public static void main(String[] args) {
         launch(args);
@@ -54,12 +62,13 @@ public class GimletApp extends Application {
         try {
             this.gimletProject = GimletProject.read(file);
             aliasList.setAliases(this.gimletProject.aliasesProperty());
-            queryConfigurationTree.setQueryList(this.gimletProject.getQueries());
+            queryConfigurationTree.setQueryList(this.gimletProject.queriesProperty());
 
             // Notify our listeners.
+            logger.info("Succesfully read '{}'", file);
             EventDispatcher.getInstance().post(new FileOpenedEvent(file, this.gimletProject));
         } catch (JAXBException e) {
-            e.printStackTrace();
+            logger.error("Unable to unmarshal " + file, e);
             Alert alert = new Alert(Alert.AlertType.ERROR, "Please try another one!", ButtonType.OK);
             alert.setHeaderText("That wasn't a proper Gimlet file...");
             alert.showAndWait();
@@ -144,7 +153,7 @@ public class GimletApp extends Application {
         aliasList.setAliases(gimletProject.aliasesProperty());
 
         queryConfigurationTree = new QueryTree();
-        queryConfigurationTree.setQueryList(gimletProject.getQueries());
+        queryConfigurationTree.setQueryList(gimletProject.queriesProperty());
 
         Tab tabAlias = new Tab("Aliases", aliasList);
         tabAlias.setGraphic(Images.BOLT.imageView());
@@ -159,6 +168,8 @@ public class GimletApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
+        logger.info("Starting up the Gimlet");
+
         initConfigs();
 
         BorderPane pane = new BorderPane();
@@ -180,6 +191,8 @@ public class GimletApp extends Application {
         primaryStage.setHeight(600);
         primaryStage.setTitle("Gimlet");
         primaryStage.show();
+
+        logger.info("Gimlet started");
     }
 
 }

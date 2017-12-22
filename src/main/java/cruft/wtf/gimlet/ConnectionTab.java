@@ -3,10 +3,14 @@ package cruft.wtf.gimlet;
 import cruft.wtf.gimlet.conf.Alias;
 import javafx.scene.control.Button;
 import javafx.scene.control.Tab;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 
 public class ConnectionTab extends Tab {
+
+    private static Logger logger = LoggerFactory.getLogger(ConnectionTab.class);
 
     private final Alias alias;
 
@@ -19,29 +23,21 @@ public class ConnectionTab extends Tab {
         setText(alias.getName());
 
         connection = DriverManager.getConnection(alias.getUrl(), alias.getUser(), alias.getPassword());
+        logger.info("Connection successfully established for alias '{}'", alias.getName());
 
         setOnCloseRequest(e -> {
             try {
                 connection.close();
-                System.out.println("Connection closed.");
+                logger.info("Closed connection for '{}'", alias.getName());
             } catch (SQLException e1) {
-                e1.printStackTrace();
+                logger.error("Could not close connection ourselves", e1);
             }
         });
 
-        Button b = new Button("CLIX ME!");
-        b.setOnAction(e -> {
-            try (PreparedStatement preparedStatement = connection.prepareStatement("select * from customer");
-                 ResultSet rs = preparedStatement.executeQuery()) {
-                while (rs.next()) {
-                    System.out.println(rs.getString(1));
-                    System.out.println(rs.getString(2));
-                }
-            } catch (SQLException e1) {
-                e1.printStackTrace();
-            }
-        });
-        setContent(b);
+        QueryTree tree = new QueryTree();
+        tree.setQueryList(GimletApp.gimletProject.queriesProperty());
+
+        setContent(tree);
     }
 
 }
