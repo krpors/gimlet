@@ -2,11 +2,14 @@ package cruft.wtf.gimlet;
 
 
 import javafx.beans.property.Property;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.util.Callback;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -26,9 +29,18 @@ public class ResultTable extends TableView {
         ResultSetMetaData rsmd = rs.getMetaData();
         for (int i = 0; i < rsmd.getColumnCount(); i++) {
             final int j = i;
-            TableColumn<ObservableList, String> col = new TableColumn<>(rsmd.getColumnName(i + 1));
-            col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().get(j).toString()));
-            getColumns().addAll(col);
+
+            // This construction allows us to make the table sortable by numbers. Need to figure out though
+            // if this needs a lot of expansion for all other types of integer-like column types.
+            if (rsmd.getColumnType(i + 1) == Types.INTEGER) {
+                TableColumn<ObservableList, Number> column = new TableColumn<>(rsmd.getColumnName(i + 1));
+                column.setCellValueFactory(param -> new SimpleIntegerProperty((Integer) param.getValue().get(j)));
+                getColumns().add(column);
+            } else {
+                TableColumn<ObservableList, String> col = new TableColumn<>(rsmd.getColumnName(i + 1));
+                col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().get(j).toString()));
+                getColumns().add(col);
+            }
             System.out.println("Added column " + i);
         }
 
