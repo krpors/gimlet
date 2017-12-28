@@ -2,7 +2,6 @@ package cruft.wtf.gimlet;
 
 import com.google.common.eventbus.Subscribe;
 import cruft.wtf.gimlet.event.ConnectEvent;
-import javafx.scene.control.Alert;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import org.slf4j.Logger;
