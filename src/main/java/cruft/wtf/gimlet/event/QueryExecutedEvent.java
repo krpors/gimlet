@@ -10,6 +10,8 @@ public class QueryExecutedEvent {
 
     private int rowCount;
 
+    private Long runtime;
+
     public QueryExecutedEvent() {
 
     }
@@ -28,5 +30,13 @@ public class QueryExecutedEvent {
 
     public void setRowCount(int rowCount) {
         this.rowCount = rowCount;
+    }
+
+    public Long getRuntime() {
+        return runtime;
+    }
+
+    public void setRuntime(Long runtime) {
+        this.runtime = runtime;
     }
 }

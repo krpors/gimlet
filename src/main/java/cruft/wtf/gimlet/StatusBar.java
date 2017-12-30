@@ -55,6 +55,6 @@ public class StatusBar extends HBox {
 
     @Subscribe
     public void onQueryExecuted(final QueryExecutedEvent event) {
-        setStatus("Query resulted in %d rows", event.getRowCount());
+        setStatus("Query executed in %d ms, containing %d rows ", event.getRuntime(), event.getRowCount());
     }
 }
