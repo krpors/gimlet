@@ -1,55 +1,132 @@
 package cruft.wtf.gimlet;
 
 
-import javafx.beans.property.Property;
+import cruft.wtf.gimlet.event.QueryExecutedEvent;
+import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.util.Callback;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 
+/**
+ * This class represents a generic {@link TableView} for SQL queries. The table columns are therefore variadic depending
+ * on the query executed.
+ */
 public class ResultTable extends TableView {
+
+    private static Logger logger = LoggerFactory.getLogger(ResultSet.class);
+
+    private int rowCount = 0;
 
     public ResultTable() {
         setEditable(false);
+        setTableMenuButtonVisible(true);
     }
 
-    public void populate(final ResultSet rs) throws SQLException {
-        getColumns().clear();
-        getItems().clear();
+    /**
+     * Executes the given {@code query} on the {@code connection} and displays the result in this table.
+     * @param connection The SQL connection to operate on.
+     * @param query The query to actually execute.
+     */
+    public void executeAndPopulate(final Connection connection, final String query) {
+        // The whole lot is executed in a custom task, since it may run for a long time (depending on query, database,
+        // network load, throughput etc.). To prevent the UI from hanging, it's done like this.
+        Task<Void> task = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+
+                PreparedStatement statement = null;
+                ResultSet rs = null;
+                try {
+                    statement = connection.prepareStatement(query);
+                    statement.setMaxRows(0);
+                    logger.debug("Executing query...");
+                    rs = statement.executeQuery();
+                    logger.debug("Done!");
+                    populate(rs);
+
+                    QueryExecutedEvent qee = new QueryExecutedEvent();
+                    qee.setRowCount(getRowCount());
+                    qee.setQuery(query);
+                    EventDispatcher.getInstance().post(qee);
+                } catch (SQLException ex) {
+                    logger.error("Could not execute query", ex);
+                    Platform.runLater(() -> Utils.showExceptionDialog("Could not execute query", "Query failed", ex));
+                } finally {
+                    try {
+                        if (rs != null) {
+                            rs.close();
+                            logger.debug("ResultSet closed");
+                        }
+                        if (statement != null) {
+                            statement.close();
+                            logger.debug("Statement closed");
+                        }
+
+                    } catch (SQLException ex) {
+                        logger.error("Could not close JDBC resources", ex);
+                        Platform.runLater(() -> Utils.showExceptionDialog("Could not close JDBC resources ourselves.", "Whoops!", ex));
+                    }
+                }
+                return null;
+            }
+        };
+
+        Thread t = new Thread(task, "Gimlet Query Executor Thread");
+        t.setDaemon(true);
+        t.start();
+    }
+
+    /**
+     * Populates the table with the {@link ResultSet}. It is expected that this class is forwarding the cursor. Updating
+     * the UI happens via the {@link Platform#runLater(Runnable)} utility function.
+     *
+     * @param rs The {@link ResultSet}.
+     * @throws SQLException When iterating the resultset fails for whatever reason.
+     */
+    @SuppressWarnings("unchecked")
+    private void populate(final ResultSet rs) throws SQLException {
+        rowCount = 0;
+
+        Platform.runLater(() -> {
+            getColumns().clear();
+            getItems().clear();
+        });
 
         ResultSetMetaData rsmd = rs.getMetaData();
+        logger.debug("Resultset contains {} columns", rsmd.getColumnCount());
         for (int i = 0; i < rsmd.getColumnCount(); i++) {
             final int j = i;
 
             // This construction allows us to make the table sortable by numbers. Need to figure out though
             // if this needs a lot of expansion for all other types of integer-like column types.
+            //
+            // The reference to the actual data is a bit funky: it refers to the ObservableList containing the
+            // row data (via setItems).
             if (rsmd.getColumnType(i + 1) == Types.INTEGER) {
                 TableColumn<ObservableList, Number> column = new TableColumn<>(rsmd.getColumnName(i + 1));
                 column.setCellValueFactory(param -> new SimpleIntegerProperty((Integer) param.getValue().get(j)));
-                getColumns().add(column);
+                Platform.runLater(() -> getColumns().add(column));
             } else {
                 TableColumn<ObservableList, String> col = new TableColumn<>(rsmd.getColumnName(i + 1));
                 col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().get(j).toString()));
-                getColumns().add(col);
+                Platform.runLater(() -> getColumns().add(col));
             }
-            System.out.println("Added column " + i);
         }
 
         ObservableList<ObservableList> rowdata = FXCollections.observableArrayList();
         while (rs.next()) {
+            rowCount++;
             ObservableList werd = FXCollections.observableArrayList();
             for (int i = 1; i <= rsmd.getColumnCount(); i++) {
                 if (rsmd.getColumnType(i) == Types.INTEGER) {
-                    System.out.println("integer!");
                     werd.add(rs.getInt(i));
                 } else {
                     werd.add(rs.getString(i));
@@ -60,5 +137,14 @@ public class ResultTable extends TableView {
         }
 
         setItems(rowdata);
+    }
+
+    /**
+     * Returns the rowcount after the ResultTable has been populated by {@link #populate(ResultSet)}.
+     *
+     * @return The rowcount.
+     */
+    public int getRowCount() {
+        return rowCount;
     }
 }

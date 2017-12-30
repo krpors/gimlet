@@ -3,38 +3,58 @@ package cruft.wtf.gimlet;
 import com.google.common.eventbus.Subscribe;
 import cruft.wtf.gimlet.event.FileOpenedEvent;
 import cruft.wtf.gimlet.event.FileSavedEvent;
+import cruft.wtf.gimlet.event.QueryExecutedEvent;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+/**
+ * This statusbar is located under the main window and is used for reporting application status to the user.
+ */
+@SuppressWarnings("unused")
 public class StatusBar extends HBox {
 
     private Label lblStatus;
+
+    private final SimpleDateFormat sdf = new SimpleDateFormat("YYYY-MM-dd HH:mm:ss ");
 
     public StatusBar() {
         setAlignment(Pos.CENTER_LEFT);
         setMinHeight(25);
         setPadding(new Insets(2.5, 5, 2.5, 5));
 
-        lblStatus = new Label("Gimlet loaded!");
+        lblStatus = new Label();
         getChildren().add(lblStatus);
 
+        setStatus("Gimlet loaded!");
         // When everything worked, register ourselves to the EventDispatcher so we get
         // notified of application wide events.
         EventDispatcher.getInstance().register(this);
     }
 
+    public void setStatus(String status, Object... fmt) {
+        String date = sdf.format(new Date());
+        String s = String.format(status, fmt);
+        Platform.runLater(() -> lblStatus.setText(date + s));
+    }
+
     @Subscribe
     public void onFileSaved(final FileSavedEvent event) {
-        lblStatus.setText("File saved: " + event.getFile().getAbsolutePath());
+        setStatus("File saved: %s", event.getFile().getAbsolutePath());
     }
 
     @Subscribe
     public void onFileOpened(final FileOpenedEvent event) {
-        lblStatus.setText(
-                String.format("Opened '%s' (%s)",
-                        event.getGimletProject().getName(),
-                        event.getFile().getAbsolutePath()));
+        setStatus("Opened '%s' (%s)", event.getGimletProject().getName(), event.getFile().getAbsolutePath());
+    }
+
+    @Subscribe
+    public void onQueryExecuted(final QueryExecutedEvent event) {
+        setStatus("Query resulted in %d rows", event.getRowCount());
     }
 }

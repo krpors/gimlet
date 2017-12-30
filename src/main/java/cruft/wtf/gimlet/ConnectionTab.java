@@ -2,13 +2,18 @@ package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.conf.Alias;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 
 public class ConnectionTab extends Tab {
 
@@ -20,6 +25,8 @@ public class ConnectionTab extends Tab {
 
     private ResultTable resultTable;
 
+    private TextArea area;
+
 
     public ConnectionTab(final Alias alias) throws SQLException {
         this.alias = alias;
@@ -30,8 +37,10 @@ public class ConnectionTab extends Tab {
         connection = DriverManager.getConnection(alias.getUrl(), alias.getUser(), alias.getPassword());
         logger.info("Connection successfully established for alias '{}'", alias.getName());
 
+
         setOnCloseRequest(e -> {
             try {
+                // Close the connection when the tab is closed.
                 connection.close();
                 logger.info("Closed connection for '{}'", alias.getName());
             } catch (SQLException e1) {
@@ -67,7 +76,7 @@ public class ConnectionTab extends Tab {
     }
 
     private Tab createTabQuery() {
-        Tab tabQuery = new Tab("Query", new Button("Kevin"));
+        Tab tabQuery = new Tab("Query");
         tabQuery.setClosable(false);
         tabQuery.setGraphic(Images.PULSE.imageView());
 
@@ -75,18 +84,14 @@ public class ConnectionTab extends Tab {
 
         resultTable = new ResultTable();
 
-        TextArea area = new TextArea();
+        area = new TextArea();
+        area.setText("select * from customer cross join invoice;");
         area.setWrapText(false);
         area.setPrefRowCount(5);
         area.setOnKeyPressed(e -> {
             if (e.isControlDown() && e.getCode() == KeyCode.ENTER) {
-                try (PreparedStatement stmt = connection.prepareStatement(area.getText());
-                     ResultSet rs = stmt.executeQuery()) {
-                    resultTable.populate(rs);
-                } catch (SQLException ex) {
-                    logger.error("Could not execute query", ex);
-                    Utils.showExceptionDialog("Could not execute query", "Bleh", ex);
-                }
+                resultTable.executeAndPopulate(connection, area.getText());
+
             }
         });
 

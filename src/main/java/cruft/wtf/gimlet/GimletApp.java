@@ -177,6 +177,7 @@ public class GimletApp extends Application {
         SplitPane centerPane = new SplitPane(createLeft(), new EditorTabView());
         centerPane.setDividerPosition(0, 0.25);
 
+
         pane.setTop(createMenuBar());
         pane.setCenter(centerPane);
         pane.setBottom(new StatusBar());
@@ -191,6 +192,7 @@ public class GimletApp extends Application {
         primaryStage.setHeight(600);
         primaryStage.setTitle("Gimlet");
         primaryStage.show();
+
 
         logger.info("Gimlet started");
     }
