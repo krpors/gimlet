@@ -27,6 +27,7 @@ public class ResultTable extends TableView {
     public ResultTable() {
         setEditable(false);
         setTableMenuButtonVisible(true);
+        setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
     }
 
     /**
@@ -92,8 +93,13 @@ public class ResultTable extends TableView {
 
         ResultSetMetaData rsmd = rs.getMetaData();
         logger.debug("Resultset contains {} columns", rsmd.getColumnCount());
+
+        TableColumn<ObservableList, Number> idCol = new TableColumn("#");
+        idCol.setCellValueFactory(param -> new SimpleIntegerProperty((Integer) param.getValue().get(0)));
+        Platform.runLater(() -> getColumns().add(idCol));
+
         for (int i = 0; i < rsmd.getColumnCount(); i++) {
-            final int j = i;
+            final int j = i + 1;
 
             // This construction allows us to make the table sortable by numbers. Need to figure out though
             // if this needs a lot of expansion for all other types of integer-like column types.
@@ -102,7 +108,10 @@ public class ResultTable extends TableView {
             // row data (via setItems).
             if (rsmd.getColumnType(i + 1) == Types.INTEGER) {
                 TableColumn<ObservableList, Number> column = new TableColumn<>(rsmd.getColumnName(i + 1));
-                column.setCellValueFactory(param -> new SimpleIntegerProperty((Integer) param.getValue().get(j)));
+                column.setCellValueFactory(param -> {
+                    System.out.println(param.getValue());
+                    return new SimpleIntegerProperty((Integer) param.getValue().get(j));
+                });
                 Platform.runLater(() -> getColumns().add(column));
             } else {
                 TableColumn<ObservableList, String> col = new TableColumn<>(rsmd.getColumnName(i + 1));
@@ -115,7 +124,10 @@ public class ResultTable extends TableView {
         while (rs.next()) {
             rowCount++;
             ObservableList werd = FXCollections.observableArrayList();
+            werd.add(rowCount);
             for (int i = 1; i <= rsmd.getColumnCount(); i++) {
+                // first element is the actual row number, which is just the i counter;
+
                 if (rsmd.getColumnType(i) == Types.INTEGER) {
                     werd.add(rs.getInt(i));
                 } else {
@@ -124,12 +136,13 @@ public class ResultTable extends TableView {
             }
 
             rowdata.add(werd);
-            System.out.println("Added rowdata " + rowCount);
         }
 
         // Err... to prevent that the clearing of the items is done later than the setting, we also run the setting
         // of the items via Platform.runLater. This looks hacky as fuck but we'll manage for now.
-        Platform.runLater(() -> setItems(rowdata));
+        Platform.runLater(() -> {
+            setItems(rowdata);
+        });
     }
 
     /**

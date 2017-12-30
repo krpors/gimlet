@@ -63,6 +63,8 @@ public class ConnectionTab extends Tab {
         } else {
             area.setEffect(null);
         }
+
+        resultTable.setVisible(!active);
     }
 
     private Node createContent() {
@@ -103,6 +105,7 @@ public class ConnectionTab extends Tab {
         area.setPrefRowCount(5);
         area.setOnKeyPressed(e -> {
             if (e.isControlDown() && e.getCode() == KeyCode.ENTER) {
+                pane.getCenter().setVisible(false);
 
                 Task<Void> task = new Task<Void>() {
                     @Override
