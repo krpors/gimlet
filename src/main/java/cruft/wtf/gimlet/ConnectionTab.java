@@ -1,11 +1,14 @@
 package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.conf.Alias;
+import javafx.concurrent.Task;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
+import javafx.scene.effect.Effect;
+import javafx.scene.effect.GaussianBlur;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
@@ -52,6 +55,16 @@ public class ConnectionTab extends Tab {
         setContent(createContent());
     }
 
+    private void setQueryActive(boolean active) {
+        area.setEditable(!active);
+
+        if (active) {
+            area.setEffect(new GaussianBlur(4));
+        } else {
+            area.setEffect(null);
+        }
+    }
+
     private Node createContent() {
         BorderPane pane = new BorderPane();
 
@@ -90,8 +103,24 @@ public class ConnectionTab extends Tab {
         area.setPrefRowCount(5);
         area.setOnKeyPressed(e -> {
             if (e.isControlDown() && e.getCode() == KeyCode.ENTER) {
-                resultTable.executeAndPopulate(connection, area.getText());
 
+                Task<Void> task = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        // TODO: cancellation on this task is not really possible.
+                        resultTable.executeAndPopulate(connection, area.getText());
+                        return null;
+                    }
+                };
+
+                task.setOnRunning(event -> setQueryActive(true));
+                task.setOnCancelled(event -> setQueryActive(false));
+                task.setOnFailed(event -> setQueryActive(false));
+                task.setOnSucceeded(event -> setQueryActive(false));
+
+                Thread t = new Thread(task, "Gimlet Query Executor Thread");
+                t.setDaemon(true);
+                t.start();
             }
         });
 

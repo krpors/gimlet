@@ -7,7 +7,6 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.slf4j.Logger;
@@ -32,56 +31,47 @@ public class ResultTable extends TableView {
 
     /**
      * Executes the given {@code query} on the {@code connection} and displays the result in this table.
+     *
      * @param connection The SQL connection to operate on.
-     * @param query The query to actually execute.
+     * @param query      The query to actually execute.
      */
     public void executeAndPopulate(final Connection connection, final String query) {
-        // The whole lot is executed in a custom task, since it may run for a long time (depending on query, database,
-        // network load, throughput etc.). To prevent the UI from hanging, it's done like this.
-        Task<Void> task = new Task<Void>() {
-            @Override
-            protected Void call() throws Exception {
+        PreparedStatement statement = null;
+        ResultSet rs = null;
+        try {
+            statement = connection.prepareStatement(query);
+            statement.setMaxRows(0);
+            logger.debug("Executing query...");
+            long start = System.currentTimeMillis();
+            rs = statement.executeQuery();
+            long end = System.currentTimeMillis();
+            logger.debug("Done!");
+            populate(rs);
 
-                PreparedStatement statement = null;
-                ResultSet rs = null;
-                try {
-                    statement = connection.prepareStatement(query);
-                    statement.setMaxRows(0);
-                    logger.debug("Executing query...");
-                    rs = statement.executeQuery();
-                    logger.debug("Done!");
-                    populate(rs);
-
-                    QueryExecutedEvent qee = new QueryExecutedEvent();
-                    qee.setRowCount(getRowCount());
-                    qee.setQuery(query);
-                    EventDispatcher.getInstance().post(qee);
-                } catch (SQLException ex) {
-                    logger.error("Could not execute query", ex);
-                    Platform.runLater(() -> Utils.showExceptionDialog("Could not execute query", "Query failed", ex));
-                } finally {
-                    try {
-                        if (rs != null) {
-                            rs.close();
-                            logger.debug("ResultSet closed");
-                        }
-                        if (statement != null) {
-                            statement.close();
-                            logger.debug("Statement closed");
-                        }
-
-                    } catch (SQLException ex) {
-                        logger.error("Could not close JDBC resources", ex);
-                        Platform.runLater(() -> Utils.showExceptionDialog("Could not close JDBC resources ourselves.", "Whoops!", ex));
-                    }
+            QueryExecutedEvent qee = new QueryExecutedEvent();
+            qee.setRowCount(getRowCount());
+            qee.setQuery(query);
+            qee.setRuntime(end - start);
+            EventDispatcher.getInstance().post(qee);
+        } catch (SQLException ex) {
+            logger.error("Could not execute query", ex);
+            Platform.runLater(() -> Utils.showExceptionDialog("Could not execute query", "Query failed", ex));
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                    logger.debug("ResultSet closed");
                 }
-                return null;
-            }
-        };
+                if (statement != null) {
+                    statement.close();
+                    logger.debug("Statement closed");
+                }
 
-        Thread t = new Thread(task, "Gimlet Query Executor Thread");
-        t.setDaemon(true);
-        t.start();
+            } catch (SQLException ex) {
+                logger.error("Could not close JDBC resources", ex);
+                Platform.runLater(() -> Utils.showExceptionDialog("Could not close JDBC resources ourselves.", "Whoops!", ex));
+            }
+        }
     }
 
     /**
@@ -134,9 +124,12 @@ public class ResultTable extends TableView {
             }
 
             rowdata.add(werd);
+            System.out.println("Added rowdata " + rowCount);
         }
 
-        setItems(rowdata);
+        // Err... to prevent that the clearing of the items is done later than the setting, we also run the setting
+        // of the items via Platform.runLater. This looks hacky as fuck but we'll manage for now.
+        Platform.runLater(() -> setItems(rowdata));
     }
 
     /**
