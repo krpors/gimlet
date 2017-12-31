@@ -12,3 +12,7 @@ Query app, work in progress.
 1. Query results view.
 1. Drilling down in a query via context menu?
    1. Right mouse click, then select query
+   
+   
+https://wiki.linuxfoundation.org/networking/netem
+

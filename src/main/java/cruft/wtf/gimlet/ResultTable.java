@@ -7,6 +7,7 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.slf4j.Logger;
@@ -28,6 +29,7 @@ public class ResultTable extends TableView {
         setEditable(false);
         setTableMenuButtonVisible(true);
         setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+        setPlaceholder(new Label("Query is running..."));
     }
 
     /**
@@ -56,7 +58,10 @@ public class ResultTable extends TableView {
             EventDispatcher.getInstance().post(qee);
         } catch (SQLException ex) {
             logger.error("Could not execute query", ex);
-            Platform.runLater(() -> Utils.showExceptionDialog("Could not execute query", "Query failed", ex));
+            Platform.runLater(() -> {
+                setPlaceholder(new Label("Query failed!"));
+                Utils.showExceptionDialog("Could not execute query", "Query failed", ex);
+            });
         } finally {
             try {
                 if (rs != null) {
@@ -93,6 +98,7 @@ public class ResultTable extends TableView {
 
         ResultSetMetaData rsmd = rs.getMetaData();
         logger.debug("Resultset contains {} columns", rsmd.getColumnCount());
+
 
         TableColumn<ObservableList, Number> idCol = new TableColumn("#");
         idCol.setCellValueFactory(param -> new SimpleIntegerProperty((Integer) param.getValue().get(0)));

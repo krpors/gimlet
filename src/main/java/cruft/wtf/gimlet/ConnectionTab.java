@@ -1,14 +1,12 @@
 package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.conf.Alias;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.geometry.Orientation;
+import javafx.geometry.Side;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TextArea;
-import javafx.scene.effect.Effect;
-import javafx.scene.effect.GaussianBlur;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
@@ -18,6 +16,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+/**
+ * This tab is added to the parent tab pane when an SQL connection is established via de Alias thing on the left hand
+ * side of the application.
+ */
 public class ConnectionTab extends Tab {
 
     private static Logger logger = LoggerFactory.getLogger(ConnectionTab.class);
@@ -26,10 +28,9 @@ public class ConnectionTab extends Tab {
 
     private Connection connection;
 
-    private ResultTable resultTable;
-
     private TextArea area;
 
+    private TabPane tabPaneResultSets;
 
     public ConnectionTab(final Alias alias) throws SQLException {
         this.alias = alias;
@@ -55,39 +56,38 @@ public class ConnectionTab extends Tab {
         setContent(createContent());
     }
 
-    private void setQueryActive(boolean active) {
-        area.setEditable(!active);
-
-        if (active) {
-            area.setEffect(new GaussianBlur(4));
-        } else {
-            area.setEffect(null);
-        }
-
-        resultTable.setVisible(!active);
-    }
-
     private Node createContent() {
         BorderPane pane = new BorderPane();
 
-        FormPane fp = new FormPane();
+        FormPane topPaneWithLabels = new FormPane();
 
         Label lbl = new Label();
         lbl.textProperty().bindBidirectional(alias.nameProperty());
 
         Label derp = new Label();
         derp.textProperty().bindBidirectional(alias.descriptionProperty());
-        fp.add("Name", lbl);
-        fp.add("Description", derp);
+        topPaneWithLabels.add("Name", lbl);
+        topPaneWithLabels.add("Description", derp);
 
-        pane.setTop(fp);
+        pane.setTop(topPaneWithLabels);
 
-        TabPane tp = new TabPane();
-        tp.getTabs().addAll(createTabQuery(), createTabDrillDown());
+        TabPane tp = new TabPane(createTabQuery(), createTabDrillDown());
 
-        pane.setCenter(tp);
+        SplitPane splitPane = new SplitPane();
+        splitPane.setOrientation(Orientation.VERTICAL);
+
+        splitPane.getItems().addAll(tp, createTabPaneResultTables());
+
+        pane.setCenter(splitPane);
 
         return pane;
+    }
+
+    private TabPane createTabPaneResultTables() {
+        tabPaneResultSets = new TabPane();
+        tabPaneResultSets.setTabMaxWidth(150.0);
+        tabPaneResultSets.setSide(Side.BOTTOM);
+        return tabPaneResultSets;
     }
 
     private Tab createTabQuery() {
@@ -97,29 +97,29 @@ public class ConnectionTab extends Tab {
 
         BorderPane pane = new BorderPane();
 
-        resultTable = new ResultTable();
-
         area = new TextArea();
         area.setText("select * from customer cross join invoice;");
         area.setWrapText(false);
         area.setPrefRowCount(5);
         area.setOnKeyPressed(e -> {
             if (e.isControlDown() && e.getCode() == KeyCode.ENTER) {
-                pane.getCenter().setVisible(false);
 
                 Task<Void> task = new Task<Void>() {
                     @Override
                     protected Void call() throws Exception {
                         // TODO: cancellation on this task is not really possible.
-                        resultTable.executeAndPopulate(connection, area.getText());
+                        //resultTable.executeAndPopulate(connection, area.getText());
+                        ResultTable table = new ResultTable();
+                        Tab tab = new Tab(area.getText());
+                        tab.setContent(table);
+                        Platform.runLater(() -> {
+                            tabPaneResultSets.getTabs().add(tab);
+                            tabPaneResultSets.getSelectionModel().select(tab);
+                        });
+                        table.executeAndPopulate(connection, area.getText());
                         return null;
                     }
                 };
-
-                task.setOnRunning(event -> setQueryActive(true));
-                task.setOnCancelled(event -> setQueryActive(false));
-                task.setOnFailed(event -> setQueryActive(false));
-                task.setOnSucceeded(event -> setQueryActive(false));
 
                 Thread t = new Thread(task, "Gimlet Query Executor Thread");
                 t.setDaemon(true);
@@ -127,8 +127,7 @@ public class ConnectionTab extends Tab {
             }
         });
 
-        pane.setTop(area);
-        pane.setCenter(resultTable);
+        pane.setCenter(area);
 
         tabQuery.setContent(pane);
 
@@ -138,6 +137,13 @@ public class ConnectionTab extends Tab {
     private Tab createTabDrillDown() {
         Tab tab = new Tab("Drill down");
         tab.setGraphic(Images.COG.imageView());
+
+        BorderPane pane = new BorderPane();
+        pane.setCenter(new Button("clix0r"));
+        pane.setLeft(new Button("hello!"));
+
+        tab.setContent(pane);
+
         return tab;
     }
 }
