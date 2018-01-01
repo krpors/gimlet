@@ -17,11 +17,12 @@ import java.sql.*;
 
 /**
  * This class represents a generic {@link TableView} for SQL queries. The table columns are therefore variadic depending
- * on the query executed.
+ * on the query executed. The table expects a {@link ResultSet} to iterate over. The class is not responsible for closing
+ * the resources, merely displaying the data.
  */
 public class ResultTable extends TableView {
 
-    private static Logger logger = LoggerFactory.getLogger(ResultSet.class);
+    private static Logger logger = LoggerFactory.getLogger(ResultTable.class);
 
     private int rowCount = 0;
 
@@ -29,54 +30,6 @@ public class ResultTable extends TableView {
         setEditable(false);
         setTableMenuButtonVisible(true);
         setPlaceholder(new Label("Query is running..."));
-    }
-
-    /**
-     * Executes the given {@code query} on the {@code connection} and displays the result in this table.
-     *
-     * @param connection The SQL connection to operate on.
-     * @param query      The query to actually execute.
-     */
-    public void executeAndPopulate(final Connection connection, final String query) {
-        PreparedStatement statement = null;
-        ResultSet rs = null;
-        try {
-            statement = connection.prepareStatement(query);
-            statement.setMaxRows(0);
-            logger.debug("Executing query...");
-            long start = System.currentTimeMillis();
-            rs = statement.executeQuery();
-            long end = System.currentTimeMillis();
-            logger.debug("Done!");
-            populate(rs);
-
-            QueryExecutedEvent qee = new QueryExecutedEvent();
-            qee.setRowCount(getRowCount());
-            qee.setQuery(query);
-            qee.setRuntime(end - start);
-            EventDispatcher.getInstance().post(qee);
-        } catch (SQLException ex) {
-            logger.error("Could not execute query", ex);
-            Platform.runLater(() -> {
-                setPlaceholder(new Label("Query failed!"));
-                Utils.showExceptionDialog("Could not execute query", "Query failed", ex);
-            });
-        } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                    logger.debug("ResultSet closed");
-                }
-                if (statement != null) {
-                    statement.close();
-                    logger.debug("Statement closed");
-                }
-
-            } catch (SQLException ex) {
-                logger.error("Could not close JDBC resources", ex);
-                Platform.runLater(() -> Utils.showExceptionDialog("Could not close JDBC resources ourselves.", "Whoops!", ex));
-            }
-        }
     }
 
     public void executeAndPopulate(final PreparedStatement statement) {
@@ -126,7 +79,7 @@ public class ResultTable extends TableView {
      * @throws SQLException When iterating the resultset fails for whatever reason.
      */
     @SuppressWarnings("unchecked")
-    private void populate(final ResultSet rs) throws SQLException {
+    public void populate(final ResultSet rs) throws SQLException {
         rowCount = 0;
 
         Platform.runLater(() -> {
@@ -152,10 +105,7 @@ public class ResultTable extends TableView {
             // row data (via setItems).
             if (rsmd.getColumnType(i + 1) == Types.INTEGER) {
                 TableColumn<ObservableList, Number> column = new TableColumn<>(rsmd.getColumnName(i + 1));
-                column.setCellValueFactory(param -> {
-                    System.out.println(param.getValue());
-                    return new SimpleIntegerProperty((Integer) param.getValue().get(j));
-                });
+                column.setCellValueFactory(param -> new SimpleIntegerProperty((Integer) param.getValue().get(j)));
                 Platform.runLater(() -> getColumns().add(column));
             } else {
                 TableColumn<ObservableList, String> col = new TableColumn<>(rsmd.getColumnName(i + 1));
@@ -180,6 +130,10 @@ public class ResultTable extends TableView {
             }
 
             rowdata.add(werd);
+        }
+
+        if (rowCount == 0) {
+            Platform.runLater(() -> setPlaceholder(new Label("No results.")));
         }
 
         // Err... to prevent that the clearing of the items is done later than the setting, we also run the setting

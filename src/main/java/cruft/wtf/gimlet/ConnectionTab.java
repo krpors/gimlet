@@ -15,9 +15,7 @@ import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -122,6 +120,7 @@ public class ConnectionTab extends Tab {
 
     private Tab createTabDrillDown() {
         Tab tab = new Tab("Drill down");
+        tab.setClosable(false);
         tab.setGraphic(Images.COG.imageView());
 
         BorderPane pane = new BorderPane();
@@ -198,7 +197,6 @@ public class ConnectionTab extends Tab {
             logger.error("Could not prepare named parameter statement", e);
             Utils.showExceptionDialog("Bleh", "Yarp", e);
         }
-
     }
 
     /**
@@ -209,22 +207,62 @@ public class ConnectionTab extends Tab {
     private void executeQuery(final String query) {
         assert query != null;
 
+        // A task is used, in another thread so the UI won't hang. All updates to the user interface are done
+        // via Platform.runLater since JavaFX requires UI updates via the JavaFX application thread.
         Task<Void> task = new Task<Void>() {
+
             @Override
             protected Void call() throws Exception {
                 // TODO: cancellation on this task is not really possible.
                 ResultTable table = new ResultTable();
                 Tab tab = new Tab(query);
                 tab.setContent(table);
+
+                // Add the tab in the JavaFX App thread.
                 Platform.runLater(() -> {
                     tabPaneResultSets.getTabs().add(tab);
                     tabPaneResultSets.getSelectionModel().select(tab);
                 });
-                table.executeAndPopulate(connection, query);
+
+                // First, prepare the statement and execute it to see if we even can execute it.
+                PreparedStatement stmt = null;
+                ResultSet rs = null;
+                try {
+                    stmt = connection.prepareStatement(query);
+                    rs = stmt.executeQuery();
+
+                    // Populate the table using the result set.
+                    table.populate(rs);
+
+                } catch (SQLException ex) {
+                    // When exceptions occur, set the tab content to something else to say that something is
+                    // screwed up. TODO: better reporting (text area?).
+                    // Also, re-throw the exception to indicate the task has failed.
+                    Platform.runLater(() -> tab.setContent(new Label("Query failed: " + ex.getMessage())));
+                    throw ex;
+                } finally {
+                    // Close the resources, if applicable.
+                    if (stmt != null) {
+                        stmt.close();
+                    }
+                    if (rs != null) {
+                        rs.close();
+                    }
+                }
+
                 return null;
             }
         };
 
+        // When the task failed (i.e. it threw an exception most likely) inform the user.
+        task.setOnFailed(event -> {
+            if (event.getSource().getException() != null) {
+                Platform.runLater(() -> Utils.showExceptionDialog(
+                        "Query failed.", "See stacktrace below for more details.", event.getSource().getException()));
+            }
+        });
+
+        // Create a thread, daemonize it and start it.
         Thread t = new Thread(task, "Gimlet Query Executor Thread");
         t.setDaemon(true);
         t.start();
