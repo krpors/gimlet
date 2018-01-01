@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -60,6 +61,11 @@ public class ConnectionTab extends Tab {
         setContent(createContent());
     }
 
+    /**
+     * Main entry point for creating the content of the tab.
+     *
+     * @return The node containing the contents.
+     */
     private Node createContent() {
         BorderPane pane = new BorderPane();
 
@@ -87,6 +93,11 @@ public class ConnectionTab extends Tab {
         return pane;
     }
 
+    /**
+     * Creates the tab pane containing the result tables.
+     *
+     * @return The TabPane.
+     */
     private TabPane createTabPaneResultTables() {
         tabPaneResultSets = new TabPane();
         tabPaneResultSets.setTabMaxWidth(150.0);
@@ -94,6 +105,11 @@ public class ConnectionTab extends Tab {
         return tabPaneResultSets;
     }
 
+    /**
+     * Creates the static tab for testing out individual queries.
+     *
+     * @return The Tab.
+     */
     private Tab createTabQuery() {
         Tab tabQuery = new Tab("Query");
         tabQuery.setClosable(false);
@@ -107,7 +123,13 @@ public class ConnectionTab extends Tab {
         area.setPrefRowCount(5);
         area.setOnKeyPressed(e -> {
             if (e.isControlDown() && e.getCode() == KeyCode.ENTER) {
-                executeQuery(area.getText());
+                try {
+                    final PreparedStatement preparedStatement = connection.prepareStatement(area.getText());
+                    executeQuery(preparedStatement, area.getText());
+                } catch (SQLException ex) {
+                    logger.error("Unable to prepare statement", ex);
+                    Utils.showExceptionDialog("Unable to prepare statement", "See stacktrace below for more details", ex);
+                }
             }
         });
 
@@ -160,8 +182,11 @@ public class ConnectionTab extends Tab {
                     TextInputDialog tid = new TextInputDialog("");
                     tid.setTitle("Input");
                     tid.setHeaderText("Specify input for '" + s + "'");
-                    tid.showAndWait().ifPresent(s1 -> map.put(s, s1));
+                    Optional<String> opt = tid.showAndWait();
+                    opt.ifPresent(s1 -> map.put(s, s1));
+                    // TODO: on cancel... bail out.
                 });
+
 
                 map.forEach((s, s2) -> {
                     try {
@@ -170,29 +195,9 @@ public class ConnectionTab extends Tab {
                         logger.error("that didn't work...", e);
                     }
                 });
-
-
-                Task<Void> task = new Task<Void>() {
-                    @Override
-                    protected Void call() throws Exception {
-                        // TODO: cancellation on this task is not really possible.
-                        ResultTable table = new ResultTable();
-                        Tab tab = new Tab(query.getName());
-                        tab.setContent(table);
-                        Platform.runLater(() -> {
-                            tabPaneResultSets.getTabs().add(tab);
-                            tabPaneResultSets.getSelectionModel().select(tab);
-                        });
-                        table.executeAndPopulate(npsm);
-                        return null;
-                    }
-                };
-
-                Thread t = new Thread(task, "Gimlet Query Executor Thread");
-                t.setDaemon(true);
-                t.start();
             }
 
+            executeQuery(npsm, query.getName());
         } catch (SQLException e) {
             logger.error("Could not prepare named parameter statement", e);
             Utils.showExceptionDialog("Bleh", "Yarp", e);
@@ -200,12 +205,12 @@ public class ConnectionTab extends Tab {
     }
 
     /**
-     * Executes a query in String format.
+     * Executes a query in String format. The resources will be closed by this method.
      *
-     * @param query The query to execute.
+     * @param stmt The statement to execute.
      */
-    private void executeQuery(final String query) {
-        assert query != null;
+    private void executeQuery(final PreparedStatement stmt, String tabText) {
+        assert stmt != null;
 
         // A task is used, in another thread so the UI won't hang. All updates to the user interface are done
         // via Platform.runLater since JavaFX requires UI updates via the JavaFX application thread.
@@ -215,7 +220,7 @@ public class ConnectionTab extends Tab {
             protected Void call() throws Exception {
                 // TODO: cancellation on this task is not really possible.
                 ResultTable table = new ResultTable();
-                Tab tab = new Tab(query);
+                Tab tab = new Tab(tabText);
                 tab.setContent(table);
 
                 // Add the tab in the JavaFX App thread.
@@ -225,10 +230,8 @@ public class ConnectionTab extends Tab {
                 });
 
                 // First, prepare the statement and execute it to see if we even can execute it.
-                PreparedStatement stmt = null;
                 ResultSet rs = null;
                 try {
-                    stmt = connection.prepareStatement(query);
                     rs = stmt.executeQuery();
 
                     // Populate the table using the result set.
@@ -238,13 +241,13 @@ public class ConnectionTab extends Tab {
                     // When exceptions occur, set the tab content to something else to say that something is
                     // screwed up. TODO: better reporting (text area?).
                     // Also, re-throw the exception to indicate the task has failed.
+                    logger.error("Failed to execute query", ex);
                     Platform.runLater(() -> tab.setContent(new Label("Query failed: " + ex.getMessage())));
                     throw ex;
                 } finally {
                     // Close the resources, if applicable.
-                    if (stmt != null) {
-                        stmt.close();
-                    }
+                    stmt.close();
+
                     if (rs != null) {
                         rs.close();
                     }
