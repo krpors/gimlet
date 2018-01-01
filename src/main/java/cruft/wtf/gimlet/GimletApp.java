@@ -1,6 +1,7 @@
 package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.conf.GimletProject;
+import cruft.wtf.gimlet.event.ConnectEvent;
 import cruft.wtf.gimlet.event.FileOpenedEvent;
 import cruft.wtf.gimlet.event.FileSavedEvent;
 import javafx.application.Application;
@@ -193,6 +194,8 @@ public class GimletApp extends Application {
         primaryStage.setTitle("Gimlet");
         primaryStage.show();
 
+        ConnectEvent event = new ConnectEvent(gimletProject.getAliases().get(0));
+        EventDispatcher.getInstance().post(event);
 
         logger.info("Gimlet started");
     }

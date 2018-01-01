@@ -28,7 +28,6 @@ public class ResultTable extends TableView {
     public ResultTable() {
         setEditable(false);
         setTableMenuButtonVisible(true);
-        setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
         setPlaceholder(new Label("Query is running..."));
     }
 
@@ -54,6 +53,45 @@ public class ResultTable extends TableView {
             QueryExecutedEvent qee = new QueryExecutedEvent();
             qee.setRowCount(getRowCount());
             qee.setQuery(query);
+            qee.setRuntime(end - start);
+            EventDispatcher.getInstance().post(qee);
+        } catch (SQLException ex) {
+            logger.error("Could not execute query", ex);
+            Platform.runLater(() -> {
+                setPlaceholder(new Label("Query failed!"));
+                Utils.showExceptionDialog("Could not execute query", "Query failed", ex);
+            });
+        } finally {
+            try {
+                if (rs != null) {
+                    rs.close();
+                    logger.debug("ResultSet closed");
+                }
+                if (statement != null) {
+                    statement.close();
+                    logger.debug("Statement closed");
+                }
+
+            } catch (SQLException ex) {
+                logger.error("Could not close JDBC resources", ex);
+                Platform.runLater(() -> Utils.showExceptionDialog("Could not close JDBC resources ourselves.", "Whoops!", ex));
+            }
+        }
+    }
+
+    public void executeAndPopulate(final PreparedStatement statement) {
+        ResultSet rs = null;
+        try {
+            statement.setMaxRows(0);
+            logger.debug("Executing query...");
+            long start = System.currentTimeMillis();
+            rs = statement.executeQuery();
+            long end = System.currentTimeMillis();
+            logger.debug("Done!");
+            populate(rs);
+
+            QueryExecutedEvent qee = new QueryExecutedEvent();
+            qee.setRowCount(getRowCount());
             qee.setRuntime(end - start);
             EventDispatcher.getInstance().post(qee);
         } catch (SQLException ex) {

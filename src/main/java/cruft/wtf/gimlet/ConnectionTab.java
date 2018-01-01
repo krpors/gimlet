@@ -1,12 +1,15 @@
 package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.conf.Alias;
+import cruft.wtf.gimlet.conf.Query;
+import cruft.wtf.gimlet.jdbc.NamedParameterPreparedStatement;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import javafx.geometry.Orientation;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
@@ -15,6 +18,9 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * This tab is added to the parent tab pane when an SQL connection is established via de Alias thing on the left hand
@@ -66,8 +72,8 @@ public class ConnectionTab extends Tab {
 
         Label derp = new Label();
         derp.textProperty().bindBidirectional(alias.descriptionProperty());
-        topPaneWithLabels.add("Name", lbl);
-        topPaneWithLabels.add("Description", derp);
+        topPaneWithLabels.add("Name:", lbl);
+        topPaneWithLabels.add("Description:", derp);
 
         pane.setTop(topPaneWithLabels);
 
@@ -103,27 +109,7 @@ public class ConnectionTab extends Tab {
         area.setPrefRowCount(5);
         area.setOnKeyPressed(e -> {
             if (e.isControlDown() && e.getCode() == KeyCode.ENTER) {
-
-                Task<Void> task = new Task<Void>() {
-                    @Override
-                    protected Void call() throws Exception {
-                        // TODO: cancellation on this task is not really possible.
-                        //resultTable.executeAndPopulate(connection, area.getText());
-                        ResultTable table = new ResultTable();
-                        Tab tab = new Tab(area.getText());
-                        tab.setContent(table);
-                        Platform.runLater(() -> {
-                            tabPaneResultSets.getTabs().add(tab);
-                            tabPaneResultSets.getSelectionModel().select(tab);
-                        });
-                        table.executeAndPopulate(connection, area.getText());
-                        return null;
-                    }
-                };
-
-                Thread t = new Thread(task, "Gimlet Query Executor Thread");
-                t.setDaemon(true);
-                t.start();
+                executeQuery(area.getText());
             }
         });
 
@@ -139,11 +125,130 @@ public class ConnectionTab extends Tab {
         tab.setGraphic(Images.COG.imageView());
 
         BorderPane pane = new BorderPane();
-        pane.setCenter(new Button("clix0r"));
-        pane.setLeft(new Button("hello!"));
+
+        ListView<Query> listView = new ListView<>();
+        listView.itemsProperty().bindBidirectional(GimletApp.gimletProject.queriesProperty());
+        listView.setCellFactory(param -> new QueryListViewListCell());
+        listView.setOnKeyPressed(event -> {
+            if (event.isControlDown() && event.getCode() == KeyCode.ENTER) {
+                System.out.println("Executing " + listView.getSelectionModel().getSelectedItem());
+                executeQuery(listView.getSelectionModel().getSelectedItem());
+            }
+        });
+
+        pane.setCenter(listView);
 
         tab.setContent(pane);
 
         return tab;
+    }
+
+    /**
+     * Executes a predefined query.
+     *
+     * @param query The query shizzle.
+     */
+    private void executeQuery(final Query query) {
+        assert query != null;
+
+        try {
+            NamedParameterPreparedStatement npsm =
+                    NamedParameterPreparedStatement.createNamedParameterPreparedStatement(connection, query.getContent());
+            if (npsm.hasNamedParameters()) {
+                Set<String> params = npsm.getParameters();
+                Map<String, String> map = new HashMap<>();
+                params.forEach(s -> {
+                    TextInputDialog tid = new TextInputDialog("");
+                    tid.setTitle("Input");
+                    tid.setHeaderText("Specify input for '" + s + "'");
+                    tid.showAndWait().ifPresent(s1 -> map.put(s, s1));
+                });
+
+                map.forEach((s, s2) -> {
+                    try {
+                        npsm.setString(s, s2);
+                    } catch (SQLException e) {
+                        logger.error("that didn't work...", e);
+                    }
+                });
+
+
+                Task<Void> task = new Task<Void>() {
+                    @Override
+                    protected Void call() throws Exception {
+                        // TODO: cancellation on this task is not really possible.
+                        ResultTable table = new ResultTable();
+                        Tab tab = new Tab(query.getName());
+                        tab.setContent(table);
+                        Platform.runLater(() -> {
+                            tabPaneResultSets.getTabs().add(tab);
+                            tabPaneResultSets.getSelectionModel().select(tab);
+                        });
+                        table.executeAndPopulate(npsm);
+                        return null;
+                    }
+                };
+
+                Thread t = new Thread(task, "Gimlet Query Executor Thread");
+                t.setDaemon(true);
+                t.start();
+            }
+
+        } catch (SQLException e) {
+            logger.error("Could not prepare named parameter statement", e);
+            Utils.showExceptionDialog("Bleh", "Yarp", e);
+        }
+
+    }
+
+    /**
+     * Executes a query in String format.
+     *
+     * @param query The query to execute.
+     */
+    private void executeQuery(final String query) {
+        assert query != null;
+
+        Task<Void> task = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                // TODO: cancellation on this task is not really possible.
+                ResultTable table = new ResultTable();
+                Tab tab = new Tab(query);
+                tab.setContent(table);
+                Platform.runLater(() -> {
+                    tabPaneResultSets.getTabs().add(tab);
+                    tabPaneResultSets.getSelectionModel().select(tab);
+                });
+                table.executeAndPopulate(connection, query);
+                return null;
+            }
+        };
+
+        Thread t = new Thread(task, "Gimlet Query Executor Thread");
+        t.setDaemon(true);
+        t.start();
+    }
+
+    /**
+     * A specialized list cell for a listview for the queries defined at the root of the app.
+     */
+    private class QueryListViewListCell extends TextFieldListCell<Query> {
+
+        public QueryListViewListCell() {
+        }
+
+        @Override
+        public void updateItem(Query item, boolean empty) {
+            super.updateItem(item, empty);
+
+            if (item == null || empty) {
+                return;
+            }
+
+            setText(item.getName());
+            setTooltip(new Tooltip(item.getDescription()));
+        }
+
     }
 }

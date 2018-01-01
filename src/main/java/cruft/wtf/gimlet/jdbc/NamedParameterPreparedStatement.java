@@ -4,9 +4,8 @@ package cruft.wtf.gimlet.jdbc;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.sql.Date;
+import java.util.*;
 
 /**
  * A {@link NamedParameterPreparedStatement} is an implementation of {@link PreparedStatement} which allows us to make
@@ -15,7 +14,9 @@ import java.util.List;
  * we can now use a format of
  * <pre>    select * from customer where name = :name and lastname = :lastname</pre>
  * which is pretty much required in Gimlet.
- *
+ * <p/>
+ * This code is copied and altered from <a href="https://github.com/axiom-data-science/jdbc-named-parameters">axiom-data-science</a>.
+ * <p/>
  * TODO: copyright notice (unlicense?)
  */
 public class NamedParameterPreparedStatement extends DelegatingPreparedStatement {
@@ -158,12 +159,21 @@ public class NamedParameterPreparedStatement extends DelegatingPreparedStatement
         this.orderedParameters = orderedParameters;
     }
 
+    /**
+     * Gets all defined parameters as an ordered set.
+     *
+     * @return The defined parameters in the SQL.
+     */
+    public Set<String> getParameters() {
+        return new TreeSet<>(orderedParameters);
+    }
+
     public boolean hasNamedParameters() {
         return !orderedParameters.isEmpty();
     }
 
     private Collection<Integer> getParameterIndexes(String parameter) {
-        Collection<Integer> indexes = new ArrayList<Integer>();
+        Collection<Integer> indexes = new ArrayList<>();
         for (int i = 0; i < orderedParameters.size(); i++) {
             if (orderedParameters.get(i).equals(parameter)) {
                 //add i + 1, since all indexes ever are 0 based EXCEPT JDBC PARAMS WHYYYYY
@@ -296,5 +306,10 @@ public class NamedParameterPreparedStatement extends DelegatingPreparedStatement
         for (Integer i : getParameterIndexes(parameter)) {
             getDelegate().setObject(i, x);
         }
+    }
+
+    @Override
+    public String toString() {
+        return getDelegate().toString();
     }
 }

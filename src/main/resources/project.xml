@@ -27,10 +27,10 @@
              In other words, it's a tree of queries. -->
         <query>
             <!-- Some meta (display) data for the query. -->
-            <name>Select all addresses.</name>
-            <description>This query selects all the main addresses.</description>
+            <name>Select all invoices</name>
+            <description>This query selects all the invoices</description>
             <!-- The actual query to run -->
-            <content>select * from address</content>
+            <content>select * from invoice where customerid = :customer_id and id = :id;</content>
             <!-- Column selectors are the columns which are supposed to be input for the
                  next query. Not sure yet how, but we'll see. -->
             <column-selectors>
