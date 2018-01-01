@@ -21,7 +21,7 @@ public final class Utils {
      * @param content   The content text.
      * @param exception The exception to display as expandable content.
      */
-    public static void showExceptionDialog(String header, String content, Exception exception) {
+    public static void showExceptionDialog(String header, String content, Throwable exception) {
         Dialog dialog = new Dialog();
         dialog.setGraphic(Images.DIALOG_ERROR.imageView());
         dialog.setTitle("Error!");
