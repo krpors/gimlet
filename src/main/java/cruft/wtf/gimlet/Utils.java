@@ -1,10 +1,12 @@
 package cruft.wtf.gimlet;
 
 import javafx.geometry.Insets;
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -47,7 +49,7 @@ public final class Utils {
         GridPane pane = new GridPane();
         pane.setMaxWidth(Double.MAX_VALUE);
         pane.add(lbl, 0, 0);
-        pane.add(new Label("Stacktrace:"), 0,  1);
+        pane.add(new Label("Stacktrace:"), 0, 1);
         pane.add(textArea, 0, 2);
 
         dialog.getDialogPane().setContent(pane);

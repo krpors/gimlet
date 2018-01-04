@@ -188,13 +188,17 @@ public class ConnectionTab extends Tab {
                 });
 
 
-                map.forEach((s, s2) -> {
+                for (String key : map.keySet()) {
                     try {
-                        npsm.setString(s, s2);
+                        npsm.setString(key, map.get(key));
+                    } catch (SQLDataException ex) {
+                        logger.error("Invalid data given");
+                        return;
                     } catch (SQLException e) {
                         logger.error("that didn't work...", e);
+                        return;
                     }
-                });
+                }
             }
 
             executeQuery(npsm, query.getName());
@@ -214,10 +218,11 @@ public class ConnectionTab extends Tab {
 
         // A task is used, in another thread so the UI won't hang. All updates to the user interface are done
         // via Platform.runLater since JavaFX requires UI updates via the JavaFX application thread.
-        Task<Void> task = new Task<Void>() {
+
+        TimedTask<Tab> task = new TimedTask<Tab>() {
 
             @Override
-            protected Void call() throws Exception {
+            protected Tab call() throws Exception {
                 // TODO: cancellation on this task is not really possible.
                 ResultTable table = new ResultTable();
                 Tab tab = new Tab(tabText);
@@ -232,11 +237,12 @@ public class ConnectionTab extends Tab {
                 // First, prepare the statement and execute it to see if we even can execute it.
                 ResultSet rs = null;
                 try {
+                    start();
                     rs = stmt.executeQuery();
+                    stop();
 
                     // Populate the table using the result set.
                     table.populate(rs);
-
                 } catch (SQLException ex) {
                     // When exceptions occur, set the tab content to something else to say that something is
                     // screwed up. TODO: better reporting (text area?).
@@ -253,9 +259,13 @@ public class ConnectionTab extends Tab {
                     }
                 }
 
-                return null;
+                return tab;
             }
         };
+
+        task.timeProperty().addListener((observable, oldValue, newValue) -> {
+            System.out.println("Time taken:"  + newValue);
+        });
 
         // When the task failed (i.e. it threw an exception most likely) inform the user.
         task.setOnFailed(event -> {
@@ -263,6 +273,11 @@ public class ConnectionTab extends Tab {
                 Platform.runLater(() -> Utils.showExceptionDialog(
                         "Query failed.", "See stacktrace below for more details.", event.getSource().getException()));
             }
+        });
+
+        task.setOnSucceeded(event -> {
+            Tab createdTab = (Tab) event.getSource().getValue();
+            createdTab.setText(String.format("(%d ms.) %s", task.timeProperty().get(), createdTab.getText()));
         });
 
         // Create a thread, daemonize it and start it.
