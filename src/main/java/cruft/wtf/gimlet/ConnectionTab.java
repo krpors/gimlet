@@ -242,7 +242,8 @@ public class ConnectionTab extends Tab {
                     stop();
 
                     // Populate the table using the result set.
-                    table.populate(rs);
+                    int rowcount = table.populate(rs);
+
                 } catch (SQLException ex) {
                     // When exceptions occur, set the tab content to something else to say that something is
                     // screwed up. TODO: better reporting (text area?).

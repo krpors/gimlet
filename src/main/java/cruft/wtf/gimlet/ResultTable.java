@@ -1,19 +1,20 @@
 package cruft.wtf.gimlet;
 
 
-import cruft.wtf.gimlet.event.QueryExecutedEvent;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.TextFieldTableCell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.*;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * This class represents a generic {@link TableView} for SQL queries. The table columns are therefore variadic depending
@@ -30,45 +31,8 @@ public class ResultTable extends TableView {
         setEditable(false);
         setTableMenuButtonVisible(true);
         setPlaceholder(new Label("Query is running..."));
-    }
 
-    public void executeAndPopulate(final PreparedStatement statement) {
-        ResultSet rs = null;
-        try {
-            statement.setMaxRows(0);
-            logger.debug("Executing query...");
-            long start = System.currentTimeMillis();
-            rs = statement.executeQuery();
-            long end = System.currentTimeMillis();
-            logger.debug("Done!");
-            populate(rs);
-
-            QueryExecutedEvent qee = new QueryExecutedEvent();
-            qee.setRowCount(getRowCount());
-            qee.setRuntime(end - start);
-            EventDispatcher.getInstance().post(qee);
-        } catch (SQLException ex) {
-            logger.error("Could not execute query", ex);
-            Platform.runLater(() -> {
-                setPlaceholder(new Label("Query failed!"));
-                Utils.showExceptionDialog("Could not execute query", "Query failed", ex);
-            });
-        } finally {
-            try {
-                if (rs != null) {
-                    rs.close();
-                    logger.debug("ResultSet closed");
-                }
-                if (statement != null) {
-                    statement.close();
-                    logger.debug("Statement closed");
-                }
-
-            } catch (SQLException ex) {
-                logger.error("Could not close JDBC resources", ex);
-                Platform.runLater(() -> Utils.showExceptionDialog("Could not close JDBC resources ourselves.", "Whoops!", ex));
-            }
-        }
+        setRowFactory(param -> new ResultTableRow());
     }
 
     /**
@@ -76,10 +40,11 @@ public class ResultTable extends TableView {
      * the UI happens via the {@link Platform#runLater(Runnable)} utility function.
      *
      * @param rs The {@link ResultSet}.
+     * @return The rowcount.
      * @throws SQLException When iterating the resultset fails for whatever reason.
      */
     @SuppressWarnings("unchecked")
-    public void populate(final ResultSet rs) throws SQLException {
+    public int populate(final ResultSet rs) throws SQLException {
         rowCount = 0;
 
         Platform.runLater(() -> {
@@ -114,22 +79,46 @@ public class ResultTable extends TableView {
             }
         }
 
+
+
         ObservableList<ObservableList> rowdata = FXCollections.observableArrayList();
         while (rs.next()) {
             rowCount++;
-            ObservableList werd = FXCollections.observableArrayList();
-            werd.add(rowCount);
+            ObservableList columnContentLists = FXCollections.observableArrayList();
+            columnContentLists.add(rowCount);
             for (int i = 1; i <= rsmd.getColumnCount(); i++) {
                 // first element is the actual row number, which is just the i counter;
 
-                if (rsmd.getColumnType(i) == Types.INTEGER) {
-                    werd.add(rs.getInt(i));
-                } else {
-                    werd.add(rs.getString(i));
+                switch (rsmd.getColumnType(i)) {
+                    case Types.BIGINT:
+                        columnContentLists.add(rs.getLong(i));
+                        break;
+                    case Types.SMALLINT:
+                    case Types.TINYINT:
+                    case Types.INTEGER:
+                        columnContentLists.add(rs.getInt(i));
+                        break;
+                    case Types.CHAR:
+                    case Types.LONGNVARCHAR:
+                    case Types.LONGVARCHAR:
+                    case Types.VARCHAR:
+                        columnContentLists.add(rs.getString(i));
+                        break;
+                    case Types.TIMESTAMP:
+                    case Types.TIMESTAMP_WITH_TIMEZONE:
+                        columnContentLists.add(rs.getTimestamp(i));
+                        break;
+                    case Types.DATE:
+                        columnContentLists.add(rs.getDate(i));
+                        break;
+                    case Types.TIME:
+                        columnContentLists.add(rs.getTime(i));
+                    default:
+                        columnContentLists.add(rs.getString(i));
                 }
             }
 
-            rowdata.add(werd);
+            rowdata.add(columnContentLists);
         }
 
         if (rowCount == 0) {
@@ -141,14 +130,30 @@ public class ResultTable extends TableView {
         Platform.runLater(() -> {
             setItems(rowdata);
         });
+
+        return rowCount;
     }
 
-    /**
-     * Returns the rowcount after the ResultTable has been populated by {@link #populate(ResultSet)}.
-     *
-     * @return The rowcount.
-     */
-    public int getRowCount() {
-        return rowCount;
+    private class Celelele extends TextFieldTableCell {
+        @Override
+        public void updateItem(Object item, boolean empty) {
+            super.updateItem(item, empty);
+
+            if (item == null || empty) {
+                setText("");
+                return;
+            }
+
+            setText(item.toString());
+        }
+    }
+
+    private class ResultTableRow extends TableRow<ObservableList> {
+        @Override
+        protected void updateItem(ObservableList rowData, boolean empty) {
+            super.updateItem(rowData, empty);
+
+            logger.debug("Upate of item {} (empty: {})", rowData, empty);
+        }
     }
 }
