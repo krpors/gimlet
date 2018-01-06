@@ -125,7 +125,7 @@ public class ConnectionTab extends Tab {
             if (e.isControlDown() && e.getCode() == KeyCode.ENTER) {
                 try {
                     final PreparedStatement preparedStatement = connection.prepareStatement(area.getText());
-                    executeQuery(preparedStatement, area.getText());
+                    executeQuery(preparedStatement, new ResultTable(), area.getText());
                 } catch (SQLException ex) {
                     logger.error("Unable to prepare statement", ex);
                     Utils.showExceptionDialog("Unable to prepare statement", "See stacktrace below for more details", ex);
@@ -201,7 +201,7 @@ public class ConnectionTab extends Tab {
                 }
             }
 
-            executeQuery(npsm, query.getName());
+            executeQuery(npsm, new DrillResultTable(), query.getName());
         } catch (SQLException e) {
             logger.error("Could not prepare named parameter statement", e);
             Utils.showExceptionDialog("Bleh", "Yarp", e);
@@ -213,7 +213,7 @@ public class ConnectionTab extends Tab {
      *
      * @param stmt The statement to execute.
      */
-    private void executeQuery(final PreparedStatement stmt, String tabText) {
+    private void executeQuery(final PreparedStatement stmt, final ResultTable table, String tabText) {
         assert stmt != null;
 
         // A task is used, in another thread so the UI won't hang. All updates to the user interface are done
@@ -224,7 +224,6 @@ public class ConnectionTab extends Tab {
             @Override
             protected Tab call() throws Exception {
                 // TODO: cancellation on this task is not really possible.
-                ResultTable table = new ResultTable();
                 Tab tab = new Tab(tabText);
                 tab.setContent(table);
 

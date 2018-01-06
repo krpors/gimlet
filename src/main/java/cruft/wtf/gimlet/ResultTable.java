@@ -6,8 +6,9 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.*;
-import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +22,7 @@ import java.sql.Types;
  * on the query executed. The table expects a {@link ResultSet} to iterate over. The class is not responsible for closing
  * the resources, merely displaying the data.
  */
-public class ResultTable extends TableView {
+public class ResultTable extends TableView<ObservableList> {
 
     private static Logger logger = LoggerFactory.getLogger(ResultTable.class);
 
@@ -31,8 +32,6 @@ public class ResultTable extends TableView {
         setEditable(false);
         setTableMenuButtonVisible(true);
         setPlaceholder(new Label("Query is running..."));
-
-        setRowFactory(param -> new ResultTableRow());
     }
 
     /**
@@ -52,36 +51,11 @@ public class ResultTable extends TableView {
             getItems().clear();
         });
 
-        ResultSetMetaData rsmd = rs.getMetaData();
-        logger.debug("Resultset contains {} columns", rsmd.getColumnCount());
-
-
-        TableColumn<ObservableList, Number> idCol = new TableColumn("#");
-        idCol.setCellValueFactory(param -> new SimpleIntegerProperty((Integer) param.getValue().get(0)));
-        Platform.runLater(() -> getColumns().add(idCol));
-
-        for (int i = 0; i < rsmd.getColumnCount(); i++) {
-            final int j = i + 1;
-
-            // This construction allows us to make the table sortable by numbers. Need to figure out though
-            // if this needs a lot of expansion for all other types of integer-like column types.
-            //
-            // The reference to the actual data is a bit funky: it refers to the ObservableList containing the
-            // row data (via setItems).
-            if (rsmd.getColumnType(i + 1) == Types.INTEGER) {
-                TableColumn<ObservableList, Number> column = new TableColumn<>(rsmd.getColumnName(i + 1));
-                column.setCellValueFactory(param -> new SimpleIntegerProperty((Integer) param.getValue().get(j)));
-                Platform.runLater(() -> getColumns().add(column));
-            } else {
-                TableColumn<ObservableList, String> col = new TableColumn<>(rsmd.getColumnName(i + 1));
-                col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().get(j).toString()));
-                Platform.runLater(() -> getColumns().add(col));
-            }
-        }
-
-
+        // Create the columns. That method is also responsible for properly showing the data using the CellValueFactory.
+        createColumns(rs);
 
         ObservableList<ObservableList> rowdata = FXCollections.observableArrayList();
+        ResultSetMetaData rsmd = rs.getMetaData();
         while (rs.next()) {
             rowCount++;
             ObservableList columnContentLists = FXCollections.observableArrayList();
@@ -89,6 +63,7 @@ public class ResultTable extends TableView {
             for (int i = 1; i <= rsmd.getColumnCount(); i++) {
                 // first element is the actual row number, which is just the i counter;
 
+                // Based on the column type, add a different type of data (int, long, string, etc).
                 switch (rsmd.getColumnType(i)) {
                     case Types.BIGINT:
                         columnContentLists.add(rs.getLong(i));
@@ -134,26 +109,41 @@ public class ResultTable extends TableView {
         return rowCount;
     }
 
-    private class Celelele extends TextFieldTableCell {
-        @Override
-        public void updateItem(Object item, boolean empty) {
-            super.updateItem(item, empty);
+    /**
+     * Create the columns based on the {@link ResultSetMetaData}
+     *
+     * @param rs The ResultSet containing the meta data.
+     * @throws SQLException
+     */
+    private void createColumns(ResultSet rs) throws SQLException {
+        ResultSetMetaData rsmd = rs.getMetaData();
+        logger.debug("Resultset contains {} columns", rsmd.getColumnCount());
 
-            if (item == null || empty) {
-                setText("");
-                return;
+        // The first column is simply the row counter.
+        TableColumn<ObservableList, Number> idCol = new TableColumn<>("#");
+        idCol.setCellValueFactory(param -> new SimpleIntegerProperty((Integer) param.getValue().get(0)));
+        Platform.runLater(() -> getColumns().add(idCol));
+
+        // Iterate over the other columns so we can add columns.
+        for (int i = 0; i < rsmd.getColumnCount(); i++) {
+            // Add 1, since the first column is actually our own row counter.
+            final int j = i + 1;
+
+            // This construction allows us to make the table sortable by numbers. Need to figure out though
+            // if this needs a lot of expansion for all other types of integer-like column types.
+            //
+            // The reference to the actual data is a bit funky: it refers to the ObservableList containing the
+            // row data (via setItems).
+            if (rsmd.getColumnType(j) == Types.INTEGER) {
+                TableColumn<ObservableList, Number> column = new TableColumn<>(rsmd.getColumnName(j));
+                column.setCellValueFactory(param -> new SimpleIntegerProperty((Integer) param.getValue().get(j)));
+                Platform.runLater(() -> getColumns().add(column));
+            } else {
+                TableColumn<ObservableList, String> col = new TableColumn<>(rsmd.getColumnName(j));
+                col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().get(j).toString()));
+                Platform.runLater(() -> getColumns().add(col));
             }
-
-            setText(item.toString());
         }
     }
 
-    private class ResultTableRow extends TableRow<ObservableList> {
-        @Override
-        protected void updateItem(ObservableList rowData, boolean empty) {
-            super.updateItem(rowData, empty);
-
-            logger.debug("Upate of item {} (empty: {})", rowData, empty);
-        }
-    }
 }
