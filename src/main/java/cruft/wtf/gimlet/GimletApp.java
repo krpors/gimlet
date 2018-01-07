@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class GimletApp extends Application {
@@ -35,6 +34,8 @@ public class GimletApp extends Application {
     private AliasList aliasList;
 
     private QueryTree queryConfigurationTree;
+
+    public static EditorTabView editorTabView;
 
     /**
      * The global reference to the opened GimletProject. Can be null if none is opened... Is there a better way?
@@ -88,7 +89,8 @@ public class GimletApp extends Application {
         Menu menuFile = new Menu("File");
 
         MenuItem fileItemNew = new MenuItem("New");
-        fileItemNew.setAccelerator(KeyCombination.keyCombination("Ctrl+N"));;
+        fileItemNew.setAccelerator(KeyCombination.keyCombination("Ctrl+N"));
+        ;
 
         MenuItem fileItemOpen = new MenuItem("Open...");
         fileItemOpen.setAccelerator(KeyCombination.keyCombination("Ctrl+O"));
@@ -175,7 +177,8 @@ public class GimletApp extends Application {
 
         BorderPane pane = new BorderPane();
 
-        SplitPane centerPane = new SplitPane(createLeft(), new EditorTabView());
+        editorTabView = new EditorTabView();
+        SplitPane centerPane = new SplitPane(createLeft(), editorTabView);
         centerPane.setDividerPosition(0, 0.25);
 
 

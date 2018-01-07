@@ -7,14 +7,21 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * Utility class with static methods.
  */
 public final class Utils {
+
+    private static Logger logger = LoggerFactory.getLogger(Utils.class);
 
     /**
      * Creates and displays a dialog with {@link Exception} details.
@@ -56,4 +63,30 @@ public final class Utils {
 
         dialog.showAndWait();
     }
+
+    /**
+     *
+     */
+    public static void close(final Statement statement) throws SQLException {
+        if (statement != null) {
+            try {
+                statement.close();
+            } catch (SQLException e) {
+                logger.error("Still unable to close statement", e);
+                throw e;
+            }
+        }
+    }
+
+    public static void close(final ResultSet rs) throws SQLException {
+        if (rs != null) {
+            try {
+                rs.close();
+            } catch (SQLException e) {
+                logger.error("Still unable to close resultset", e);
+                throw e;
+            }
+        }
+    }
+
 }

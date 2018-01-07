@@ -2,6 +2,7 @@ package cruft.wtf.gimlet;
 
 
 import cruft.wtf.gimlet.conf.Query;
+import cruft.wtf.gimlet.event.QueryExecuteEvent;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -25,14 +26,13 @@ public class DrillResultTable extends ResultTable {
     /**
      * The parent tab where this result table is added.
      */
-    private ConnectionTab connectionTab;
+    private DrillDownTab drillDownTab;
 
-    public DrillResultTable(final ConnectionTab connectionTab, final Query query) {
-        this.connectionTab = connectionTab;
+    public DrillResultTable(final DrillDownTab drillDownTab, final Query query) {
+        this.drillDownTab = drillDownTab;
         this.query = query;
         setRowFactory(param -> new DrillResultTableRow());
     }
-
 
     /**
      * TableRow for this {@link DrillResultTable}. Contains context menus etc.
@@ -63,8 +63,10 @@ public class DrillResultTable extends ResultTable {
                 map.put(columnName, selectedItem.get(i));
             }
 
-
-            connectionTab.executeQuery(subquery, map);
+            QueryExecuteEvent executeEvent = new QueryExecuteEvent();
+            executeEvent.setQuery(subquery);
+            executeEvent.setColumnnMap(map);
+            EventDispatcher.getInstance().post(executeEvent);
         }
 
         @Override

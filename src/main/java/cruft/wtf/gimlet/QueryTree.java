@@ -2,6 +2,7 @@ package cruft.wtf.gimlet;
 
 import com.google.common.eventbus.Subscribe;
 import cruft.wtf.gimlet.conf.Query;
+import cruft.wtf.gimlet.event.QueryExecuteEvent;
 import cruft.wtf.gimlet.event.QuerySavedEvent;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
@@ -56,6 +57,12 @@ public class QueryTree extends TreeView<Query> {
         }
 
         root.setExpanded(true);
+    }
+
+    private void executeSelectedQuery(final Query query) {
+        QueryExecuteEvent e = new QueryExecuteEvent();
+        e.setQuery(query);
+        EventDispatcher.getInstance().post(e);
     }
 
     /**
@@ -126,11 +133,19 @@ public class QueryTree extends TreeView<Query> {
         private ContextMenu menu = new ContextMenu();
 
         public QueryConfigurationTreeCell() {
+            MenuItem executeItem = new MenuItem("EXECUTE!");
+            executeItem.setGraphic(Images.COG.imageView());
             MenuItem editItem = new MenuItem("Edit");
             MenuItem removeItem = new MenuItem("Delete");
 
-            menu.getItems().addAll(editItem, new SeparatorMenuItem(), removeItem);
+            menu.getItems().addAll(
+                    executeItem,
+                    new SeparatorMenuItem(),
+                    editItem,
+                    new SeparatorMenuItem(),
+                    removeItem);
 
+            executeItem.setOnAction(e -> executeSelectedQuery(getItem()));
             editItem.setOnAction(e -> openQueryEditDialog());
             removeItem.setOnAction(e -> removeSelectedQuery());
         }

@@ -2,7 +2,6 @@ package cruft.wtf.gimlet;
 
 import com.google.common.eventbus.Subscribe;
 import cruft.wtf.gimlet.event.ConnectEvent;
-import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,15 +14,15 @@ public class EditorTabView extends TabPane {
 
     public EditorTabView() {
         EventDispatcher.getInstance().register(this);
-
-        setTabMaxWidth(150);
-        Tab staticTab = new Tab("Gimlet v1.0.0");
-        staticTab.setClosable(false);
-        getTabs().add(staticTab);
     }
 
+    public ConnectionTab getOpenTab() {
+        return (ConnectionTab) getSelectionModel().getSelectedItem();
+    }
+
+    @SuppressWarnings("unused")
     @Subscribe
-    public void onConnectEvent(ConnectEvent evt) {
+    public void onConnectEvent(final ConnectEvent evt) {
         ConnectionTab tab = null;
         try {
             tab = new ConnectionTab(evt.getAlias());
