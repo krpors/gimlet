@@ -75,26 +75,7 @@ public class DrillResultTable extends ResultTable {
                 return;
             }
 
-            Set<String> columns = new TreeSet<>();
-            columns.addAll(Arrays.asList("lastname", "firstname"));
-
-            Map<String, Integer> columnIndex = new HashMap<>();
-
-            for (int i = 0; i < getTableView().getColumns().size(); i++) {
-                TableColumn thecol = getTableView().getColumns().get(i);
-                if (columns.contains(thecol.getText().toLowerCase())) {
-                    columnIndex.put(thecol.getText().toLowerCase(), i);
-                }
-            }
-
-//            menu.getItems().get(0).setOnAction(event -> {
-//                ObservableList selectedItem = getTableView().getSelectionModel().getSelectedItem();
-//                columnIndex.forEach((s, integer) -> logger.debug("Column {} is at {} => {}", s, integer, selectedItem.get(integer)));
-//            });
-
             setContextMenu(menu);
         }
-
-
     }
 }
