@@ -180,10 +180,10 @@ public class NamedParameterPreparedStatement extends DelegatingPreparedStatement
                 indexes.add(i + 1);
             }
         }
-        if (indexes.isEmpty()) {
-            throw new IllegalArgumentException(String.format("SQL statement doesn't contain the parameter '%s'",
-                    parameter));
-        }
+//        if (indexes.isEmpty()) {
+//            throw new IllegalArgumentException(String.format("SQL statement doesn't contain the parameter '%s'",
+//                    parameter));
+//        }
         return indexes;
     }
 

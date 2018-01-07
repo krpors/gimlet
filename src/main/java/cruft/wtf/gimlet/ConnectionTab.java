@@ -4,17 +4,19 @@ import cruft.wtf.gimlet.conf.Alias;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.jdbc.NamedParameterPreparedStatement;
 import javafx.application.Platform;
-import javafx.concurrent.Task;
 import javafx.geometry.Orientation;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
 import java.sql.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -201,7 +203,29 @@ public class ConnectionTab extends Tab {
                 }
             }
 
-            executeQuery(npsm, new DrillResultTable(), query.getName());
+            executeQuery(npsm, new DrillResultTable(this, query), query.getName());
+        } catch (SQLException e) {
+            logger.error("Could not prepare named parameter statement", e);
+            Utils.showExceptionDialog("Bleh", "Yarp", e);
+        }
+    }
+
+    /**
+     * Executes a predefined query.
+     *
+     * @param query The query shizzle.
+     */
+    protected void executeQuery(final Query query, final Map<String, Object> columnValues) {
+        assert query != null;
+
+        try {
+            NamedParameterPreparedStatement npsm =
+                    NamedParameterPreparedStatement.createNamedParameterPreparedStatement(connection, query.getContent());
+            for (String key : columnValues.keySet()) {
+                npsm.setObject(key, columnValues.get(key));
+            }
+
+            executeQuery(npsm, new DrillResultTable(this, query), query.getName());
         } catch (SQLException e) {
             logger.error("Could not prepare named parameter statement", e);
             Utils.showExceptionDialog("Bleh", "Yarp", e);
@@ -264,7 +288,7 @@ public class ConnectionTab extends Tab {
         };
 
         task.timeProperty().addListener((observable, oldValue, newValue) -> {
-            System.out.println("Time taken:"  + newValue);
+            System.out.println("Time taken:" + newValue);
         });
 
         // When the task failed (i.e. it threw an exception most likely) inform the user.

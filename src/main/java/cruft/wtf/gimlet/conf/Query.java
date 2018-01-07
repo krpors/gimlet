@@ -13,7 +13,6 @@ import java.util.List;
 @XmlType(propOrder = {
         "name",
         "description",
-        "columnSelectors",
         "content",
         "subQueries"
 })
@@ -24,8 +23,6 @@ public class Query {
     private StringProperty description = new SimpleStringProperty();
 
     private StringProperty content = new SimpleStringProperty();
-
-    private SimpleListProperty<String> columnSelectors = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     private SimpleListProperty<Query> subQueries = new SimpleListProperty<>(FXCollections.observableArrayList());
 
@@ -51,20 +48,6 @@ public class Query {
 
     public void setContent(String content) {
         this.content.set(content);
-    }
-
-    @XmlElementWrapper(name = "column-selectors")
-    @XmlElement(name = "column")
-    public List<String> getColumnSelectors() {
-        return columnSelectors.get();
-    }
-
-    public SimpleListProperty<String> columnSelectorsProperty() {
-        return columnSelectors;
-    }
-
-    public void setColumnSelectors(List<String> columnSelectors) {
-        this.columnSelectors.setAll(columnSelectors);
     }
 
     public String getDescription() {
