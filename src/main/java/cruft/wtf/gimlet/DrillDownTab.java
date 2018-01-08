@@ -74,17 +74,18 @@ public class DrillDownTab extends Tab {
     }
 
     public void executeQuery(final Query query, final Map<String, Object> columnMap) {
-        logger.debug("EXECUTIN' QUERY {}", query);
+        logger.debug("Executing drilldown query '{}' with column map of {} keys", query.getName(), columnMap.size());
 
+        NamedParameterPreparedStatement npsm = null;
+        ResultSet rs = null;
         try {
-            NamedParameterPreparedStatement npsm =
-                    NamedParameterPreparedStatement.createNamedParameterPreparedStatement(connection, query.getContent());
+            npsm = NamedParameterPreparedStatement.createNamedParameterPreparedStatement(connection, query.getContent());
             npsm.setMaxRows(100);
             if (columnMap.isEmpty()) {
                 if (npsm.hasNamedParameters()) {
                     Map<String, String> map = new HashMap<>();
                     for (String s : npsm.getParameters()) {
-                        TextInputDialog tid = new TextInputDialog("Input!");
+                        TextInputDialog tid = new TextInputDialog();
                         tid.setHeaderText("Specify input for '" + s + "'");
                         Optional<String> opt = tid.showAndWait();
                         if (!opt.isPresent()) {
@@ -97,15 +98,7 @@ public class DrillDownTab extends Tab {
 
 
                     for (String key : map.keySet()) {
-                        try {
-                            npsm.setString(key, map.get(key));
-                        } catch (SQLDataException ex) {
-                            logger.error("Invalid data given");
-                            return;
-                        } catch (SQLException e) {
-                            logger.error("that didn't work...", e);
-                            return;
-                        }
+                        npsm.setObject(key, map.get(key));
                     }
                 }
             } else {
@@ -116,7 +109,7 @@ public class DrillDownTab extends Tab {
 
             setContent(tabPaneResultSets);
 
-            ResultSet rs = npsm.executeQuery();
+            rs = npsm.executeQuery();
             DrillResultTable drt = new DrillResultTable(this, query);
             drt.populate(rs);
 
@@ -125,9 +118,21 @@ public class DrillDownTab extends Tab {
             tabPaneResultSets.getTabs().add(tab);
             tabPaneResultSets.getSelectionModel().select(tab);
 
+        } catch (SQLDataException e) {
+            logger.error("Invalid data given to statement", e);
+            Utils.showExceptionDialog("SQL data exception", "The input given was invalid for the property.", e);
         } catch (SQLException e) {
             logger.error("Could not prepare named parameter statement", e);
-            Utils.showExceptionDialog("Bleh", "Yarp", e);
+            Utils.showExceptionDialog("Generic SQL exception", "See stacktrace below for details.", e);
+        } finally {
+            try {
+                Utils.close(npsm);
+                logger.debug("Closed statement");
+                Utils.close(rs);
+                logger.debug("Closed resultset");
+            } catch (SQLException ex) {
+                // swallow
+            }
         }
     }
 }

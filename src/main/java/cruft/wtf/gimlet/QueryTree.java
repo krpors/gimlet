@@ -130,22 +130,28 @@ public class QueryTree extends TreeView<Query> {
      */
     private class QueryConfigurationTreeCell extends TextFieldTreeCell<Query> {
 
+        private MenuItem menuItemExecute;
+
         private ContextMenu menu = new ContextMenu();
 
         public QueryConfigurationTreeCell() {
-            MenuItem executeItem = new MenuItem("EXECUTE!");
-            executeItem.setGraphic(Images.COG.imageView());
+            menuItemExecute = new MenuItem("Run query", Images.COG.imageView());
+
             MenuItem editItem = new MenuItem("Edit");
             MenuItem removeItem = new MenuItem("Delete");
 
             menu.getItems().addAll(
-                    executeItem,
+                    menuItemExecute,
                     new SeparatorMenuItem(),
                     editItem,
                     new SeparatorMenuItem(),
                     removeItem);
 
-            executeItem.setOnAction(e -> executeSelectedQuery(getItem()));
+            // Funky binding. We bind the 'disabled' property of the menu item, to the boolean property
+            // of the editorTabViews's boolean value whether a tab is opened or not.
+            menuItemExecute.disableProperty().bind(GimletApp.editorTabView.tabSelectedProperty().not());
+
+            menuItemExecute.setOnAction(e -> executeSelectedQuery(getItem()));
             editItem.setOnAction(e -> openQueryEditDialog());
             removeItem.setOnAction(e -> removeSelectedQuery());
         }

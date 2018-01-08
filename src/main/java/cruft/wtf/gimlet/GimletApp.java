@@ -6,9 +6,11 @@ import cruft.wtf.gimlet.event.FileOpenedEvent;
 import cruft.wtf.gimlet.event.FileSavedEvent;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.geometry.NodeOrientation;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
+import javafx.scene.effect.Effect;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
@@ -182,6 +184,27 @@ public class GimletApp extends Application {
         return tabPane;
     }
 
+    /**
+     * This method creates the bottom part of the application, containing the statusbar and other cruft.
+     * @return
+     */
+    private Node createBottom() {
+        BorderPane pane = new BorderPane();
+
+        Accordion accordion = new Accordion();
+        TitledPane pane1 = new TitledPane("Messages", new TextArea("Messages published throughout Gimlet"));
+        pane1.setAnimated(false);
+        TitledPane pane2 = new TitledPane("Scratch", new TextArea("Scratch pad"));
+        pane2.setAnimated(false);
+
+        accordion.getPanes().addAll(pane1, pane2);
+
+
+        pane.setCenter(accordion);
+        pane.setBottom(new StatusBar());
+        return pane;
+    }
+
     @Override
     public void start(Stage primaryStage) throws IOException {
         logger.info("Starting up the Gimlet");
@@ -196,7 +219,7 @@ public class GimletApp extends Application {
 
         pane.setTop(createMenuBar());
         pane.setCenter(centerPane);
-        pane.setBottom(new StatusBar());
+        pane.setBottom(createBottom());
 
         Scene scene = new Scene(pane);
 

@@ -42,6 +42,7 @@ public class DrillResultTable extends ResultTable {
         private ContextMenu menu = new ContextMenu();
 
         public DrillResultTableRow() {
+            // Create a context menu, containing the direct sub queries for the original query.
             for (Query subQuery : query.getSubQueries()) {
                 MenuItem item = new MenuItem(subQuery.getName());
                 menu.getItems().add(item);
@@ -52,10 +53,12 @@ public class DrillResultTable extends ResultTable {
         }
 
         public void executeDrillDown(final Query subquery) {
-            logger.debug("Executing subquery {}", subquery.getName());
+            logger.debug("Executing subquery '{}'", subquery.getName());
 
             ObservableList selectedItem = getSelectionModel().getSelectedItem();
 
+            // Get all columns of a row, and put the values in a map where the key is the column name,
+            // and the value is the actual value of that column in the selected row.
             Map<String, Object> map = new TreeMap<>();
             for (int i = 0; i < getTableView().getColumns().size(); i++) {
                 TableColumn thecol = getTableView().getColumns().get(i);
@@ -63,6 +66,8 @@ public class DrillResultTable extends ResultTable {
                 map.put(columnName, selectedItem.get(i));
             }
 
+            // Create an event, post it on the event bus to notify listeners that we're going to execute a
+            // drilldown query.
             QueryExecuteEvent executeEvent = new QueryExecuteEvent();
             executeEvent.setQuery(subquery);
             executeEvent.setColumnnMap(map);

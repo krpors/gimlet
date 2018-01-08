@@ -100,12 +100,21 @@ public class ConnectionTab extends Tab {
         return connection;
     }
 
+    /**
+     * When a {@link QueryExecuteEvent} is published on the bus, invoke this method to execute it on the drilldown tab.
+     *
+     * @param event The event.
+     */
     @Subscribe
     public void onQueryExecute(final QueryExecuteEvent event) {
+        // Make sure to apply the query to the current open/selected connection tab. Multiple ConnectionTabs can be
+        // opened at once, so we make sure the query execution applies to the open tab.
         if (isSelected()) {
-            logger.debug("Applying query execute cruft to '{}', with query {}", getText(), event.getQuery().getName());
+            logger.debug("Query will be executed on tab '{}' ({})", getText(), hashCode());
             tabPane.getSelectionModel().select(drillDownTab);
             drillDownTab.executeQuery(event.getQuery(), event.getColumnnMap());
+        } else {
+            logger.debug("Ignoring QueryExecuteEvent for tab '{}' ({}): tab is not selected", getText(), hashCode());
         }
     }
 }
