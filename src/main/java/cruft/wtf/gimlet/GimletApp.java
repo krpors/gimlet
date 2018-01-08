@@ -43,12 +43,22 @@ public class GimletApp extends Application {
     public static GimletProject gimletProject;
 
     public static void main(String[] args) {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            AppProperties.instance.write();
+        }));
+
         launch(args);
     }
 
     public void initConfigs() {
+        AppProperties.instance.load();
         try {
-            this.gimletProject = GimletProject.read(GimletProject.class.getResourceAsStream("/project.xml"));
+            String lastProject = AppProperties.instance.getProperty(AppProperties.LAST_PROJECT_FILE);
+            if (lastProject == null) {
+                this.gimletProject = GimletProject.read(GimletProject.class.getResourceAsStream("/project.xml"));
+            } else {
+                this.gimletProject = GimletProject.read(new File(lastProject));
+            }
         } catch (JAXBException e) {
             e.printStackTrace();
             Platform.exit();
@@ -63,6 +73,9 @@ public class GimletApp extends Application {
     public void loadProjectFile(final File file) {
         try {
             this.gimletProject = GimletProject.read(file);
+
+            AppProperties.instance.setProperty(AppProperties.LAST_PROJECT_FILE, file.getAbsolutePath());
+
             aliasList.setAliases(this.gimletProject.aliasesProperty());
             queryConfigurationTree.setQueryList(this.gimletProject.queriesProperty());
 
@@ -90,7 +103,6 @@ public class GimletApp extends Application {
 
         MenuItem fileItemNew = new MenuItem("New");
         fileItemNew.setAccelerator(KeyCombination.keyCombination("Ctrl+N"));
-        ;
 
         MenuItem fileItemOpen = new MenuItem("Open...");
         fileItemOpen.setAccelerator(KeyCombination.keyCombination("Ctrl+O"));
@@ -105,6 +117,7 @@ public class GimletApp extends Application {
             }
 
             loadProjectFile(file);
+
             // TODO: invalidate UI, close tabs, connections, etc etc.
         });
 
@@ -181,7 +194,6 @@ public class GimletApp extends Application {
         SplitPane centerPane = new SplitPane(createLeft(), editorTabView);
         centerPane.setDividerPosition(0, 0.25);
 
-
         pane.setTop(createMenuBar());
         pane.setCenter(centerPane);
         pane.setBottom(new StatusBar());
@@ -196,9 +208,6 @@ public class GimletApp extends Application {
         primaryStage.setHeight(600);
         primaryStage.setTitle("Gimlet");
         primaryStage.show();
-
-        ConnectEvent event = new ConnectEvent(gimletProject.getAliases().get(0));
-        EventDispatcher.getInstance().post(event);
 
         logger.info("Gimlet started");
     }
