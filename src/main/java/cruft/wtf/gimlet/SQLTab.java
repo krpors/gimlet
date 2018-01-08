@@ -92,6 +92,7 @@ public class SQLTab extends Tab {
                     Platform.runLater(() -> tabPaneResultSets.getTabs().add(tab));
 
                     stmt = connection.prepareStatement(query);
+                    stmt.setMaxRows(100);
                     rs = stmt.executeQuery();
 
                     table.populate(stmt.executeQuery());
