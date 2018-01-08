@@ -20,7 +20,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * This class is a tab where drilldown functionality exists.
@@ -80,19 +79,21 @@ public class DrillDownTab extends Tab {
         try {
             NamedParameterPreparedStatement npsm =
                     NamedParameterPreparedStatement.createNamedParameterPreparedStatement(connection, query.getContent());
-
+            npsm.setMaxRows(100);
             if (columnMap.isEmpty()) {
                 if (npsm.hasNamedParameters()) {
-                    Set<String> params = npsm.getParameters();
                     Map<String, String> map = new HashMap<>();
-                    params.forEach(s -> {
-                        TextInputDialog tid = new TextInputDialog("");
-                        tid.setTitle("Input");
+                    for (String s : npsm.getParameters()) {
+                        TextInputDialog tid = new TextInputDialog("Input!");
                         tid.setHeaderText("Specify input for '" + s + "'");
                         Optional<String> opt = tid.showAndWait();
-                        opt.ifPresent(s1 -> map.put(s, s1));
-                        // TODO: on cancel... bail out.
-                    });
+                        if (!opt.isPresent()) {
+                            // bail out. User pressed cancel button.
+                            return;
+                        } else {
+                            map.put(s, opt.get());
+                        }
+                    }
 
 
                     for (String key : map.keySet()) {
