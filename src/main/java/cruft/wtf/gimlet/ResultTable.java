@@ -6,9 +6,12 @@ import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.scene.control.Control;
 import javafx.scene.control.Label;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.util.Callback;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +35,7 @@ public class ResultTable extends TableView<ObservableList> {
         setEditable(false);
         setTableMenuButtonVisible(true);
         setPlaceholder(new Label("Query is running..."));
+        setColumnResizePolicy(UNCONSTRAINED_RESIZE_POLICY);
     }
 
     /**
@@ -104,9 +108,19 @@ public class ResultTable extends TableView<ObservableList> {
         // of the items via Platform.runLater. This looks hacky as fuck but we'll manage for now.
         Platform.runLater(() -> {
             setItems(rowdata);
+//            resizeColumnsToFitTitle();
         });
 
         return rowCount;
+    }
+
+    private void resizeColumnsToFitTitle() {
+        for (TableColumn c : getColumns()) {
+//            c.setPrefWidth();
+            TableCell cell = (TableCell) c.getCellFactory().call(c);
+//            cell.getSkin().
+//            System.out.println(cell);
+        }
     }
 
     /**
@@ -136,11 +150,18 @@ public class ResultTable extends TableView<ObservableList> {
             // row data (via setItems).
             if (rsmd.getColumnType(j) == Types.INTEGER) {
                 TableColumn<ObservableList, Number> column = new TableColumn<>(rsmd.getColumnName(j));
+
                 column.setCellValueFactory(param -> new SimpleIntegerProperty((Integer) param.getValue().get(j)));
                 Platform.runLater(() -> getColumns().add(column));
             } else {
                 TableColumn<ObservableList, String> col = new TableColumn<>(rsmd.getColumnName(j));
-                col.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().get(j).toString()));
+                col.setCellValueFactory(param -> {
+                    if (param.getValue().get(j) != null) {
+                        return new SimpleStringProperty(param.getValue().get(j).toString());
+                    } else {
+                        return new SimpleStringProperty("<NULL>");
+                    }
+                });
                 Platform.runLater(() -> getColumns().add(col));
             }
         }
