@@ -1,10 +1,7 @@
 package cruft.wtf.gimlet;
 
 import javafx.geometry.Insets;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import org.slf4j.Logger;
@@ -62,6 +59,18 @@ public final class Utils {
         dialog.getDialogPane().setContent(pane);
 
         dialog.showAndWait();
+    }
+
+    /**
+     * Utility function to display an error without any stacktrace details.
+     *
+     * @param header  The header text.
+     * @param content The content text.
+     */
+    public static void showError(String header, String content) {
+        Alert alert = new Alert(Alert.AlertType.ERROR, content, ButtonType.OK);
+        alert.setHeaderText(header);
+        alert.showAndWait();
     }
 
     /**
