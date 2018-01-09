@@ -1,16 +1,13 @@
 package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.conf.GimletProject;
-import cruft.wtf.gimlet.event.ConnectEvent;
 import cruft.wtf.gimlet.event.FileOpenedEvent;
 import cruft.wtf.gimlet.event.FileSavedEvent;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.geometry.NodeOrientation;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.effect.Effect;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
@@ -45,17 +42,28 @@ public class GimletApp extends Application {
     public static GimletProject gimletProject;
 
     public static void main(String[] args) {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            AppProperties.instance.write();
-        }));
-
+        addShutdownHook();
         launch(args);
     }
 
+    /**
+     * Adds a shutdown hook so when the application is shutdown, some actions will run.
+     */
+    private static void addShutdownHook() {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            try {
+                AppProperties.instance.write();
+            } catch (IOException e) {
+                System.err.println("Unable to write the properties file at JVM exit!");
+                e.printStackTrace();
+            }
+        }));
+    }
+
     public void initConfigs() {
-        AppProperties.instance.load();
         try {
-            String lastProject = AppProperties.instance.getProperty(AppProperties.LAST_PROJECT_FILE);
+            AppProperties.instance.load();
+            String lastProject = AppProperties.instance.getProperty(AppProperties.Keys.LAST_PROJECT_FILE);
             if (lastProject == null) {
                 this.gimletProject = GimletProject.read(GimletProject.class.getResourceAsStream("/project.xml"));
             } else {
@@ -64,6 +72,11 @@ public class GimletApp extends Application {
         } catch (JAXBException e) {
             e.printStackTrace();
             Platform.exit();
+        } catch (IOException e) {
+            Utils.showExceptionDialog(
+                    "Error!",
+                    "Could not load properties file " + AppProperties.instance.getConfigFile(),
+                    e);
         }
     }
 
@@ -74,22 +87,19 @@ public class GimletApp extends Application {
      */
     public void loadProjectFile(final File file) {
         try {
-            this.gimletProject = GimletProject.read(file);
+            GimletApp.gimletProject = GimletProject.read(file);
 
-            AppProperties.instance.setProperty(AppProperties.LAST_PROJECT_FILE, file.getAbsolutePath());
+            AppProperties.instance.setProperty(AppProperties.Keys.LAST_PROJECT_FILE, file.getAbsolutePath());
 
-            aliasList.setAliases(this.gimletProject.aliasesProperty());
-            queryConfigurationTree.setQueryList(this.gimletProject.queriesProperty());
+            aliasList.setAliases(GimletApp.gimletProject.aliasesProperty());
+            queryConfigurationTree.setQueryList(GimletApp.gimletProject.queriesProperty());
 
             // Notify our listeners.
             logger.info("Succesfully read '{}'", file);
-            EventDispatcher.getInstance().post(new FileOpenedEvent(file, this.gimletProject));
+            EventDispatcher.getInstance().post(new FileOpenedEvent(file, GimletApp.gimletProject));
         } catch (JAXBException e) {
             logger.error("Unable to unmarshal " + file, e);
-            Alert alert = new Alert(Alert.AlertType.ERROR, "Please try another one!", ButtonType.OK);
-            alert.setHeaderText("That wasn't a proper Gimlet file...");
-            alert.showAndWait();
-            // TODO: better notification.
+            Utils.showError("Invalid Gimlet project file", "The specified file could not be read properly.");
         }
     }
 
@@ -186,6 +196,7 @@ public class GimletApp extends Application {
 
     /**
      * This method creates the bottom part of the application, containing the statusbar and other cruft.
+     *
      * @return
      */
     private Node createBottom() {
@@ -207,9 +218,11 @@ public class GimletApp extends Application {
 
     @Override
     public void start(Stage primaryStage) throws IOException {
-        logger.info("Starting up the Gimlet");
+        logger.info("Starting up Gimlet");
 
         initConfigs();
+
+        AppProperties ap = AppProperties.instance;
 
         BorderPane pane = new BorderPane();
 
@@ -226,13 +239,40 @@ public class GimletApp extends Application {
         // We started, set our main window reference!
         mainWindow = primaryStage.getOwner();
 
+        primaryStage.setTitle("Gimlet");
         primaryStage.setScene(scene);
         primaryStage.setWidth(800);
         primaryStage.setHeight(600);
-        primaryStage.setTitle("Gimlet");
+
+        // Read some properties from the user configuration file.
+        ap.getIntegerProperty(AppProperties.Keys.WINDOW_WIDTH).ifPresent(primaryStage::setWidth);
+        ap.getIntegerProperty(AppProperties.Keys.WINDOW_HEIGHT).ifPresent(primaryStage::setHeight);
+        ap.getBooleanProperty(AppProperties.Keys.WINDOW_MAXIMIZED).ifPresent(primaryStage::setMaximized);
+
+        // Show the stage after possibly reading and setting window properties.
         primaryStage.show();
 
-        logger.info("Gimlet started");
+        // Set the saved divider position, which should be done after the thing is visible.
+        ap.getDoubleProperty(AppProperties.Keys.QUERY_TREE_DIVIDER_POSITION).ifPresent(aDouble -> centerPane.setDividerPosition(0, aDouble));
+
+        primaryStage.heightProperty().addListener((observable, oldValue, newValue) -> {
+            ap.setProperty(AppProperties.Keys.WINDOW_HEIGHT, newValue.intValue());
+        });
+
+        primaryStage.widthProperty().addListener((observable, oldValue, newValue) -> {
+            ap.setProperty(AppProperties.Keys.WINDOW_WIDTH, newValue.intValue());
+        });
+
+        primaryStage.maximizedProperty().addListener((observable, oldValue, newValue) -> {
+            ap.setProperty(AppProperties.Keys.WINDOW_MAXIMIZED, newValue);
+        });
+
+        // Add a listener to the divider position lastly.
+        centerPane.getDividers().get(0).positionProperty().addListener((observable, oldValue, newValue) -> {
+            ap.setProperty(AppProperties.Keys.QUERY_TREE_DIVIDER_POSITION, newValue);
+        });
+
+        logger.info("Gimlet started and ready");
     }
 
 }
