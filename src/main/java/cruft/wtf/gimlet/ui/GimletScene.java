@@ -1,40 +1,31 @@
-package cruft.wtf.gimlet;
+package cruft.wtf.gimlet.ui;
 
+import cruft.wtf.gimlet.Configuration;
+import cruft.wtf.gimlet.GimletApp;
+import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.conf.GimletProject;
 import cruft.wtf.gimlet.event.FileOpenedEvent;
 import cruft.wtf.gimlet.event.FileSavedEvent;
-import cruft.wtf.gimlet.ui.*;
-import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
-import javafx.stage.Stage;
-import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
-import java.io.IOException;
 
 /**
- * This is the main class how Gimlet can be run. It also contains some global references to certain user interface
- * object instances which allow us for easier access. Unsure whether this is actually proper UI programming, but
- * it seemed to be one of the easiest solutions.
+ * The main Scene of Gimlet.
  */
-public class GimletApp extends Application {
+public class GimletScene extends Scene {
 
     private static Logger logger = LoggerFactory.getLogger(GimletApp.class);
-
-    /**
-     * Reference to the main window. This should never be null, and is a reference to the top-level window.
-     * This reference can be used to keep certain other windows in a modal state.
-     */
-    public static Window mainWindow;
 
     /**
      * There is only one EditorTabView throughout Gimlet. So once we created it, we can reference to it statically.
@@ -56,49 +47,20 @@ public class GimletApp extends Application {
      */
     public static GimletProject gimletProject;
 
-    /**
-     * Entry point.
-     *
-     * @param args Currently unused.
-     */
-    public static void main(String[] args) {
-        addShutdownHook();
-        launch(args);
+    public GimletScene(Parent root) {
+        super(root);
+
+        BorderPane pane = new BorderPane();
+
+        editorTabView = new EditorTabView();
+        SplitPane centerPane = new SplitPane(createLeft(), editorTabView);
+        centerPane.setDividerPosition(0, 0.25);
+
+        pane.setTop(createMenuBar());
+        pane.setCenter(centerPane);
+        pane.setBottom(createBottom());
     }
 
-    /**
-     * Adds a shutdown hook so when the application is shutdown, some actions will run.
-     */
-    private static void addShutdownHook() {
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                Configuration.instance.write();
-            } catch (IOException e) {
-                System.err.println("Unable to write the properties file at JVM exit!");
-                e.printStackTrace();
-            }
-        }));
-    }
-
-    public void initConfigs() {
-        try {
-            Configuration.instance.load();
-            String lastProject = Configuration.instance.getProperty(Configuration.Key.LAST_PROJECT_FILE);
-            if (lastProject == null) {
-                this.gimletProject = GimletProject.read(GimletProject.class.getResourceAsStream("/project.xml"));
-            } else {
-                this.gimletProject = GimletProject.read(new File(lastProject));
-            }
-        } catch (JAXBException e) {
-            e.printStackTrace();
-            Platform.exit();
-        } catch (IOException e) {
-            Utils.showExceptionDialog(
-                    "Error!",
-                    "Could not load properties file " + Configuration.instance.getConfigFile(),
-                    e);
-        }
-    }
 
     /**
      * Load up a project file.
@@ -234,71 +196,6 @@ public class GimletApp extends Application {
         pane.setCenter(accordion);
         pane.setBottom(new StatusBar());
         return pane;
-    }
-
-    /**
-     * Creates the {@link Stage} and all other cruft of the main window.
-     *
-     * @param primaryStage
-     * @throws IOException
-     */
-    @Override
-    public void start(Stage primaryStage) throws IOException {
-        logger.info("Starting up Gimlet");
-
-        initConfigs();
-
-        Configuration config = Configuration.instance;
-
-        BorderPane pane = new BorderPane();
-
-        editorTabView = new EditorTabView();
-        SplitPane centerPane = new SplitPane(createLeft(), editorTabView);
-        centerPane.setDividerPosition(0, 0.25);
-
-        pane.setTop(createMenuBar());
-        pane.setCenter(centerPane);
-        pane.setBottom(createBottom());
-
-        Scene scene = new Scene(pane);
-
-        // We started, set our main window reference!
-        mainWindow = primaryStage.getOwner();
-
-        primaryStage.setTitle("Gimlet");
-        primaryStage.setScene(scene);
-        primaryStage.setWidth(800);
-        primaryStage.setHeight(600);
-
-        // Read some properties from the user configuration file.
-        config.getIntegerProperty(Configuration.Key.WINDOW_WIDTH).ifPresent(primaryStage::setWidth);
-        config.getIntegerProperty(Configuration.Key.WINDOW_HEIGHT).ifPresent(primaryStage::setHeight);
-        config.getBooleanProperty(Configuration.Key.WINDOW_MAXIMIZED).ifPresent(primaryStage::setMaximized);
-
-        // Show the stage after possibly reading and setting window properties.
-        primaryStage.show();
-
-        // Set the saved divider position, which should be done after the thing is visible.
-        config.getDoubleProperty(Configuration.Key.QUERY_TREE_DIVIDER_POSITION).ifPresent(aDouble -> centerPane.setDividerPosition(0, aDouble));
-
-        primaryStage.heightProperty().addListener((observable, oldValue, newValue) -> {
-            config.setProperty(Configuration.Key.WINDOW_HEIGHT, newValue.intValue());
-        });
-
-        primaryStage.widthProperty().addListener((observable, oldValue, newValue) -> {
-            config.setProperty(Configuration.Key.WINDOW_WIDTH, newValue.intValue());
-        });
-
-        primaryStage.maximizedProperty().addListener((observable, oldValue, newValue) -> {
-            config.setProperty(Configuration.Key.WINDOW_MAXIMIZED, newValue);
-        });
-
-        // Add a listener to the divider position lastly.
-        centerPane.getDividers().get(0).positionProperty().addListener((observable, oldValue, newValue) -> {
-            config.setProperty(Configuration.Key.QUERY_TREE_DIVIDER_POSITION, newValue);
-        });
-
-        logger.info("Gimlet started and ready");
     }
 
 }

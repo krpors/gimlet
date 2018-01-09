@@ -1,4 +1,4 @@
-package cruft.wtf.gimlet;
+package cruft.wtf.gimlet.ui;
 
 import com.google.common.eventbus.Subscribe;
 import cruft.wtf.gimlet.conf.Alias;

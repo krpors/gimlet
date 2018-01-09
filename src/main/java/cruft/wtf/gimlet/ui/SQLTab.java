@@ -1,6 +1,8 @@
-package cruft.wtf.gimlet;
+package cruft.wtf.gimlet.ui;
 
 
+import cruft.wtf.gimlet.TimedTask;
+import cruft.wtf.gimlet.Utils;
 import javafx.application.Platform;
 import javafx.geometry.Orientation;
 import javafx.scene.control.*;

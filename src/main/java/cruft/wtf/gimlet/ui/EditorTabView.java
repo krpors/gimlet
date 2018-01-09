@@ -1,6 +1,7 @@
-package cruft.wtf.gimlet;
+package cruft.wtf.gimlet.ui;
 
 import com.google.common.eventbus.Subscribe;
+import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.event.ConnectEvent;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;

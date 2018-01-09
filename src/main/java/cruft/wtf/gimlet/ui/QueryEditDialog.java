@@ -1,5 +1,6 @@
-package cruft.wtf.gimlet;
+package cruft.wtf.gimlet.ui;
 
+import cruft.wtf.gimlet.GimletApp;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.QuerySavedEvent;
 import javafx.event.ActionEvent;
@@ -8,10 +9,8 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.TextFieldListCell;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;

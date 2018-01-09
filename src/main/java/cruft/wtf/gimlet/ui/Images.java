@@ -1,4 +1,4 @@
-package cruft.wtf.gimlet;
+package cruft.wtf.gimlet.ui;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;

@@ -1,6 +1,7 @@
-package cruft.wtf.gimlet;
+package cruft.wtf.gimlet.ui;
 
 
+import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.jdbc.NamedParameterPreparedStatement;
 import javafx.collections.ListChangeListener;

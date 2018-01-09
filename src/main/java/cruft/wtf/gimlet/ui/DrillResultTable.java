@@ -1,4 +1,4 @@
-package cruft.wtf.gimlet;
+package cruft.wtf.gimlet.ui;
 
 
 import cruft.wtf.gimlet.conf.Query;

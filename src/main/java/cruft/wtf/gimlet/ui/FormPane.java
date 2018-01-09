@@ -1,4 +1,4 @@
-package cruft.wtf.gimlet;
+package cruft.wtf.gimlet.ui;
 
 import javafx.geometry.Insets;
 import javafx.geometry.VPos;

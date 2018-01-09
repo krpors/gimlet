@@ -1,5 +1,7 @@
-package cruft.wtf.gimlet;
+package cruft.wtf.gimlet.ui;
 
+import cruft.wtf.gimlet.GimletApp;
+import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.conf.Alias;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;

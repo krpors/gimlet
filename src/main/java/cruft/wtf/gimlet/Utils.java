@@ -1,5 +1,6 @@
 package cruft.wtf.gimlet;
 
+import cruft.wtf.gimlet.ui.Images;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
