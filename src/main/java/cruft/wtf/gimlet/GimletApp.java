@@ -3,26 +3,12 @@ package cruft.wtf.gimlet;
 import cruft.wtf.gimlet.conf.GimletProject;
 import cruft.wtf.gimlet.event.FileOpenedEvent;
 import cruft.wtf.gimlet.event.FileSavedEvent;
-import cruft.wtf.gimlet.ui.AliasList;
-import cruft.wtf.gimlet.ui.EditorTabView;
-import cruft.wtf.gimlet.ui.EventDispatcher;
-import cruft.wtf.gimlet.ui.Images;
-import cruft.wtf.gimlet.ui.QueryTree;
-import cruft.wtf.gimlet.ui.StatusBar;
+import cruft.wtf.gimlet.ui.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Accordion;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TitledPane;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
@@ -51,6 +37,11 @@ public class GimletApp extends Application {
      */
     public static Window mainWindow;
 
+
+    /**
+     * Reference to the primary stage.
+     */
+    private Stage primaryStage;
 
     /**
      * There is only one EditorTabView throughout Gimlet. So once we created it, we can reference to it statically.
@@ -89,8 +80,11 @@ public class GimletApp extends Application {
     private void addShutdownHook() {
         logger.debug("Adding shutdown hook.");
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            logger.debug("Invoking shutdown hook.");
             try {
-                Configuration.instance.write();
+                Configuration c = Configuration.getInstance();
+                c.setProperty(Configuration.Key.WINDOW_MAXIMIZED, primaryStage.isMaximized());
+                c.write();
             } catch (IOException e) {
                 System.err.println("Unable to write the properties file at JVM exit!");
                 e.printStackTrace();
@@ -104,7 +98,7 @@ public class GimletApp extends Application {
     public void initConfigs() {
         try {
             logger.debug("Loading Gimlet configuration");
-            Configuration c = Configuration.instance;
+            Configuration c = Configuration.getInstance();
             c.load();
 
             Optional<String> lastProject = c.getStringProperty(Configuration.Key.LAST_PROJECT_FILE);
@@ -120,7 +114,7 @@ public class GimletApp extends Application {
         } catch (IOException e) {
             Utils.showExceptionDialog(
                     "Error!",
-                    "Could not load properties file " + Configuration.instance.getConfigFile(),
+                    "Could not load properties file " + Configuration.getInstance().getConfigFile(),
                     e);
         }
     }
@@ -134,7 +128,7 @@ public class GimletApp extends Application {
         try {
             GimletApp.gimletProject = GimletProject.read(file);
 
-            Configuration.instance.setProperty(Configuration.Key.LAST_PROJECT_FILE, file.getAbsolutePath());
+            Configuration.getInstance().setProperty(Configuration.Key.LAST_PROJECT_FILE, file.getAbsolutePath());
 
             aliasList.setAliases(GimletApp.gimletProject.aliasesProperty());
             queryConfigurationTree.setQueryList(GimletApp.gimletProject.queriesProperty());
@@ -271,6 +265,8 @@ public class GimletApp extends Application {
     public void start(Stage primaryStage) throws IOException {
         logger.info("Starting up Gimlet");
 
+        this.primaryStage = primaryStage;
+
         addShutdownHook();
         initConfigs();
 
@@ -296,25 +292,11 @@ public class GimletApp extends Application {
         primaryStage.setHeight(600);
 
         // Read some properties from the user configuration file.
-        Configuration config = Configuration.instance;
-        config.getIntegerProperty(Configuration.Key.WINDOW_WIDTH).ifPresent(primaryStage::setWidth);
-        config.getIntegerProperty(Configuration.Key.WINDOW_HEIGHT).ifPresent(primaryStage::setHeight);
+        Configuration config = Configuration.getInstance();
         config.getBooleanProperty(Configuration.Key.WINDOW_MAXIMIZED).ifPresent(primaryStage::setMaximized);
 
         // Show the stage after possibly reading and setting window properties.
         primaryStage.show();
-
-        primaryStage.heightProperty().addListener((observable, oldValue, newValue) -> {
-            config.setProperty(Configuration.Key.WINDOW_HEIGHT, newValue.intValue());
-        });
-
-        primaryStage.widthProperty().addListener((observable, oldValue, newValue) -> {
-            config.setProperty(Configuration.Key.WINDOW_WIDTH, newValue.intValue());
-        });
-
-        primaryStage.maximizedProperty().addListener((observable, oldValue, newValue) -> {
-            config.setProperty(Configuration.Key.WINDOW_MAXIMIZED, newValue);
-        });
 
         logger.info("Gimlet started and ready");
     }

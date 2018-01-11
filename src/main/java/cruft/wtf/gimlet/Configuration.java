@@ -22,11 +22,15 @@ public final class Configuration extends Properties {
     /**
      * The one and only instance.
      */
-    public static Configuration instance = new Configuration();
+    private static Configuration instance = new Configuration();
 
     private static final File CONFIG_FILE = new File(System.getProperty("user.home") + "/.gimlet/", "config");
 
     private Configuration() {
+    }
+
+    public static Configuration getInstance() {
+        return instance;
     }
 
     public File getConfigFile() {
@@ -116,7 +120,7 @@ public final class Configuration extends Properties {
      */
     public void load() throws IOException {
         if (!CONFIG_FILE.exists()) {
-            logger.info("Configuration file '{}' does not exist; setting default values");
+            logger.info("Configuration file '{}' does not exist; setting default values", CONFIG_FILE);
             return;
         }
         FileInputStream fis = new FileInputStream(CONFIG_FILE);
@@ -142,8 +146,6 @@ public final class Configuration extends Properties {
      */
     public enum Key {
         LAST_PROJECT_FILE,
-        WINDOW_WIDTH,
-        WINDOW_HEIGHT,
         WINDOW_MAXIMIZED,;
 
         public String getName() {

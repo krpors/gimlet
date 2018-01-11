@@ -1,6 +1,7 @@
 package cruft.wtf.gimlet.ui;
 
 
+import cruft.wtf.gimlet.TimedTask;
 import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.jdbc.NamedParameterPreparedStatement;
@@ -76,6 +77,7 @@ public class DrillDownTab extends Tab {
 
     public void executeQuery(final Query query, final Map<String, Object> columnMap) {
         logger.debug("Executing drilldown query '{}' with column map of {} keys", query.getName(), columnMap.size());
+
 
         NamedParameterPreparedStatement npsm = null;
         ResultSet rs = null;
