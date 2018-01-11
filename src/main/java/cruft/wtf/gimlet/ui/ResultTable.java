@@ -1,13 +1,14 @@
 package cruft.wtf.gimlet.ui;
 
 
+import cruft.wtf.gimlet.Column;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
-import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.slf4j.Logger;
@@ -17,11 +18,14 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.List;
 
 /**
  * This class represents a generic {@link TableView} for SQL queries. The table columns are therefore variadic depending
  * on the query executed. The table expects a {@link ResultSet} to iterate over. The class is not responsible for closing
  * the resources, merely displaying the data.
+ *
+ * @see cruft.wtf.gimlet.SimpleQueryTask
  */
 public class ResultTable extends TableView<ObservableList> {
 
@@ -35,6 +39,7 @@ public class ResultTable extends TableView<ObservableList> {
         setPlaceholder(new Label("Query is running..."));
         setColumnResizePolicy(UNCONSTRAINED_RESIZE_POLICY);
     }
+
 
     /**
      * Populates the table with the {@link ResultSet}. It is expected that this class is forwarding the cursor. Updating
@@ -112,12 +117,21 @@ public class ResultTable extends TableView<ObservableList> {
         return rowCount;
     }
 
-    private void resizeColumnsToFitTitle() {
-        for (TableColumn c : getColumns()) {
-//            c.setPrefWidth();
-            TableCell cell = (TableCell) c.getCellFactory().call(c);
-//            cell.getSkin().
-//            System.out.println(cell);
+    /**
+     * Sets the columns.
+     * <p>
+     * TODO: since we now got a SimpleObjectProperty, do we really need the Column type? Maybe later.
+     *
+     * @param columnList The list of columns.
+     */
+    @SuppressWarnings("unchecked")
+    public void setColumns(List<Column> columnList) {
+        for (int i = 0; i < columnList.size(); i++) {
+            final int colnum = i;
+            TableColumn<ObservableList, String> col = new TableColumn<>(columnList.get(colnum).getColumnName());
+            // every column has a type dependent on the ResultSet. So just use SimpleObjectProperty.
+            col.setCellValueFactory(param -> new SimpleObjectProperty(param.getValue().get(colnum)));
+            getColumns().add(col);
         }
     }
 

@@ -30,6 +30,7 @@ public final class Utils {
      */
     public static void showExceptionDialog(String header, String content, Throwable exception) {
         Dialog dialog = new Dialog();
+        dialog.getDialogPane().getStylesheets().add("/css/style.css");
         dialog.setGraphic(Images.DIALOG_ERROR.imageView());
         dialog.setTitle("Error!");
         dialog.setHeaderText(header);
@@ -43,6 +44,7 @@ public final class Utils {
         Label lbl = new Label(dialog.getContentText());
 
         TextArea textArea = new TextArea(sw.toString());
+        textArea.getStyleClass().add("textarea");
         textArea.setEditable(false);
         textArea.setMaxWidth(Double.MAX_VALUE);
         textArea.setMaxHeight(Double.MAX_VALUE);

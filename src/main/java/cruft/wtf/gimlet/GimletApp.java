@@ -282,6 +282,7 @@ public class GimletApp extends Application {
         pane.setBottom(createBottom());
 
         Scene scene = new Scene(pane);
+        scene.getStylesheets().add("/css/style.css");
 
         // We started, set our main window reference!
         mainWindow = primaryStage.getOwner();
