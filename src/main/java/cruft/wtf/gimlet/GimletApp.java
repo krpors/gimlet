@@ -3,12 +3,26 @@ package cruft.wtf.gimlet;
 import cruft.wtf.gimlet.conf.GimletProject;
 import cruft.wtf.gimlet.event.FileOpenedEvent;
 import cruft.wtf.gimlet.event.FileSavedEvent;
-import cruft.wtf.gimlet.ui.*;
+import cruft.wtf.gimlet.ui.AliasList;
+import cruft.wtf.gimlet.ui.EditorTabView;
+import cruft.wtf.gimlet.ui.EventDispatcher;
+import cruft.wtf.gimlet.ui.Images;
+import cruft.wtf.gimlet.ui.QueryTree;
+import cruft.wtf.gimlet.ui.StatusBar;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Accordion;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TitledPane;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
@@ -20,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 
 /**
  * This is the main class how Gimlet can be run. It also contains some global references to certain user interface
@@ -36,10 +51,13 @@ public class GimletApp extends Application {
      */
     public static Window mainWindow;
 
+
     /**
      * There is only one EditorTabView throughout Gimlet. So once we created it, we can reference to it statically.
      */
     public static EditorTabView editorTabView;
+
+    private SplitPane centerPane;
 
     /**
      * The list containing the aliases.
@@ -62,14 +80,14 @@ public class GimletApp extends Application {
      * @param args Currently unused.
      */
     public static void main(String[] args) {
-        addShutdownHook();
         launch(args);
     }
 
     /**
      * Adds a shutdown hook so when the application is shutdown, some actions will run.
      */
-    private static void addShutdownHook() {
+    private void addShutdownHook() {
+        logger.debug("Adding shutdown hook.");
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             try {
                 Configuration.instance.write();
@@ -80,14 +98,21 @@ public class GimletApp extends Application {
         }));
     }
 
+    /**
+     * Read configuration file, and read the last opened project file and reopen it, if present.
+     */
     public void initConfigs() {
         try {
-            Configuration.instance.load();
-            String lastProject = Configuration.instance.getProperty(Configuration.Key.LAST_PROJECT_FILE);
-            if (lastProject == null) {
-                this.gimletProject = GimletProject.read(GimletProject.class.getResourceAsStream("/project.xml"));
+            logger.debug("Loading Gimlet configuration");
+            Configuration c = Configuration.instance;
+            c.load();
+
+            Optional<String> lastProject = c.getStringProperty(Configuration.Key.LAST_PROJECT_FILE);
+            if (lastProject.isPresent()) {
+                GimletApp.gimletProject = GimletProject.read(new File(lastProject.get()));
             } else {
-                this.gimletProject = GimletProject.read(new File(lastProject));
+                // TODO: instead of setting an empty project, display a screen saying CLICK NEW!!!
+                GimletApp.gimletProject = new GimletProject();
             }
         } catch (JAXBException e) {
             e.printStackTrace();
@@ -230,11 +255,11 @@ public class GimletApp extends Application {
 
         accordion.getPanes().addAll(pane1, pane2);
 
-
         pane.setCenter(accordion);
         pane.setBottom(new StatusBar());
         return pane;
     }
+
 
     /**
      * Creates the {@link Stage} and all other cruft of the main window.
@@ -246,15 +271,15 @@ public class GimletApp extends Application {
     public void start(Stage primaryStage) throws IOException {
         logger.info("Starting up Gimlet");
 
+        addShutdownHook();
         initConfigs();
-
-        Configuration config = Configuration.instance;
 
         BorderPane pane = new BorderPane();
 
         editorTabView = new EditorTabView();
-        SplitPane centerPane = new SplitPane(createLeft(), editorTabView);
-        centerPane.setDividerPosition(0, 0.25);
+        Node left = createLeft();
+        centerPane = new SplitPane(left, editorTabView);
+        SplitPane.setResizableWithParent(left, false);
 
         pane.setTop(createMenuBar());
         pane.setCenter(centerPane);
@@ -271,15 +296,13 @@ public class GimletApp extends Application {
         primaryStage.setHeight(600);
 
         // Read some properties from the user configuration file.
+        Configuration config = Configuration.instance;
         config.getIntegerProperty(Configuration.Key.WINDOW_WIDTH).ifPresent(primaryStage::setWidth);
         config.getIntegerProperty(Configuration.Key.WINDOW_HEIGHT).ifPresent(primaryStage::setHeight);
         config.getBooleanProperty(Configuration.Key.WINDOW_MAXIMIZED).ifPresent(primaryStage::setMaximized);
 
         // Show the stage after possibly reading and setting window properties.
         primaryStage.show();
-
-        // Set the saved divider position, which should be done after the thing is visible.
-        config.getDoubleProperty(Configuration.Key.QUERY_TREE_DIVIDER_POSITION).ifPresent(aDouble -> centerPane.setDividerPosition(0, aDouble));
 
         primaryStage.heightProperty().addListener((observable, oldValue, newValue) -> {
             config.setProperty(Configuration.Key.WINDOW_HEIGHT, newValue.intValue());
@@ -291,11 +314,6 @@ public class GimletApp extends Application {
 
         primaryStage.maximizedProperty().addListener((observable, oldValue, newValue) -> {
             config.setProperty(Configuration.Key.WINDOW_MAXIMIZED, newValue);
-        });
-
-        // Add a listener to the divider position lastly.
-        centerPane.getDividers().get(0).positionProperty().addListener((observable, oldValue, newValue) -> {
-            config.setProperty(Configuration.Key.QUERY_TREE_DIVIDER_POSITION, newValue);
         });
 
         logger.info("Gimlet started and ready");

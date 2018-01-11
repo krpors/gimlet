@@ -86,6 +86,21 @@ public final class Configuration extends Properties {
         }
     }
 
+    /**
+     * Gets a property as a String, or if it can't be found, return an empty {@link Optional}.
+     *
+     * @param key The key to look up.
+     * @return {@link Optional#empty()} when the key cannot be found.
+     */
+    public Optional<String> getStringProperty(Key key) {
+        String property = getProperty(key);
+        if (property == null) {
+            return Optional.empty();
+        }
+
+        return Optional.of(property);
+    }
+
     public String getProperty(Key key) {
         return getProperty(key.getName());
     }
@@ -129,8 +144,7 @@ public final class Configuration extends Properties {
         LAST_PROJECT_FILE,
         WINDOW_WIDTH,
         WINDOW_HEIGHT,
-        WINDOW_MAXIMIZED,
-        QUERY_TREE_DIVIDER_POSITION,;
+        WINDOW_MAXIMIZED,;
 
         public String getName() {
             return name().toLowerCase().replace('_', '.');
