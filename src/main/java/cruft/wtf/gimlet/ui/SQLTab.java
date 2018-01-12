@@ -3,6 +3,7 @@ package cruft.wtf.gimlet.ui;
 
 import com.sun.javafx.scene.control.behavior.TabPaneBehavior;
 import com.sun.javafx.scene.control.skin.TabPaneSkin;
+import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.jdbc.SimpleQueryTask;
 import cruft.wtf.gimlet.event.QueryExecutedEvent;
 import javafx.geometry.Insets;
@@ -83,8 +84,14 @@ public class SQLTab extends Tab {
     }
 
     private void executeQuery() {
+        String query = txtQuery.getText();
+        // Check if we selected some text. If so, that's the query we want to run.
+        if (txtQuery.getSelection().getLength() != 0) {
+            query = txtQuery.getSelectedText();
+        }
+
         final ResultTable table = new ResultTable();
-        final Tab tab = new Tab(txtQuery.getText());
+        final Tab tab = new Tab(Utils.abbrev(query, 36));
         tab.setContent(table);
 
         // TODO: parameterize the maxRows properly (via the UI)
@@ -92,7 +99,7 @@ public class SQLTab extends Tab {
         if (checkMaxRows.isSelected()) {
             maxRows = 100;
         }
-        SimpleQueryTask task = new SimpleQueryTask(this.connection, txtQuery.getText(), maxRows);
+        SimpleQueryTask task = new SimpleQueryTask(this.connection, query, maxRows);
 
         // Task is scheduled and about to start. Add the tab and select it.
         task.setOnScheduled(event -> {
