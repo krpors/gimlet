@@ -8,6 +8,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.control.TabPane;
+import javafx.scene.input.KeyCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +25,15 @@ public class ConnectionTabPane extends TabPane {
 
     public ConnectionTabPane() {
         EventDispatcher.getInstance().register(this);
-
         getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             tabSelectedProperty.set(newValue != null);
+        });
+        setOnKeyPressed(event -> {
+            // Close the active result table tab. TODO: this sort of works. The DrillDownTab sometimes fails.
+            if (event.isControlDown() && event.isShiftDown() && event.getCode() == KeyCode.F4) {
+                ConnectionTab selectedConnection = (ConnectionTab) getSelectionModel().getSelectedItem();
+                selectedConnection.closeSelectedResultTable();
+            }
         });
     }
 

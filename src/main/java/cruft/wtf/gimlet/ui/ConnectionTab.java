@@ -100,6 +100,14 @@ public class ConnectionTab extends Tab {
         return connection;
     }
 
+    public void closeSelectedResultTable() {
+        if (sqlTab.isSelected()) {
+            sqlTab.closeSelectedResultTable();
+        } else if (drillDownTab.isSelected()) {
+            drillDownTab.closeSelectedResultTable();
+        }
+    }
+
     /**
      * When a {@link QueryExecuteEvent} is published on the bus, invoke this method to execute it on the drilldown tab.
      *

@@ -1,27 +1,25 @@
 package cruft.wtf.gimlet.ui;
 
 
+import com.sun.javafx.scene.control.behavior.TabPaneBehavior;
+import com.sun.javafx.scene.control.skin.TabPaneSkin;
 import cruft.wtf.gimlet.NamedQueryTask;
 import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.conf.Query;
-import cruft.wtf.gimlet.jdbc.NamedParameterPreparedStatement;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLDataException;
-import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * This class is a tab where drilldown functionality exists.
@@ -90,13 +88,24 @@ public class DrillDownTab extends Tab {
         });
 
         namedQueryTask.setOnFailed(event -> {
-            logger.error("Named query failed", namedQueryTask.getException());
-            Utils.showError("OOPS!!!", "That did not work");
+            // When the query failed, we add a textarea to the tab instead of the table.
+            // This textarea contains the stacktrace information.
+            StringWriter sw = new StringWriter();
+            namedQueryTask.getException().printStackTrace(new PrintWriter(sw));
+            TextArea area = new TextArea(String.format("Source query:\n\n%s\n\nStacktrace:\n\n%s", namedQueryTask.getQuery(), sw.toString()));
+            area.getStyleClass().add("textarea");
+            area.setEditable(false);
+            tab.setContent(area);
         });
 
         namedQueryTask.setOnSucceeded(event -> {
             table.setColumns(namedQueryTask.columnProperty());
-            table.setItems(namedQueryTask.getValue());
+
+            if(namedQueryTask.getValue().size() <= 0) {
+                table.setPlaceHolderNoResults();
+            } else {
+                table.setItems(namedQueryTask.getValue());
+            }
             setContent(tabPaneResultSets);
         });
 
@@ -105,67 +114,15 @@ public class DrillDownTab extends Tab {
         t.start();
     }
 
-    public void executeQuery___(final Query query, final Map<String, Object> columnMap) {
-        logger.debug("Executing drilldown query '{}' with column map of {} keys", query.getName(), columnMap.size());
-
-
-        NamedParameterPreparedStatement npsm = null;
-        ResultSet rs = null;
-        try {
-            npsm = NamedParameterPreparedStatement.createNamedParameterPreparedStatement(connection, query.getContent());
-            npsm.setMaxRows(100);
-            if (columnMap.isEmpty()) {
-                if (npsm.hasNamedParameters()) {
-                    Map<String, String> map = new HashMap<>();
-                    for (String s : npsm.getParameters()) {
-                        TextInputDialog tid = new TextInputDialog();
-                        tid.setHeaderText("Specify input for '" + s + "'");
-                        Optional<String> opt = tid.showAndWait();
-                        if (!opt.isPresent()) {
-                            // bail out. User pressed cancel button.
-                            return;
-                        } else {
-                            map.put(s, opt.get());
-                        }
-                    }
-
-
-                    for (String key : map.keySet()) {
-                        npsm.setObject(key, map.get(key));
-                    }
-                }
-            } else {
-                for (String key : columnMap.keySet()) {
-                    npsm.setObject(key, columnMap.get(key));
-                }
-            }
-
-            setContent(tabPaneResultSets);
-
-            rs = npsm.executeQuery();
-            DrillResultTable drt = new DrillResultTable(this, query);
-            drt.populate(rs);
-
-            Tab tab = new Tab(query.getName());
-            tab.setContent(drt);
-            tabPaneResultSets.getTabs().add(tab);
-            tabPaneResultSets.getSelectionModel().select(tab);
-
-        } catch (SQLDataException e) {
-            logger.error("Invalid data given to statement", e);
-            Utils.showExceptionDialog("SQL data exception", "The input given was invalid for the property.", e);
-        } catch (SQLException e) {
-            logger.error("Could not prepare named parameter statement", e);
-            Utils.showExceptionDialog("Generic SQL exception", "See stacktrace below for details.", e);
-        } finally {
-            try {
-                Utils.close(npsm);
-                logger.debug("Closed statement");
-                Utils.close(rs);
-                logger.debug("Closed resultset");
-            } catch (SQLException ex) {
-                // swallow
-            }
+    /**
+     * Closes the tab which is currently selected by a workaround (TabPaneSkin and stuff).
+     */
+    public void closeSelectedResultTable() {
+        // TODO: Extend TabPane with this behaviour, and use that one as the TabPaneResultSets?
+        Tab selected = tabPaneResultSets.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            TabPaneBehavior b = ((TabPaneSkin) (tabPaneResultSets.getSkin())).getBehavior();
+            b.closeTab(selected);
         }
     }
 }

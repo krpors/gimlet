@@ -1,8 +1,9 @@
 package cruft.wtf.gimlet.ui;
 
 
+import com.sun.javafx.scene.control.behavior.TabPaneBehavior;
+import com.sun.javafx.scene.control.skin.TabPaneSkin;
 import cruft.wtf.gimlet.SimpleQueryTask;
-import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.event.QueryExecutedEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
@@ -39,7 +40,7 @@ public class SQLTab extends Tab {
 
     private CheckBox checkMaxRows;
 
-    private TextArea txtQuery = new TextArea("select * from customer cross join invoice");
+    private TextArea txtQuery = new TextArea("select * from feniks_owner.energy_label where id = 111111");
 
     private TabPane tabPaneResultSets = new TabPane();
 
@@ -101,21 +102,24 @@ public class SQLTab extends Tab {
 
         // Task failed:
         task.setOnFailed(event -> {
+            // When the query failed, we add a textarea to the tab instead of the table.
+            // This textarea contains the stacktrace information.
             StringWriter sw = new StringWriter();
             task.getException().printStackTrace(new PrintWriter(sw));
             TextArea area = new TextArea(sw.toString());
             area.getStyleClass().add("textarea");
             area.setEditable(false);
             tab.setContent(area);
-            Utils.showExceptionDialog(
-                    "Query failed",
-                    "The entered query failed. See exception below for more details.",
-                    task.getException());
         });
 
         task.setOnSucceeded(event -> {
             table.setColumns(task.columnProperty());
-            table.setItems(task.getValue());
+
+            if (task.getValue().size() <= 0) {
+                table.setPlaceHolderNoResults();
+            } else {
+                table.setItems(task.getValue());
+            }
 
             QueryExecutedEvent e = new QueryExecutedEvent();
             e.setQuery(task.getQuery());
@@ -127,5 +131,17 @@ public class SQLTab extends Tab {
         Thread t = new Thread(task, "Gimlet SimpleQueryTask runner");
         t.setDaemon(true);
         t.start();
+    }
+
+    /**
+     * Closes the tab which is currently selected by a workaround (TabPaneSkin and stuff).
+     */
+    public void closeSelectedResultTable() {
+        // TODO: Extend TabPane with this behaviour, and use that one as the TabPaneResultSets?
+        Tab selected = tabPaneResultSets.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            TabPaneBehavior b = ((TabPaneSkin) (tabPaneResultSets.getSkin())).getBehavior();
+            b.closeTab(selected);
+        }
     }
 }
