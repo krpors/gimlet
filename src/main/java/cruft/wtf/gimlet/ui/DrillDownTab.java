@@ -3,8 +3,7 @@ package cruft.wtf.gimlet.ui;
 
 import com.sun.javafx.scene.control.behavior.TabPaneBehavior;
 import com.sun.javafx.scene.control.skin.TabPaneSkin;
-import cruft.wtf.gimlet.NamedQueryTask;
-import cruft.wtf.gimlet.Utils;
+import cruft.wtf.gimlet.jdbc.NamedQueryTask;
 import cruft.wtf.gimlet.conf.Query;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Node;

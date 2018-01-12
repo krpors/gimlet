@@ -1,5 +1,7 @@
-package cruft.wtf.gimlet;
+package cruft.wtf.gimlet.jdbc;
 
+import cruft.wtf.gimlet.Column;
+import cruft.wtf.gimlet.Utils;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.collections.FXCollections;
@@ -108,8 +110,6 @@ public abstract class QueryTask extends Task<ObservableList<ObservableList>> {
             while (rs.next()) {
                 ObservableList<Object> list = FXCollections.observableArrayList();
                 for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                    // first element is the actual row number, which is just the i counter;
-
                     // Based on the column type, add a different type of data (int, long, string, etc).
                     switch (rsmd.getColumnType(i)) {
                         case Types.BIGINT:

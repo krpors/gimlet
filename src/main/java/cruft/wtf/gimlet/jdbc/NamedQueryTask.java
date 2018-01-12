@@ -1,6 +1,4 @@
-package cruft.wtf.gimlet;
-
-import cruft.wtf.gimlet.jdbc.NamedParameterPreparedStatement;
+package cruft.wtf.gimlet.jdbc;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

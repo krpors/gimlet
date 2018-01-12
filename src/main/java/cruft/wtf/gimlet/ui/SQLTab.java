@@ -3,7 +3,7 @@ package cruft.wtf.gimlet.ui;
 
 import com.sun.javafx.scene.control.behavior.TabPaneBehavior;
 import com.sun.javafx.scene.control.skin.TabPaneSkin;
-import cruft.wtf.gimlet.SimpleQueryTask;
+import cruft.wtf.gimlet.jdbc.SimpleQueryTask;
 import cruft.wtf.gimlet.event.QueryExecutedEvent;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;

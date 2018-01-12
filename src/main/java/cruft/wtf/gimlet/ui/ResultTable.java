@@ -2,6 +2,7 @@ package cruft.wtf.gimlet.ui;
 
 
 import cruft.wtf.gimlet.Column;
+import cruft.wtf.gimlet.jdbc.SimpleQueryTask;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
@@ -18,7 +19,7 @@ import java.util.List;
  * on the query executed. The table expects a {@link ResultSet} to iterate over. The class is not responsible for closing
  * the resources, merely displaying the data.
  *
- * @see cruft.wtf.gimlet.SimpleQueryTask
+ * @see SimpleQueryTask
  */
 public class ResultTable extends TableView<ObservableList> {
 
