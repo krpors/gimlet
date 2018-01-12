@@ -6,7 +6,12 @@ import cruft.wtf.gimlet.conf.Alias;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
@@ -22,11 +27,11 @@ import java.sql.SQLException;
  */
 public class AliasDialog extends Stage {
 
-    private TextField txtName;
-    private TextField txtDescription;
-    private TextField txtJdbcUrl;
-    private TextField txtDriverClass;
-    private TextField txtUsername;
+    private TextField     txtName;
+    private TextField     txtDescription;
+    private TextField     txtJdbcUrl;
+    private TextField     txtDriverClass;
+    private TextField     txtUsername;
     private PasswordField txtPassword;
 
     private Button btnOK;

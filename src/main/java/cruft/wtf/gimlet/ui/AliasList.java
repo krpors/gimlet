@@ -3,7 +3,13 @@ package cruft.wtf.gimlet.ui;
 import cruft.wtf.gimlet.conf.Alias;
 import cruft.wtf.gimlet.event.ConnectEvent;
 import javafx.collections.ObservableList;
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.Tooltip;
 
 import java.util.List;
 
@@ -66,7 +72,7 @@ public class AliasList extends ListView<Alias> {
      */
     private class AliasListCell extends ListCell<Alias> {
 
-        private ContextMenu contextMenu = new ContextMenu();
+        private ContextMenu contextMenu  = new ContextMenu();
         private ContextMenu contextMenu2 = new ContextMenu();
 
         public AliasListCell() {

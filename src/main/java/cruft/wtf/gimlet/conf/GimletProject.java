@@ -10,7 +10,11 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
 import java.io.File;
 import java.io.InputStream;
 import java.util.List;
@@ -118,7 +122,7 @@ public class GimletProject {
     public static GimletProject read(final File file) throws JAXBException {
         JAXBContext ctx = JAXBContext.newInstance(GimletProject.class);
         Unmarshaller unmarshaller = ctx.createUnmarshaller();
-        GimletProject gp = (GimletProject)unmarshaller.unmarshal(file);
+        GimletProject gp = (GimletProject) unmarshaller.unmarshal(file);
         gp.setFile(file);
         return gp;
     }

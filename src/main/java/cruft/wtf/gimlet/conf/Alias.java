@@ -16,12 +16,12 @@ import javax.xml.bind.annotation.XmlType;
 })
 public class Alias {
 
-    private StringProperty name = new SimpleStringProperty();
+    private StringProperty name        = new SimpleStringProperty();
     private StringProperty description = new SimpleStringProperty();
-    private StringProperty url = new SimpleStringProperty();
+    private StringProperty url         = new SimpleStringProperty();
     private StringProperty driverClass = new SimpleStringProperty();
-    private StringProperty user = new SimpleStringProperty();
-    private StringProperty password = new SimpleStringProperty(); // TODO: byte array
+    private StringProperty user        = new SimpleStringProperty();
+    private StringProperty password    = new SimpleStringProperty(); // TODO: byte array
 
     @XmlElement(name = "name")
     public String getName() {

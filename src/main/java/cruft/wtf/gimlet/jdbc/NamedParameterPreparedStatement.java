@@ -3,9 +3,17 @@ package cruft.wtf.gimlet.jdbc;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
-import java.sql.*;
+import java.sql.Connection;
 import java.sql.Date;
-import java.util.*;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * A {@link NamedParameterPreparedStatement} is an implementation of {@link PreparedStatement} which allows us to make
@@ -27,7 +35,7 @@ public class NamedParameterPreparedStatement extends DelegatingPreparedStatement
      * Class to hold the results of SQL parsing (used by factory methods)
      */
     public static class ParseResult {
-        private String sql;
+        private String       sql;
         private List<String> orderedParameters;
 
         public ParseResult(String sql, List<String> orderedParameters) {

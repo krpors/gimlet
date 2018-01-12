@@ -22,7 +22,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.TreeMap;
 
 /**
  * This class is a tab where drilldown functionality exists.

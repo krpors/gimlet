@@ -1,7 +1,9 @@
 package cruft.wtf.gimlet;
 
 public class Column {
+
     private final int type;
+
     private final String columnName;
 
     public Column(int type, String columnName) {

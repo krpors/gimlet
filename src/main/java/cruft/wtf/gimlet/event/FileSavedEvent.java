@@ -5,7 +5,7 @@ import java.io.File;
 public class FileSavedEvent {
     private File file;
 
-    public FileSavedEvent( File file) {
+    public FileSavedEvent(File file) {
         this.file = file;
     }
 

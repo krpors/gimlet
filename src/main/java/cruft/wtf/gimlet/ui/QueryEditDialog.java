@@ -26,7 +26,7 @@ public class QueryEditDialog extends Stage {
 
     private TextField txtName;
     private TextField txtDescription;
-    private TextArea txtQuery;
+    private TextArea  txtQuery;
 
     private Button btnOK;
     private Button btnCancel;

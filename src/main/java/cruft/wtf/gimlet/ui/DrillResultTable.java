@@ -11,7 +11,8 @@ import javafx.scene.control.TableRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * This class is a specialization of the regular {@link ResultTable}. The main difference is that this class allows us

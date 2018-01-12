@@ -68,7 +68,7 @@ public class SQLTab extends Tab {
 
         BorderPane bpane = new BorderPane();
         checkMaxRows = new CheckBox("Enable max rows 100");
-        checkMaxRows.setPadding(new Insets(5,5,5,5));
+        checkMaxRows.setPadding(new Insets(5, 5, 5, 5));
         bpane.setTop(checkMaxRows);
         bpane.setCenter(txtQuery);
 
