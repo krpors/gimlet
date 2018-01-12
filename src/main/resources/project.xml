@@ -41,19 +41,16 @@
                         <query>
                             <name>Get items belonging to this invoice</name>
                             <content>select * from item where invoiceid = :ID</content>
+                            <queries>
+                                <query>
+                                    <name>Get product item</name>
+                                    <content>select * from product where id = :PRODUCTID</content>
+                                </query>
+                            </queries>
                         </query>
                     </queries>
                 </query>
-                <query>
-                    <name>Nothing</name>
-                    <content>select derp from w00t;</content>
-                </query>
             </queries>
-        </query>
-        <query>
-            <name>Query two</name>
-            <description>Some other rooted query</description>
-            <content>select cruft from LOLZ;</content>
         </query>
     </queries>
 
