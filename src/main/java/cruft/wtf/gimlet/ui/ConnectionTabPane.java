@@ -5,19 +5,24 @@ import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.event.ConnectEvent;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.scene.control.TabPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 
-public class EditorTabView extends TabPane {
+/**
+ * The {@link ConnectionTabPane} contains the tabs associated with {@link ConnectionTab}s.
+ */
+public class ConnectionTabPane extends TabPane {
 
-    private Logger logger = LoggerFactory.getLogger(EditorTabView.class);
+    private Logger logger = LoggerFactory.getLogger(ConnectionTabPane.class);
 
     private SimpleBooleanProperty tabSelectedProperty = new SimpleBooleanProperty(false);
 
-    public EditorTabView() {
+    public ConnectionTabPane() {
         EventDispatcher.getInstance().register(this);
 
         getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
@@ -32,6 +37,19 @@ public class EditorTabView extends TabPane {
      */
     public ReadOnlyBooleanProperty tabSelectedProperty() {
         return tabSelectedProperty;
+    }
+
+    /**
+     * Closes all tabs in this tabpane. As a result, calls the onCloseRequest handler on each tab so
+     * the connection is closed, which is bound to that tab.
+     */
+    public void closeAllTabs() {
+        getTabs().forEach(tab -> {
+            EventHandler<Event> handler = tab.getOnCloseRequest();
+            if (handler != null) {
+                handler.handle(null);
+            }
+        });
     }
 
     @SuppressWarnings("unused")

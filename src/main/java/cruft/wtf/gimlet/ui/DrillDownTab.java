@@ -1,7 +1,7 @@
 package cruft.wtf.gimlet.ui;
 
 
-import cruft.wtf.gimlet.TimedTask;
+import cruft.wtf.gimlet.NamedQueryTask;
 import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.jdbc.NamedParameterPreparedStatement;
@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
 /**
  * This class is a tab where drilldown functionality exists.
@@ -76,6 +77,36 @@ public class DrillDownTab extends Tab {
     }
 
     public void executeQuery(final Query query, final Map<String, Object> columnMap) {
+        logger.debug("Execute drilldown!!!!");
+
+        final DrillResultTable table = new DrillResultTable(this, query);
+        final Tab tab = new Tab(query.getName());
+        tab.setContent(table);
+
+        NamedQueryTask namedQueryTask = new NamedQueryTask(this.connection, query.getContent(), 100, columnMap);
+
+        namedQueryTask.setOnScheduled(event -> {
+            tabPaneResultSets.getTabs().add(tab);
+            tabPaneResultSets.getSelectionModel().select(tab);
+        });
+
+        namedQueryTask.setOnFailed(event -> {
+            logger.error("Named query failed", namedQueryTask.getException());
+            Utils.showError("OOPS!!!", "That did not work");
+        });
+
+        namedQueryTask.setOnSucceeded(event -> {
+            table.setColumns(namedQueryTask.columnProperty());
+            table.setItems(namedQueryTask.getValue());
+            setContent(tabPaneResultSets);
+        });
+
+        Thread t = new Thread(namedQueryTask, "Gimlet named query task");
+        t.setDaemon(true);
+        t.start();
+    }
+
+    public void executeQuery___(final Query query, final Map<String, Object> columnMap) {
         logger.debug("Executing drilldown query '{}' with column map of {} keys", query.getName(), columnMap.size());
 
 

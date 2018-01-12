@@ -5,11 +5,24 @@ import cruft.wtf.gimlet.GimletApp;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.QueryExecuteEvent;
 import cruft.wtf.gimlet.event.QuerySavedEvent;
+import cruft.wtf.gimlet.jdbc.NamedParameterPreparedStatement;
 import javafx.collections.ObservableList;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.Tooltip;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.TextFieldTreeCell;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
 
 public class QueryTree extends TreeView<Query> {
 
@@ -60,10 +73,44 @@ public class QueryTree extends TreeView<Query> {
         root.setExpanded(true);
     }
 
+    /**
+     * Asks the user via text input dialogs for values.
+     *
+     * @param query The Query to parse.
+     * @return An optional map of string mapped to objects. If an empty Optional is returned, the user has any of the input dialogs.
+     */
+    private Optional<Map<String, Object>> askInputForQuery(final Query query) {
+        NamedParameterPreparedStatement.ParseResult result = NamedParameterPreparedStatement.parse(query.getContent());
+
+        Map<String, Object> map = new TreeMap<>();
+        for (String s : result.getUniqueParameters()) {
+            TextInputDialog tid = new TextInputDialog();
+            tid.setHeaderText("Specify input for '" + s + "'");
+            Optional<String> opt = tid.showAndWait();
+            if (!opt.isPresent()) {
+                // bail out. User pressed cancel button.
+                return Optional.empty();
+            } else {
+                map.put(s, opt.get());
+            }
+        }
+        return Optional.of(map);
+    }
+
+    /**
+     * Exectues the {@link Query} which has been selected to run in this tree.
+     *
+     * @param query The query to run.
+     */
     private void executeSelectedQuery(final Query query) {
-        QueryExecuteEvent e = new QueryExecuteEvent();
-        e.setQuery(query);
-        EventDispatcher.getInstance().post(e);
+        // If the optional is not present (empty), user has cancelled the input dialog.
+        // If the optional is present, but empty, there are no parameters required.
+        askInputForQuery(query).ifPresent(stringObjectMap -> {
+            QueryExecuteEvent e = new QueryExecuteEvent();
+            e.setQuery(query);
+            e.setColumnnMap(stringObjectMap);
+            EventDispatcher.getInstance().post(e);
+        });
     }
 
     /**
@@ -150,7 +197,7 @@ public class QueryTree extends TreeView<Query> {
 
             // Funky binding. We bind the 'disabled' property of the menu item, to the boolean property
             // of the editorTabViews's boolean value whether a tab is opened or not.
-            menuItemExecute.disableProperty().bind(GimletApp.editorTabView.tabSelectedProperty().not());
+            menuItemExecute.disableProperty().bind(GimletApp.connectionTabPane.tabSelectedProperty().not());
 
             menuItemExecute.setOnAction(e -> executeSelectedQuery(getItem()));
             editItem.setOnAction(e -> openQueryEditDialog());

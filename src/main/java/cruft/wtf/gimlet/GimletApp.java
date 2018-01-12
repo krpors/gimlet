@@ -44,9 +44,9 @@ public class GimletApp extends Application {
     private Stage primaryStage;
 
     /**
-     * There is only one EditorTabView throughout Gimlet. So once we created it, we can reference to it statically.
+     * There is only one ConnectionTabPane throughout Gimlet. So once we created it, we can reference to it statically.
      */
-    public static EditorTabView editorTabView;
+    public static ConnectionTabPane connectionTabPane;
 
     private SplitPane centerPane;
 
@@ -81,6 +81,8 @@ public class GimletApp extends Application {
         logger.debug("Adding shutdown hook.");
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             logger.debug("Invoking shutdown hook.");
+            connectionTabPane.closeAllTabs();
+
             try {
                 Configuration c = Configuration.getInstance();
                 c.setProperty(Configuration.Key.WINDOW_MAXIMIZED, primaryStage.isMaximized());
@@ -272,9 +274,9 @@ public class GimletApp extends Application {
 
         BorderPane pane = new BorderPane();
 
-        editorTabView = new EditorTabView();
+        connectionTabPane = new ConnectionTabPane();
         Node left = createLeft();
-        centerPane = new SplitPane(left, editorTabView);
+        centerPane = new SplitPane(left, connectionTabPane);
         SplitPane.setResizableWithParent(left, false);
 
         pane.setTop(createMenuBar());

@@ -26,7 +26,7 @@ public class NamedParameterPreparedStatement extends DelegatingPreparedStatement
     /**
      * Class to hold the results of SQL parsing (used by factory methods)
      */
-    static class ParseResult {
+    public static class ParseResult {
         private String sql;
         private List<String> orderedParameters;
 
@@ -42,6 +42,10 @@ public class NamedParameterPreparedStatement extends DelegatingPreparedStatement
         public List<String> getOrderedParameters() {
             return orderedParameters;
         }
+
+        public Set<String> getUniqueParameters() {
+            return new TreeSet<>(orderedParameters);
+        }
     }
 
     /**
@@ -52,7 +56,7 @@ public class NamedParameterPreparedStatement extends DelegatingPreparedStatement
      * @param query Query containing named parameters.
      * @return The {@link ParseResult}.
      */
-    private static ParseResult parse(String query) {
+    public static ParseResult parse(String query) {
         List<String> orderedParameters = new ArrayList<>();
         int length = query.length();
         StringBuilder parsedQuery = new StringBuilder(length);
