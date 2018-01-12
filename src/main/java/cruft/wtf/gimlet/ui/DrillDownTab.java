@@ -3,8 +3,8 @@ package cruft.wtf.gimlet.ui;
 
 import com.sun.javafx.scene.control.behavior.TabPaneBehavior;
 import com.sun.javafx.scene.control.skin.TabPaneSkin;
-import cruft.wtf.gimlet.jdbc.NamedQueryTask;
 import cruft.wtf.gimlet.conf.Query;
+import cruft.wtf.gimlet.jdbc.NamedQueryTask;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -12,6 +12,7 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +38,13 @@ public class DrillDownTab extends Tab {
      */
     private Connection connection;
 
-    private TabPane tabPaneResultSets = new TabPane();
+    private TabPane tabPaneResultSets;
+
+    /**
+     * The content pane is a stack pane containing the contents. When no result is shown (i.e. no tabs visible)  an
+     * 'empty' pane is shown with some text provided.
+     */
+    private StackPane contentPane;
 
     private Node emptyPane;
 
@@ -54,21 +61,27 @@ public class DrillDownTab extends Tab {
         setClosable(false);
         setGraphic(Images.COG.imageView());
 
+        contentPane = new StackPane();
         emptyPane = createEmptyPane();
 
-        setContent(emptyPane);
+        tabPaneResultSets = new TabPane();
+        tabPaneResultSets.setVisible(false);
+
+        contentPane.getChildren().add(emptyPane);
+        contentPane.getChildren().add(tabPaneResultSets);
+
+        setContent(contentPane);
 
         tabPaneResultSets.getTabs().addListener((ListChangeListener<Tab>) c -> {
-            if (c.getList().size() <= 0) {
-                setContent(emptyPane);
-            }
+            boolean noTabs = c.getList().size() <= 0;
+            emptyPane.setVisible(noTabs);
+            tabPaneResultSets.setVisible(!noTabs);
         });
     }
 
     private Node createEmptyPane() {
         BorderPane pane = new BorderPane();
         pane.setCenter(new Label("Select a query on the left side."));
-
         return pane;
     }
 
@@ -91,7 +104,25 @@ public class DrillDownTab extends Tab {
             // This textarea contains the stacktrace information.
             StringWriter sw = new StringWriter();
             namedQueryTask.getException().printStackTrace(new PrintWriter(sw));
-            TextArea area = new TextArea(String.format("Source query:\n\n%s\n\nStacktrace:\n\n%s", namedQueryTask.getQuery(), sw.toString()));
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder
+                    .append("Source query:\n\n")
+                    .append(namedQueryTask.getQuery())
+                    .append("\n\n");
+
+            if (!namedQueryTask.getNamedProperties().isEmpty()) {
+                stringBuilder.append("Named parameters given:\n\n");
+                namedQueryTask.getNamedProperties().forEach((s, o) -> {
+                    stringBuilder.append(String.format("\t%s = %s\n", s, o));
+                });
+            } else {
+                stringBuilder.append("The query does not contain named parameters.\n");
+            }
+
+            stringBuilder
+                    .append("\nStacktrace:\n\n")
+                    .append(sw.toString());
+            TextArea area = new TextArea(stringBuilder.toString());
             area.getStyleClass().add("textarea");
             area.setEditable(false);
             tab.setContent(area);
@@ -100,12 +131,11 @@ public class DrillDownTab extends Tab {
         namedQueryTask.setOnSucceeded(event -> {
             table.setColumns(namedQueryTask.columnProperty());
 
-            if(namedQueryTask.getValue().size() <= 0) {
+            if (namedQueryTask.getValue().size() <= 0) {
                 table.setPlaceHolderNoResults();
             } else {
                 table.setItems(namedQueryTask.getValue());
             }
-            setContent(tabPaneResultSets);
         });
 
         Thread t = new Thread(namedQueryTask, "Gimlet named query task");
