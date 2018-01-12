@@ -2,11 +2,7 @@ package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.ui.Images;
 import javafx.geometry.Insets;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import org.slf4j.Logger;
@@ -78,6 +74,25 @@ public final class Utils {
         Alert alert = new Alert(Alert.AlertType.ERROR, content, ButtonType.OK);
         alert.setHeaderText(header);
         alert.showAndWait();
+    }
+
+    /**
+     * Abbreviates a string to a certain length, followed by and ellipsis (as three dots). Any newlines and such are
+     * removed.
+     *
+     * @param s      The String to abbreviate.
+     * @param maxlen The maximum length.
+     * @return The abbreviated string ({@code blah blah blah ...} or the string itself if it's smaller than maxlen.
+     */
+    public static String abbrev(String s, int maxlen) {
+        String trim = s
+                .trim()
+                .replace('\n', ' ')
+                .replace('\r', ' ');
+        if (trim.length() >= maxlen) {
+            return trim.substring(0, maxlen - 3).concat("...");
+        }
+        return trim;
     }
 
     /**
