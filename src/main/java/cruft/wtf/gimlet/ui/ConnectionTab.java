@@ -30,6 +30,8 @@ public class ConnectionTab extends Tab {
 
     private TabPane tabPane = new TabPane();
 
+    private ObjectsTab objectsTab;
+
     private SQLTab sqlTab;
 
     private DrillDownTab drillDownTab;
@@ -81,10 +83,11 @@ public class ConnectionTab extends Tab {
 
         pane.setTop(topPaneWithLabels);
 
+        objectsTab = new ObjectsTab();
         sqlTab = new SQLTab(this);
         drillDownTab = new DrillDownTab(this);
 
-        tabPane = new TabPane(sqlTab, drillDownTab);
+        tabPane = new TabPane(objectsTab, sqlTab, drillDownTab);
 
         pane.setCenter(tabPane);
 

@@ -18,6 +18,9 @@ public class NamedQueryTask extends QueryTask {
         this.namedProperties = props;
     }
 
+    public Map<String, Object> getNamedProperties() {
+        return namedProperties;
+    }
 
     @Override
     public PreparedStatement prepareStatement() throws SQLException {
