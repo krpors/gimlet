@@ -126,7 +126,8 @@ public class GimletApp extends Application {
             }
         } catch (JAXBException e) {
             e.printStackTrace();
-            Platform.exit();
+            Utils.showError("Unable to read the most recent project file.", "The file seems to be corrupted. Please inspect!");
+            GimletApp.gimletProject = new GimletProject();
         } catch (IOException e) {
             Utils.showExceptionDialog(
                     "Error!",
