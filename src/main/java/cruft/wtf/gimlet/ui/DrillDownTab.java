@@ -4,6 +4,7 @@ package cruft.wtf.gimlet.ui;
 import com.sun.javafx.scene.control.behavior.TabPaneBehavior;
 import com.sun.javafx.scene.control.skin.TabPaneSkin;
 import cruft.wtf.gimlet.conf.Query;
+import cruft.wtf.gimlet.event.QueryExecutedEvent;
 import cruft.wtf.gimlet.jdbc.NamedQueryTask;
 import javafx.collections.ListChangeListener;
 import javafx.scene.Node;
@@ -139,6 +140,12 @@ public class DrillDownTab extends Tab {
             } else {
                 table.setItems(namedQueryTask.getValue());
             }
+
+            QueryExecutedEvent qee = new QueryExecutedEvent();
+            qee.setQuery(namedQueryTask.getQuery());
+            qee.setRuntime(namedQueryTask.getProcessingTime());
+            qee.setRowCount(namedQueryTask.getRowCount());
+            EventDispatcher.getInstance().post(qee);
         });
 
         Thread t = new Thread(namedQueryTask, "Gimlet named query task");
