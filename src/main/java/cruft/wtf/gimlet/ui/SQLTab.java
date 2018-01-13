@@ -4,15 +4,11 @@ package cruft.wtf.gimlet.ui;
 import com.sun.javafx.scene.control.behavior.TabPaneBehavior;
 import com.sun.javafx.scene.control.skin.TabPaneSkin;
 import cruft.wtf.gimlet.Utils;
-import cruft.wtf.gimlet.jdbc.SimpleQueryTask;
 import cruft.wtf.gimlet.event.QueryExecutedEvent;
+import cruft.wtf.gimlet.jdbc.SimpleQueryTask;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
@@ -57,7 +53,7 @@ public class SQLTab extends Tab {
 
         setText("SQL");
         setClosable(false);
-        setGraphic(Images.PULSE.imageView());
+        setGraphic(Images.CODE.imageView());
 
         txtQuery.setWrapText(false);
         txtQuery.setPromptText("Enter any SQL query here");
@@ -83,6 +79,9 @@ public class SQLTab extends Tab {
         setContent(pane);
     }
 
+    /**
+     * Executes the query in a JavaFX task.
+     */
     private void executeQuery() {
         String query = txtQuery.getText();
         // Check if we selected some text. If so, that's the query we want to run.
@@ -92,6 +91,7 @@ public class SQLTab extends Tab {
 
         final ResultTable table = new ResultTable();
         final Tab tab = new Tab(Utils.abbrev(query, 36));
+        tab.setGraphic(Images.CLOCK.imageView());
         tab.setContent(table);
 
         // TODO: parameterize the maxRows properly (via the UI)
@@ -116,10 +116,13 @@ public class SQLTab extends Tab {
             TextArea area = new TextArea(sw.toString());
             area.getStyleClass().add("textarea");
             area.setEditable(false);
+            tab.setGraphic(Images.WARNING.imageView());
             tab.setContent(area);
         });
 
         task.setOnSucceeded(event -> {
+            tab.setGraphic(Images.SPREADSHEET.imageView());
+
             table.setColumns(task.columnProperty());
 
             if (task.getValue().size() <= 0) {

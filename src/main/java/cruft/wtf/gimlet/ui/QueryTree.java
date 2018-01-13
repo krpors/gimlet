@@ -2,21 +2,14 @@ package cruft.wtf.gimlet.ui;
 
 import com.google.common.eventbus.Subscribe;
 import cruft.wtf.gimlet.GimletApp;
+import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.QueryExecuteEvent;
 import cruft.wtf.gimlet.event.QuerySavedEvent;
 import cruft.wtf.gimlet.jdbc.NamedParameterPreparedStatement;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.control.Tooltip;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.event.ActionEvent;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeCell;
 
 import java.util.List;
@@ -51,6 +44,10 @@ public class QueryTree extends TreeView<Query> {
         setCellFactory(param -> new QueryConfigurationTreeCell());
 
         setRoot(root);
+
+        ContextMenu menu = new ContextMenu();
+        menu.getItems().add(new MenuItem("Add new rooted query", Images.FILE.imageView()));
+        setContextMenu(menu);
     }
 
     /**
@@ -183,14 +180,16 @@ public class QueryTree extends TreeView<Query> {
         private ContextMenu menu = new ContextMenu();
 
         public QueryConfigurationTreeCell() {
-            menuItemExecute = new MenuItem("Run query", Images.COG.imageView());
+            menuItemExecute = new MenuItem("Run query", Images.MEDIA_PLAY.imageView());
 
-            MenuItem editItem = new MenuItem("Edit");
-            MenuItem removeItem = new MenuItem("Delete");
+            MenuItem menuItemAdd = new MenuItem("Add query...", Images.PLUS.imageView());
+            MenuItem editItem = new MenuItem("Edit...", Images.PENCIL.imageView());
+            MenuItem removeItem = new MenuItem("Delete...", Images.TRASH.imageView());
 
             menu.getItems().addAll(
                     menuItemExecute,
                     new SeparatorMenuItem(),
+                    menuItemAdd,
                     editItem,
                     new SeparatorMenuItem(),
                     removeItem);
@@ -199,6 +198,9 @@ public class QueryTree extends TreeView<Query> {
             // of the editorTabViews's boolean value whether a tab is opened or not.
             menuItemExecute.disableProperty().bind(GimletApp.connectionTabPane.tabSelectedProperty().not());
 
+            menuItemAdd.setOnAction(event -> {
+                System.out.println("clixed");
+            });
             menuItemExecute.setOnAction(e -> executeSelectedQuery(getItem()));
             editItem.setOnAction(e -> openQueryEditDialog());
             removeItem.setOnAction(e -> removeSelectedQuery());
@@ -208,7 +210,7 @@ public class QueryTree extends TreeView<Query> {
         public void updateItem(Query item, boolean empty) {
             // super call is required, see documentation.
             super.updateItem(item, empty);
-            if (empty) {
+            if (empty || item == null) {
                 setText(null);
                 setGraphic(null);
                 return;

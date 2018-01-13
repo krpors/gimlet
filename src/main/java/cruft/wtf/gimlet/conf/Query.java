@@ -5,6 +5,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 
+import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlType;
@@ -25,6 +26,8 @@ public class Query {
     private StringProperty content = new SimpleStringProperty();
 
     private SimpleListProperty<Query> subQueries = new SimpleListProperty<>(FXCollections.observableArrayList());
+
+    private Query parentQuery;
 
     public String getName() {
         return name.get();
@@ -76,8 +79,15 @@ public class Query {
         this.subQueries.setAll(subQueries);
     }
 
+    protected void afterUnmarshal(Unmarshaller um, Object parent) {
+        if (parent instanceof Query) {
+            Query query = (Query) parent;
+            this.parentQuery = query;
+        }
+    }
+
     @Override
     public String toString() {
-        return "Query{name='" + name + "}";
+        return "Query{name='" + name.get() + "}";
     }
 }

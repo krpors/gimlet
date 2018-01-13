@@ -91,6 +91,7 @@ public class DrillDownTab extends Tab {
         final DrillResultTable table = new DrillResultTable(this, query);
         final Tab tab = new Tab(query.getName());
         tab.setContent(table);
+        tab.setGraphic(Images.CLOCK.imageView());
 
         NamedQueryTask namedQueryTask = new NamedQueryTask(this.connection, query.getContent(), 100, columnMap);
 
@@ -100,6 +101,7 @@ public class DrillDownTab extends Tab {
         });
 
         namedQueryTask.setOnFailed(event -> {
+            tab.setGraphic(Images.WARNING.imageView());
             // When the query failed, we add a textarea to the tab instead of the table.
             // This textarea contains the stacktrace information.
             StringWriter sw = new StringWriter();
@@ -129,6 +131,7 @@ public class DrillDownTab extends Tab {
         });
 
         namedQueryTask.setOnSucceeded(event -> {
+            tab.setGraphic(Images.SPREADSHEET.imageView());
             table.setColumns(namedQueryTask.columnProperty());
 
             if (namedQueryTask.getValue().size() <= 0) {
