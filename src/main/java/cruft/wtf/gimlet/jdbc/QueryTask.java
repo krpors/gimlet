@@ -10,12 +10,7 @@ import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 
 /**
  * A JavaFX task to run a simple query (i.e. a typed query, without named parameters).
@@ -95,11 +90,13 @@ public abstract class QueryTask extends Task<ObservableList<ObservableList>> {
         try {
             // TODO: make the statement cancellable from another thread.
             // When a huge query is run, you're unable to cancel it.
+            logger.debug("Preparing statement. Setting max rows to {}", maxRows);
             statement = prepareStatement();
             statement.setMaxRows(maxRows);
             rs = statement.executeQuery();
 
             ResultSetMetaData rsmd = rs.getMetaData();
+            logger.debug("Found {} columns in ResultSet", rsmd.getColumnCount());
             for (int col = 0; col < rsmd.getColumnCount(); col++) {
                 int z = col + 1;
                 Column column = new Column(rsmd.getColumnType(z), rsmd.getColumnName(z));
@@ -148,8 +145,7 @@ public abstract class QueryTask extends Task<ObservableList<ObservableList>> {
 
             // When all is finished, add it to the end list. This will notify listeners.
             processingTime.set(System.currentTimeMillis() - before);
-
-            logger.debug("Finished task.");
+            logger.debug("Task finished in {} ms.", processingTime.get());
             return tempList;
         } finally {
             Utils.close(statement);
