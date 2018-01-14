@@ -2,3 +2,15 @@
     -fx-font-family: "Monospace";
     -fx-text-fill: red;
 }
+
+.query-editor {
+    -fx-font-family: "Monospace";
+}
+
+.table-view {
+    -fx-font-family: "Monospace";
+}
+.table-view .null {
+    -fx-background-color: yellow;
+    -fx-alignment: center;
+}

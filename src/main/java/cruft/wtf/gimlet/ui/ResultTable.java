@@ -8,6 +8,8 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.text.TextAlignment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,10 +53,34 @@ public class ResultTable extends TableView<ObservableList> {
     public void setColumns(List<Column> columnList) {
         for (int i = 0; i < columnList.size(); i++) {
             final int colnum = i;
-            TableColumn<ObservableList, String> col = new TableColumn<>(columnList.get(colnum).getColumnName());
+            TableColumn<ObservableList, Object> col = new TableColumn<>(columnList.get(colnum).getColumnName());
             // every column has a type dependent on the ResultSet. So just use SimpleObjectProperty.
             col.setCellValueFactory(param -> new SimpleObjectProperty(param.getValue().get(colnum)));
+            col.setCellFactory(param -> {
+                return new Cell();
+            });
             getColumns().add(col);
+        }
+    }
+
+    private class Cell extends TextFieldTableCell<ObservableList, Object> {
+
+        public Cell() {
+        }
+        @Override
+        public void updateItem(Object item, boolean empty) {
+            super.updateItem(item, empty);
+
+            if (empty) {
+                return;
+            }
+
+            if (item == null) {
+                // add a style class so it's easy to see it's nulled (from the database).
+                getStyleClass().add("null");
+                // set a string indicator. The text is centered via CSS.
+                setText("<NULL>");
+            }
         }
     }
 }

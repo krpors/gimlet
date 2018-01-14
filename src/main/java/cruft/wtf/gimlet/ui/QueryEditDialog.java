@@ -9,6 +9,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
@@ -28,27 +29,23 @@ public class QueryEditDialog extends Stage {
     private TextField txtDescription;
     private TextArea  txtQuery;
 
+    private ButtonType result;
     private Button btnOK;
     private Button btnCancel;
 
     private EventHandler<ActionEvent> eventSave = event -> {
-        query.nameProperty().set(txtName.getText());
-        query.descriptionProperty().set(txtDescription.getText());
-        query.contentProperty().set(txtQuery.getText());
-        QuerySavedEvent qse = new QuerySavedEvent(query);
-        EventDispatcher.getInstance().post(qse);
+        result = ButtonType.OK;
         close();
     };
 
-    public QueryEditDialog(Query query) {
-        this.query = query;
-
+    public QueryEditDialog() {
         Parent content = createContent();
 
         Scene scene = new Scene(content);
+        scene.getStylesheets().add("/css/style.css");
         setResizable(true);
         setScene(scene);
-        setTitle("Edit query");
+        setTitle("Add query");
         initModality(Modality.APPLICATION_MODAL);
         initOwner(GimletApp.mainWindow);
         centerOnScreen();
@@ -56,21 +53,48 @@ public class QueryEditDialog extends Stage {
         // Exit the window (close it) without saving changes.
         scene.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ESCAPE) {
+                result = ButtonType.CANCEL;
                 close();
             }
         });
     }
 
+    public void initFromQuery(final Query queryToEdit) {
+        setTitle("Edit query");
+        txtName.setText(queryToEdit.getName());
+        txtQuery.setText(queryToEdit.getContent());
+        txtDescription.setText(queryToEdit.getDescription());
+    }
+
+    public void applyTo(final Query query) {
+        query.setName(txtName.getText());
+        query.setDescription(txtDescription.getText());
+        query.setContent(txtQuery.getText());
+    }
+
+    public Query getQuery() {
+        Query q = new Query();
+        q.setName(txtName.getText());
+        q.setDescription(txtDescription.getText());
+        q.setContent(txtQuery.getText());
+        return q;
+    }
+
+    public ButtonType getResult() {
+        return result;
+    }
+
     private Parent createContent() {
         FormPane formPane = new FormPane();
 
-        txtName = new TextField(query.getName());
+        txtName = new TextField();
         formPane.add("Name:", txtName);
 
-        txtDescription = new TextField(query.getDescription());
+        txtDescription = new TextField();
         formPane.add("Description:", txtDescription);
 
-        txtQuery = new TextArea(query.getContent());
+        txtQuery = new TextArea();
+        txtQuery.getStyleClass().add("query-editor");
         // TODO: monospaced font for query
         formPane.add("Query:", txtQuery);
 

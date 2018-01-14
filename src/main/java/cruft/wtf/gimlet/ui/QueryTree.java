@@ -46,7 +46,7 @@ public class QueryTree extends TreeView<Query> {
         setRoot(root);
 
         ContextMenu menu = new ContextMenu();
-        menu.getItems().add(new MenuItem("Add new rooted query", Images.FILE.imageView()));
+        menu.getItems().add(new MenuItem("New root query", Images.FILE.imageView()));
         setContextMenu(menu);
     }
 
@@ -119,8 +119,13 @@ public class QueryTree extends TreeView<Query> {
             return;
         }
 
-        QueryEditDialog qed = new QueryEditDialog(selectedItem.getValue());
+        QueryEditDialog qed = new QueryEditDialog();
+        qed.initFromQuery(selectedItem.getValue());
         qed.showAndWait();
+        if (qed.getResult() == ButtonType.OK) {
+            qed.applyTo(selectedItem.getValue());
+            refresh();
+        }
     }
 
     /**
@@ -156,6 +161,20 @@ public class QueryTree extends TreeView<Query> {
         });
     }
 
+    public void showQueryDialog(final Query root) {
+        QueryEditDialog qed = new QueryEditDialog();
+        qed.showAndWait();
+        if (qed.getResult() == ButtonType.OK) {
+            Query theq = qed.getQuery();
+            root.getSubQueries().add(theq);
+
+            TreeItem<Query> selected = getSelectionModel().getSelectedItem();
+            selected.getChildren().add(new TreeItem<>(theq));
+            selected.setExpanded(true);
+            refresh();
+        }
+    }
+
 
     /**
      * When a {@link Query} is saved through a {@link QueryEditDialog}, the {@link EventDispatcher} will notify this
@@ -182,14 +201,14 @@ public class QueryTree extends TreeView<Query> {
         public QueryConfigurationTreeCell() {
             menuItemExecute = new MenuItem("Run query", Images.MEDIA_PLAY.imageView());
 
-            MenuItem menuItemAdd = new MenuItem("Add query...", Images.PLUS.imageView());
+            MenuItem menuItemNew = new MenuItem("New query...", Images.PLUS.imageView());
             MenuItem editItem = new MenuItem("Edit...", Images.PENCIL.imageView());
             MenuItem removeItem = new MenuItem("Delete...", Images.TRASH.imageView());
 
             menu.getItems().addAll(
                     menuItemExecute,
                     new SeparatorMenuItem(),
-                    menuItemAdd,
+                    menuItemNew,
                     editItem,
                     new SeparatorMenuItem(),
                     removeItem);
@@ -198,9 +217,7 @@ public class QueryTree extends TreeView<Query> {
             // of the editorTabViews's boolean value whether a tab is opened or not.
             menuItemExecute.disableProperty().bind(GimletApp.connectionTabPane.tabSelectedProperty().not());
 
-            menuItemAdd.setOnAction(event -> {
-                System.out.println("clixed");
-            });
+            menuItemNew.setOnAction(event -> showQueryDialog(getItem()));
             menuItemExecute.setOnAction(e -> executeSelectedQuery(getItem()));
             editItem.setOnAction(e -> openQueryEditDialog());
             removeItem.setOnAction(e -> removeSelectedQuery());
