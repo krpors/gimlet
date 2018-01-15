@@ -11,12 +11,23 @@
     -fx-font-family: "Monospace";
 }
 
-.null {
-    -fx-background-color: lightgray;
+
+.table-row-cell .null {
+   -fx-background-color: lightgray;
     -fx-alignment: center;
 }
 
 .table-row-cell:selected .null {
     -fx-background-color: -fx-table-cell-border-color;
     -fx-text-fill: black;
+}
+
+.table-row-cell .abbrev {
+    -fx-background-color: #c9c984;
+     -fx-text-fill: black;
+}
+
+.table-row-cell:selected .abbrev {
+    -fx-background-color: -fx-table-cell-border-color;
+     -fx-text-fill: black;
 }

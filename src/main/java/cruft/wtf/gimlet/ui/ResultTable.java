@@ -2,6 +2,7 @@ package cruft.wtf.gimlet.ui;
 
 
 import cruft.wtf.gimlet.Column;
+import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.jdbc.SimpleQueryTask;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
@@ -64,10 +65,15 @@ public class ResultTable extends TableView<ObservableList> {
         }
     }
 
+    /**
+     * Cell for the ResultTable.
+     */
     private class Cell extends TextFieldTableCell<ObservableList, Object> {
 
         public Cell() {
+
         }
+
         @Override
         public void updateItem(Object item, boolean empty) {
             super.updateItem(item, empty);
@@ -76,14 +82,26 @@ public class ResultTable extends TableView<ObservableList> {
                 return;
             }
 
+            // clear style, prevents possible display bug?
+            getStyleClass().remove("null");
+            getStyleClass().remove("abbrev");
+
+            // TODO: double click on cells view their full content in a text area
+
             if (item == null) {
                 // add a style class so it's easy to see it's nulled (from the database).
                 getStyleClass().add("null");
                 // set a string indicator. The text is centered via CSS.
                 setText("<NULL>");
-            } else {
-                // clear style, prevents possible display bug
-                getStyleClass().remove("null");
+                return;
+            }
+
+            // If the cell content is larger than 32 chars, abbreviate it and mark it as such.
+            // User should be able to double click on the cell to display its full data.
+            String s = item.toString().replace('\n', ' ').replace('\r', ' ').trim();
+            if (s.length() >= 32) {
+                getStyleClass().add("abbrev");
+                setText(Utils.abbrev(s, 32));
             }
         }
     }
