@@ -113,6 +113,8 @@ public abstract class QueryTask extends Task<ObservableList<ObservableList>> {
                             list.add(rs.getLong(i));
                             break;
                         case Types.NUMERIC:
+                            list.add(rs.getLong(i));
+                            break;
                         case Types.SMALLINT:
                         case Types.TINYINT:
                         case Types.INTEGER:
