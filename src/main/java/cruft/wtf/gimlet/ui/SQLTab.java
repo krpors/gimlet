@@ -73,7 +73,7 @@ public class SQLTab extends Tab {
 
         SplitPane pane = new SplitPane();
         pane.setOrientation(Orientation.VERTICAL);
-        pane.setDividerPosition(0, 0.5);
+        pane.setDividerPosition(0, 0.30);
         pane.getItems().add(bpane);
         pane.getItems().add(tabPaneResultSets);
 
@@ -91,7 +91,7 @@ public class SQLTab extends Tab {
         }
 
         final ResultTable table = new ResultTable();
-        final Tab tab = new Tab(Utils.abbrev(query, 36));
+        final Tab tab = new Tab(Utils.truncate(query, 36));
         tab.setGraphic(Images.CLOCK.imageView());
         tab.setContent(table);
 

@@ -93,14 +93,14 @@ public final class Utils {
     }
 
     /**
-     * Abbreviates a string to a certain length, followed by and ellipsis (as three dots). Any newlines and such are
+     * Truncates a string to a certain length, followed by and ellipses (as three dots). Any newlines and such are
      * removed.
      *
-     * @param s      The String to abbreviate.
+     * @param s      The String to truncate.
      * @param maxlen The maximum length.
-     * @return The abbreviated string ({@code blah blah blah ...} or the string itself if it's smaller than maxlen.
+     * @return The truncated string ({@code blah blah blah ...} or the string itself if it's smaller than maxlen.
      */
-    public static String abbrev(String s, int maxlen) {
+    public static String truncate(String s, int maxlen) {
         String trim = s
                 .trim()
                 .replace('\n', ' ')

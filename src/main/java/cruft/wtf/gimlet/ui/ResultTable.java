@@ -6,9 +6,7 @@ import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.jdbc.SimpleQueryTask;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +32,6 @@ public class ResultTable extends TableView<ObservableList> {
         setTableMenuButtonVisible(true);
         setPlaceholder(new Label("Query is running..."));
         setColumnResizePolicy(UNCONSTRAINED_RESIZE_POLICY);
-
     }
 
     /**
@@ -58,9 +55,7 @@ public class ResultTable extends TableView<ObservableList> {
             TableColumn<ObservableList, Object> col = new TableColumn<>(columnList.get(colnum).getColumnName());
             // every column has a type dependent on the ResultSet. So just use SimpleObjectProperty.
             col.setCellValueFactory(param -> new SimpleObjectProperty(param.getValue().get(colnum)));
-            col.setCellFactory(param -> {
-                return new Cell();
-            });
+            col.setCellFactory(param -> new Cell());
             getColumns().add(col);
         }
     }
@@ -84,7 +79,7 @@ public class ResultTable extends TableView<ObservableList> {
 
             // clear style, prevents possible display bug?
             getStyleClass().remove("null");
-            getStyleClass().remove("abbrev");
+            getStyleClass().remove("truncate");
 
             // TODO: double click on cells view their full content in a text area
 
@@ -100,9 +95,38 @@ public class ResultTable extends TableView<ObservableList> {
             // User should be able to double click on the cell to display its full data.
             String s = item.toString().replace('\n', ' ').replace('\r', ' ').trim();
             if (s.length() >= 32) {
-                getStyleClass().add("abbrev");
-                setText(Utils.abbrev(s, 32));
+                getStyleClass().add("truncate");
+
+                setOnMouseClicked(event -> {
+                    if (event.getClickCount() == 2) {
+                        ColumnContentDialog d = new ColumnContentDialog(getTableColumn().getText(), item.toString());
+                        d.showAndWait();
+                    }
+                });
+
+                Tooltip t = new Tooltip("The contents of this cell are truncated.\nDouble click to see the full contents.");
+                t.setGraphic(Images.WARNING.imageView());
+                setTooltip(t);
+                setText(Utils.truncate(s, 32));
             }
+        }
+    }
+
+    /**
+     * This class is a simple dialog for displaying truncated data.
+     */
+    private class ColumnContentDialog extends Dialog {
+        public ColumnContentDialog(String columnName, String content) {
+            getScene().getStylesheets().add("/css/style.css");
+            setTitle("Contents of column " + columnName);
+            setResizable(true);
+            getDialogPane().getButtonTypes().add(ButtonType.OK);
+
+            TextArea derp = new TextArea(content);
+            derp.getStyleClass().add("query-editor");
+            derp.setEditable(false);
+
+            getDialogPane().setContent(derp);
         }
     }
 }

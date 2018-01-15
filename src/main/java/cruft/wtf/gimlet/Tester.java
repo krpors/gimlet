@@ -36,7 +36,7 @@ public class Tester extends Application {
         );
         ObservableList<ObservableList> rowData = FXCollections.observableArrayList();
         rowData.addAll(
-                FXCollections.observableArrayList(Arrays.asList("Kevin", "Pors", "Rulez")),
+                FXCollections.observableArrayList(Arrays.asList("Kevin", "Pors", "Rulez. This contains a very long string blah laslkdjasldjalskdjal alsd jalks j")),
                 FXCollections.observableArrayList(Arrays.asList(null, "Pors", "Rulez")),
                 FXCollections.observableArrayList(Arrays.asList("Kevin", null, "Rulez")),
                 FXCollections.observableArrayList(Arrays.asList("Kevin", "zzz", null))

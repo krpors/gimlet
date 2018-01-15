@@ -74,9 +74,11 @@ public class ConnectionTab extends Tab {
         FormPane topPaneWithLabels = new FormPane();
 
         Label lbl = new Label();
+        lbl.getStyleClass().add("value-label");
         lbl.textProperty().bindBidirectional(alias.nameProperty());
 
         Label derp = new Label();
+        derp.getStyleClass().add("value-label");
         derp.textProperty().bindBidirectional(alias.descriptionProperty());
         topPaneWithLabels.add("Name:", lbl);
         topPaneWithLabels.add("Description:", derp);

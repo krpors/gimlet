@@ -11,9 +11,12 @@
     -fx-font-family: "Monospace";
 }
 
+.value-label {
+    -fx-font-weight: bold;
+}
 
 .table-row-cell .null {
-   -fx-background-color: lightgray;
+    -fx-background-color: lightgray;
     -fx-alignment: center;
 }
 
@@ -22,12 +25,12 @@
     -fx-text-fill: black;
 }
 
-.table-row-cell .abbrev {
+.table-row-cell .truncate {
     -fx-background-color: #c9c984;
      -fx-text-fill: black;
 }
 
-.table-row-cell:selected .abbrev {
+.table-row-cell:selected .truncate {
     -fx-background-color: -fx-table-cell-border-color;
      -fx-text-fill: black;
 }
