@@ -10,7 +10,13 @@
 .table-view {
     -fx-font-family: "Monospace";
 }
-.table-view .null {
-    -fx-background-color: yellow;
+
+.null {
+    -fx-background-color: lightgray;
     -fx-alignment: center;
+}
+
+.table-row-cell:selected .null {
+    -fx-background-color: -fx-table-cell-border-color;
+    -fx-text-fill: black;
 }

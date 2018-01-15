@@ -56,6 +56,7 @@ public class SQLTab extends Tab {
         setGraphic(Images.CODE.imageView());
 
         txtQuery.setWrapText(false);
+        txtQuery.getStyleClass().add("query-editor");
         txtQuery.setPromptText("Enter any SQL query here");
         txtQuery.setOnKeyPressed(e -> {
             if (e.isControlDown() && e.getCode() == KeyCode.ENTER) {

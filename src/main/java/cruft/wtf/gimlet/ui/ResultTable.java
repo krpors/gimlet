@@ -9,7 +9,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.text.TextAlignment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,9 +29,11 @@ public class ResultTable extends TableView<ObservableList> {
 
     public ResultTable() {
         setEditable(false);
+        // FIXME: table menu button shows columns, but mnemonic is parsed (_). Disable that somehow.
         setTableMenuButtonVisible(true);
         setPlaceholder(new Label("Query is running..."));
         setColumnResizePolicy(UNCONSTRAINED_RESIZE_POLICY);
+
     }
 
     /**
@@ -80,6 +81,9 @@ public class ResultTable extends TableView<ObservableList> {
                 getStyleClass().add("null");
                 // set a string indicator. The text is centered via CSS.
                 setText("<NULL>");
+            } else {
+                // clear style, prevents possible display bug
+                getStyleClass().remove("null");
             }
         }
     }
