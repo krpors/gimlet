@@ -2,14 +2,21 @@ package cruft.wtf.gimlet.ui;
 
 import com.google.common.eventbus.Subscribe;
 import cruft.wtf.gimlet.GimletApp;
-import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.QueryExecuteEvent;
 import cruft.wtf.gimlet.event.QuerySavedEvent;
 import cruft.wtf.gimlet.jdbc.NamedParameterPreparedStatement;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.Tooltip;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.TextFieldTreeCell;
 
 import java.util.List;
@@ -46,7 +53,17 @@ public class QueryTree extends TreeView<Query> {
         setRoot(root);
 
         ContextMenu menu = new ContextMenu();
-        menu.getItems().add(new MenuItem("New root query", Images.FILE.imageView()));
+        MenuItem newRootQuery = new MenuItem("New root query", Images.PLUS.imageView());
+        newRootQuery.setOnAction(event -> {
+            QueryEditDialog qed = new QueryEditDialog();
+            qed.showAndWait();
+            if (qed.getResult() == ButtonType.OK) {
+                Query query = qed.getQuery();
+                getRoot().getChildren().add(new TreeItem<>(query));
+                queryList.add(query);
+            }
+        });
+        menu.getItems().add(newRootQuery);
         setContextMenu(menu);
     }
 
@@ -155,6 +172,7 @@ public class QueryTree extends TreeView<Query> {
                     queryList.remove(selectedItem.getValue());
                 } else {
                     parent.getSubQueries().remove(selectedItem.getValue());
+                    selectedItem.getParent().getChildren().remove(selectedItem);
                 }
                 refresh();
             }

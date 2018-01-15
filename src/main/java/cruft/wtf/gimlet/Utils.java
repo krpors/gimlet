@@ -2,7 +2,11 @@ package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.ui.Images;
 import javafx.geometry.Insets;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import org.slf4j.Logger;
@@ -72,6 +76,18 @@ public final class Utils {
      */
     public static void showError(String header, String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR, content, ButtonType.OK);
+        alert.setHeaderText(header);
+        alert.showAndWait();
+    }
+
+    /**
+     * Shows information.
+     *
+     * @param header  The header text.
+     * @param content The content text.
+     */
+    public static void showInfo(String header, String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION, content, ButtonType.OK);
         alert.setHeaderText(header);
         alert.showAndWait();
     }

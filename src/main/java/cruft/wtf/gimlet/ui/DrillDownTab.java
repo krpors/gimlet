@@ -135,7 +135,7 @@ public class DrillDownTab extends Tab {
             tab.setGraphic(Images.SPREADSHEET.imageView());
             table.setColumns(namedQueryTask.columnProperty());
 
-            if (namedQueryTask.getValue().size() <= 0) {
+            if (namedQueryTask.getRowCount() <= 0) {
                 table.setPlaceHolderNoResults();
             } else {
                 table.setItems(namedQueryTask.getValue());
