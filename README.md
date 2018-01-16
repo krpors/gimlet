@@ -2,17 +2,17 @@
 
 GImlet is an attempt to make a useful query application. Users can create their
 own predefined (parameterized) queries to run against a database. Following the
-result set of that query, you can 'drill down' further into the result set by
-effectively executing a sub-query.
+result set of that query, you can 'drill down' further into other tables by
+effectively executing a sub-query, based on the resultset of the previous query. 
+In a sense, it's a lazy query evaluator.
 
 ## But why not just use JOINs?
 
 Joins are useful of course, but fail to display data properly when you have to
 find specific information when there is more than 1 join. You could get double
 data and things. Also, when there are N:M relations between tables, a drill-down
-functionality might come in handy.
-
-This tool attempts to make that drill down configurable.
+functionality might come in handy. This tool attempts to make that drill down 
+configurable.
 
 ## Example
 
@@ -43,6 +43,18 @@ In Gimlet we can now define the following query tree:
    1. Select invoices for customer: `select * from INVOICE where CUSTOMER_ID = :ID`
 
 The `:ID` is crucial here: this is input from the column `ID` from the previous query.
+
+# TODOs
+
+A list of things to be done
+
+1. Fix the way the `QueryTree` and the backed `Query` object tree works.
+1. Re-use (make a reference to) a query structure so you can make sort of 
+duplicates, where you make a reference to another query structure for the
+subqueries.
+
+
+
 
 # Other things
 

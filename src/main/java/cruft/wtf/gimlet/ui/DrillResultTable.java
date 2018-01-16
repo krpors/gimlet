@@ -46,6 +46,7 @@ public class DrillResultTable extends ResultTable {
             // Create a context menu, containing the direct sub queries for the original query.
             for (Query subQuery : query.getSubQueries()) {
                 MenuItem item = new MenuItem(subQuery.getName());
+                item.setMnemonicParsing(false);
                 menu.getItems().add(item);
                 item.setOnAction(event -> {
                     executeDrillDown(subQuery);

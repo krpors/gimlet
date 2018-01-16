@@ -15,6 +15,15 @@
     -fx-font-weight: bold;
 }
 
+.table-column {
+    -fx-alignment: center-left;
+    -fx-font-size: 9pt;
+}
+
+.table-row-cell {
+    -fx-cell-size: 20px;
+}
+
 .table-row-cell .null {
     -fx-background-color: lightgray;
     -fx-alignment: center;
@@ -27,10 +36,10 @@
 
 .table-row-cell .truncate {
     -fx-background-color: #c9c984;
-     -fx-text-fill: black;
+    -fx-text-fill: black;
 }
 
 .table-row-cell:selected .truncate {
     -fx-background-color: -fx-table-cell-border-color;
-     -fx-text-fill: black;
+    -fx-text-fill: black;
 }

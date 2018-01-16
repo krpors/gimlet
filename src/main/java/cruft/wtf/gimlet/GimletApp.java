@@ -244,7 +244,7 @@ public class GimletApp extends Application {
         tabPane.getTabs().add(tabAlias);
 
         Tab tabQueries = new Tab("Queries", queryConfigurationTree);
-        tabQueries.setGraphic(Images.DASHBOARD.imageView());
+        tabQueries.setGraphic(Images.MAGNIFYING_GLASS.imageView());
         tabPane.getTabs().add(tabQueries);
 
         return tabPane;

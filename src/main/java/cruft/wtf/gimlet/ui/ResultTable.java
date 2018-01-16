@@ -61,12 +61,12 @@ public class ResultTable extends TableView<ObservableList> {
     }
 
     /**
-     * Cell for the ResultTable.
+     * Cell for the ResultTable. A Cell is reused to prevent lots of instantiation. See documentation of
+     * {@link javafx.scene.control.Cell} for more information.
      */
     private class Cell extends TextFieldTableCell<ObservableList, Object> {
 
         public Cell() {
-
         }
 
         @Override
@@ -77,9 +77,10 @@ public class ResultTable extends TableView<ObservableList> {
                 return;
             }
 
-            // clear style, prevents possible display bug?
+            // a Cell seems to be reused, so clear any state which may have been set.
             getStyleClass().remove("null");
             getStyleClass().remove("truncate");
+            setOnMouseClicked(null);
 
             // TODO: double click on cells view their full content in a text area
 

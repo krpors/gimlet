@@ -60,7 +60,7 @@ public class DrillDownTab extends Tab {
 
         setText("Drill down");
         setClosable(false);
-        setGraphic(Images.COG.imageView());
+        setGraphic(Images.MAGNIFYING_GLASS.imageView());
 
         contentPane = new StackPane();
         emptyPane = createEmptyPane();

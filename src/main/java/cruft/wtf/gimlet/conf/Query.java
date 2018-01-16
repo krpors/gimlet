@@ -79,6 +79,10 @@ public class Query {
         this.subQueries.setAll(subQueries);
     }
 
+    public Query getParentQuery() {
+        return parentQuery;
+    }
+
     protected void afterUnmarshal(Unmarshaller um, Object parent) {
         if (parent instanceof Query) {
             Query query = (Query) parent;
