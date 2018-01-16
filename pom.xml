@@ -28,20 +28,18 @@
                 <version>3.0.2</version>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
+                <artifactId>maven-assembly-plugin</artifactId>
                 <version>3.1.0</version>
-                <configuration>
-                    <!-- put your configurations here -->
-                </configuration>
                 <executions>
                     <execution>
                         <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/assembly/distribution.xml</descriptor>
+                    </descriptors>
+                </configuration>
             </plugin>
         </plugins>
     </build>
