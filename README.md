@@ -44,15 +44,37 @@ In Gimlet we can now define the following query tree:
 
 The `:ID` is crucial here: this is input from the column `ID` from the previous query.
 
-# TODOs
+# Compiling and packaging
 
-A list of things to be done
+Java 8 is required. Maven must be used to build the sources and optionally build a 
+distribution (work in progress):
 
-1. Fix the way the `QueryTree` and the backed `Query` object tree works.
+Just compile:
+
+    mvn clean install
+
+Create .tar.gz distribution:
+
+    mvn clean package assembly:single
+
+
+# TODOs and ideas
+
+A list of things to be done, or some ideas. Not in any particular order.
+
+1. Fix the way the `QueryTree` and the backed `Query` object tree works?
 1. Re-use (make a reference to) a query structure so you can make sort of 
 duplicates, where you make a reference to another query structure for the
 subqueries.
-
+1. Add some kind of list of known JDBC drivers + connection strings.
+1. Splash screen with some funky graphic.
+1. Help file/screen.
+1. New project.
+1. Save project as.
+1. Drag/drop queries to a new parent.
+1. Drag/drop (or reorder by button or context menu) of aliases.
+1. Query wizard or something: start by a root query, execute sample query, then hit next
+to configure the next query, until finished, then a query tree is a result.
 
 
 
