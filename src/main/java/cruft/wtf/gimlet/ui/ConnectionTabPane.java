@@ -3,6 +3,7 @@ package cruft.wtf.gimlet.ui;
 import com.google.common.eventbus.Subscribe;
 import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.event.ConnectEvent;
+import cruft.wtf.gimlet.event.FileOpenedEvent;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.Event;
@@ -57,6 +58,15 @@ public class ConnectionTabPane extends TabPane {
                 handler.handle(null);
             }
         });
+
+        getTabs().clear();
+    }
+
+    @SuppressWarnings("unused")
+    @Subscribe
+    public void onFileOpenedEvent(final FileOpenedEvent event) {
+        logger.debug("New file opened, closing all tabs");
+        closeAllTabs();
     }
 
     @SuppressWarnings("unused")

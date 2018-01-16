@@ -39,6 +39,8 @@ public class ConnectionTab extends Tab {
     public ConnectionTab(final Alias alias) throws SQLException {
         this.alias = alias;
 
+        EventDispatcher.getInstance().register(this);
+
         setGraphic(Images.BOLT.imageView());
 
         connection = DriverManager.getConnection(alias.getUrl(), alias.getUser(), alias.getPassword());
@@ -60,7 +62,6 @@ public class ConnectionTab extends Tab {
 
 
         setContent(createContent());
-        EventDispatcher.getInstance().register(this);
     }
 
     /**

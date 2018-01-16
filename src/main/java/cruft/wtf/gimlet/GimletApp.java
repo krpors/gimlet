@@ -202,6 +202,7 @@ public class GimletApp extends Application {
                     System.out.println("Writing fail0red");
                 }
             } else {
+
                 // TODO: pop up save-as?
             }
         });

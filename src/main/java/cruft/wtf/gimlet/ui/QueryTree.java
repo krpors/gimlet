@@ -29,7 +29,7 @@ public class QueryTree extends TreeView<Query> {
     /**
      * The original assigned query list.
      */
-    private ObservableList<Query> queryList;
+    private List<Query> queryList;
 
     public QueryTree() {
         EventDispatcher.getInstance().register(this);
@@ -40,9 +40,7 @@ public class QueryTree extends TreeView<Query> {
      *
      * @param queryList The list of queries.
      */
-    public void setQueryList(final ObservableList<Query> queryList) {
-        this.queryList = queryList;
-
+    public void setQueryList(final List<Query> queryList) {
         TreeItem<Query> root = new TreeItem<>();
 
         addQuery(root, queryList);
@@ -59,6 +57,7 @@ public class QueryTree extends TreeView<Query> {
             qed.showAndWait();
             if (qed.getResult() == ButtonType.OK) {
                 Query query = qed.getQuery();
+                // Add a TreeItem to the root, and to the root of the querylist.
                 getRoot().getChildren().add(new TreeItem<>(query));
                 queryList.add(query);
             }

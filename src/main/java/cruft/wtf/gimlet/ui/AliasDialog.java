@@ -6,20 +6,17 @@ import cruft.wtf.gimlet.conf.Alias;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.sql.Connection;
+import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Enumeration;
 
 /**
  * The dialog to add/edit an alias in. Probably refactor because the method I used (see {@link #applyTo(Alias)}
@@ -27,11 +24,11 @@ import java.sql.SQLException;
  */
 public class AliasDialog extends Stage {
 
-    private TextField     txtName;
-    private TextField     txtDescription;
-    private TextField     txtJdbcUrl;
-    private TextField     txtDriverClass;
-    private TextField     txtUsername;
+    private TextField txtName;
+    private TextField txtDescription;
+    private TextField txtJdbcUrl;
+    private ComboBox<String> comboDriverClass;
+    private TextField txtUsername;
     private PasswordField txtPassword;
 
     private Button btnOK;
@@ -81,9 +78,15 @@ public class AliasDialog extends Stage {
         txtJdbcUrl.setPromptText("JDBC URL, differs per driver");
         pane.add("JDBC URL:", txtJdbcUrl);
 
-        txtDriverClass = new TextField();
-        txtDriverClass.setPromptText("JDBC driver class, e.g. org.hsqldb.jdbc.JDBCDriver");
-        pane.add("JDBC driver:", txtDriverClass);
+
+        comboDriverClass= new ComboBox<>();
+        comboDriverClass.setEditable(true);
+        Enumeration<Driver> ez = DriverManager.getDrivers();
+        while (ez.hasMoreElements()) {
+            comboDriverClass.getItems().add(ez.nextElement().getClass().getName());
+        }
+
+        pane.add("JDBC driver:", comboDriverClass);
 
         txtUsername = new TextField();
         txtUsername.setPromptText("The username to authenticate with");
@@ -106,13 +109,13 @@ public class AliasDialog extends Stage {
         btnTestConnection = new Button("Test connection");
         btnTestConnection.setTooltip(new Tooltip("Tests the connection to the given JDBC URL"));
         btnTestConnection.setOnAction(e -> {
-            if (txtDriverClass.getText() == null || txtDriverClass.getText().isEmpty()) {
+            if (comboDriverClass.getValue() == null || comboDriverClass.getValue().isEmpty()) {
                 new Alert(Alert.AlertType.ERROR, "No driver class is given.", ButtonType.OK).showAndWait();
                 return;
             }
 
             try {
-                Class.forName(txtDriverClass.getText());
+                Class.forName(comboDriverClass.getValue());
                 Connection c = DriverManager.getConnection(txtJdbcUrl.getText(), txtUsername.getText(), txtPassword.getText());
                 c.close();
                 Alert alert = new Alert(Alert.AlertType.INFORMATION, "Press OK to continue.", ButtonType.OK);
@@ -128,7 +131,7 @@ public class AliasDialog extends Stage {
                 ex.printStackTrace();
                 Utils.showExceptionDialog(
                         "Could not instantiate driver.",
-                        String.format("Driver class not found: '%s'", txtDriverClass.getText()),
+                        String.format("Driver class not found: '%s'", comboDriverClass.getValue()),
                         ex);
             }
         });
@@ -154,7 +157,7 @@ public class AliasDialog extends Stage {
         txtName.setText(alias.getName());
         txtDescription.setText(alias.getDescription());
         txtJdbcUrl.setText(alias.getUrl());
-        txtDriverClass.setText(alias.getDriverClass());
+        comboDriverClass.setValue(alias.getDriverClass());
         txtUsername.setText(alias.getUser());
         txtPassword.setText(alias.getPassword());
     }
@@ -168,7 +171,7 @@ public class AliasDialog extends Stage {
         alias.nameProperty().set(txtName.getText());
         alias.descriptionProperty().set(txtDescription.getText());
         alias.urlProperty().set(txtJdbcUrl.getText());
-        alias.driverClassProperty().set(txtDriverClass.getText());
+        alias.driverClassProperty().set(comboDriverClass.getValue());
         alias.userProperty().set(txtUsername.getText());
         alias.passwordProperty().set(txtPassword.getText());
     }
@@ -184,7 +187,7 @@ public class AliasDialog extends Stage {
         alias.setName(txtName.getText());
         alias.setDescription(txtDescription.getText());
         alias.setUrl(txtJdbcUrl.getText());
-        alias.setDriverClass(txtDriverClass.getText());
+        alias.setDriverClass(comboDriverClass.getValue());
         alias.setUser(txtUsername.getText());
         alias.setPassword(txtPassword.getText());
         return alias;
