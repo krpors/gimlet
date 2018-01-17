@@ -6,14 +6,7 @@ import cruft.wtf.gimlet.conf.Alias;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ColorPicker;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.PasswordField;
-import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.paint.Color;
@@ -32,16 +25,26 @@ import java.util.Enumeration;
  */
 public class AliasDialog extends Stage {
 
-    private TextField        txtName;
-    private TextField        txtDescription;
-    private TextField        txtJdbcUrl;
+    private TextField txtName;
+
+    private TextField txtDescription;
+
+    private TextField txtJdbcUrl;
+
     private ComboBox<String> comboDriverClass;
-    private TextField        txtUsername;
-    private PasswordField    txtPassword;
-    private ColorPicker      colorPicker;
+
+    private TextField txtUsername;
+
+    private PasswordField txtPassword;
+
+    private ColorPicker colorPicker;
+
+    private CheckBox chkDisableColor;
 
     private Button btnOK;
+
     private Button btnCancel;
+
     private Button btnTestConnection;
 
     private ButtonType result;
@@ -87,7 +90,7 @@ public class AliasDialog extends Stage {
         txtJdbcUrl.setPromptText("JDBC URL, differs per driver");
         pane.add("JDBC URL:", txtJdbcUrl);
 
-        comboDriverClass= new ComboBox<>();
+        comboDriverClass = new ComboBox<>();
         comboDriverClass.setEditable(true);
         Enumeration<Driver> ez = DriverManager.getDrivers();
         while (ez.hasMoreElements()) {
@@ -105,7 +108,12 @@ public class AliasDialog extends Stage {
         pane.add("Password:", txtPassword);
 
         colorPicker = new ColorPicker();
-        pane.add("Tab coloring:", colorPicker);
+        chkDisableColor = new CheckBox("Disable color");
+
+        HBox box = new HBox(colorPicker, chkDisableColor);
+        box.setSpacing(5);
+        box.setAlignment(Pos.CENTER_LEFT);
+        pane.add("Tab coloring:", box);
 
         btnOK = new Button("OK");
         btnOK.setOnAction(event -> {
@@ -147,9 +155,9 @@ public class AliasDialog extends Stage {
             }
         });
 
-        HBox box = new HBox(5, btnOK, btnCancel, btnTestConnection);
-        box.setAlignment(Pos.CENTER_RIGHT);
-        pane.add(box, 1, pane.rowCounter++);
+        HBox btnBox = new HBox(5, btnOK, btnCancel, btnTestConnection);
+        btnBox.setAlignment(Pos.CENTER_RIGHT);
+        pane.add(btnBox, 1, pane.rowCounter++);
 
         return pane;
     }
@@ -171,12 +179,8 @@ public class AliasDialog extends Stage {
         comboDriverClass.setValue(alias.getDriverClass());
         txtUsername.setText(alias.getUser());
         txtPassword.setText(alias.getPassword());
-        Color color = null;
-        if (alias.getColor() != null) {
-            color = Color.valueOf(alias.getColor());
-        }
-
-        colorPicker.setValue(color);
+        colorPicker.setValue(Color.valueOf(alias.getColor()));
+        chkDisableColor.setSelected(alias.isColorDisabled());
     }
 
     /**
@@ -192,6 +196,7 @@ public class AliasDialog extends Stage {
         alias.userProperty().set(txtUsername.getText());
         alias.passwordProperty().set(txtPassword.getText());
         alias.colorProperty().set(Utils.toRgbCode(colorPicker.getValue()));
+        alias.colorDisabledProperty().set(chkDisableColor.isSelected());
     }
 
     /**
@@ -209,6 +214,7 @@ public class AliasDialog extends Stage {
         alias.setUser(txtUsername.getText());
         alias.setPassword(txtPassword.getText());
         alias.setColor(Utils.toRgbCode(colorPicker.getValue()));
+        alias.setColorDisabled(chkDisableColor.isSelected());
         return alias;
     }
 }

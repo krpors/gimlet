@@ -42,6 +42,18 @@ public class ConnectionTab extends Tab {
 
         setGraphic(Images.BOLT.imageView());
 
+        selectedProperty().addListener((observable, oldValue, newValue) -> {
+            if (alias.isColorDisabled()) {
+                return;
+            }
+
+            if (newValue) {
+                setStyle("-fx-background-color: linear-gradient(to top, " + alias.getColor() + ", -fx-background)");
+            } else {
+                setStyle(null);
+            }
+        });
+
         connection = DriverManager.getConnection(alias.getUrl(), alias.getUser(), alias.getPassword());
         logger.info("Connection successfully established for alias '{}'", alias.getName());
 

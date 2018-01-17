@@ -70,6 +70,9 @@ public final class Utils {
     }
 
     public static String toRgbCode(final Color color) {
+        if (color == null) {
+            return null;
+        }
         return String.format("#%02X%02X%02X",
                 (int) (color.getRed() * 255),
                 (int) (color.getGreen() * 255),

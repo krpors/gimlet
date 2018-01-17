@@ -1,5 +1,7 @@
 package cruft.wtf.gimlet.conf;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -13,17 +15,26 @@ import javax.xml.bind.annotation.XmlType;
         "driverClass",
         "user",
         "password",
-        "color"
+        "color",
+        "colorDisabled"
 })
 public class Alias {
 
-    private StringProperty name        = new SimpleStringProperty();
+    private StringProperty name = new SimpleStringProperty();
+
     private StringProperty description = new SimpleStringProperty();
-    private StringProperty url         = new SimpleStringProperty();
+
+    private StringProperty url = new SimpleStringProperty();
+
     private StringProperty driverClass = new SimpleStringProperty();
-    private StringProperty user        = new SimpleStringProperty();
-    private StringProperty password    = new SimpleStringProperty(); // TODO: byte array
-    private StringProperty color       = new SimpleStringProperty();
+
+    private StringProperty user = new SimpleStringProperty();
+
+    private StringProperty password = new SimpleStringProperty(); // TODO: byte array
+
+    private StringProperty color = new SimpleStringProperty("#c0c0c0");
+
+    private BooleanProperty colorDisabled = new SimpleBooleanProperty(true);
 
     @XmlElement(name = "name")
     public String getName() {
@@ -109,6 +120,18 @@ public class Alias {
 
     public void setColor(String color) {
         this.color.set(color);
+    }
+
+    public boolean isColorDisabled() {
+        return colorDisabled.get();
+    }
+
+    public BooleanProperty colorDisabledProperty() {
+        return colorDisabled;
+    }
+
+    public void setColorDisabled(boolean colorDisabled) {
+        this.colorDisabled.set(colorDisabled);
     }
 
     @Override
