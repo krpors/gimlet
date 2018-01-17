@@ -16,6 +16,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -119,7 +120,10 @@ public class GimletProject {
         return (GimletProject) unmarshaller.unmarshal(is);
     }
 
-    public static GimletProject read(final File file) throws JAXBException {
+    public static GimletProject read(final File file) throws JAXBException, FileNotFoundException {
+        if (!file.exists()) {
+            throw new FileNotFoundException("File not found: " + file);
+        }
         JAXBContext ctx = JAXBContext.newInstance(GimletProject.class);
         Unmarshaller unmarshaller = ctx.createUnmarshaller();
         GimletProject gp = (GimletProject) unmarshaller.unmarshal(file);

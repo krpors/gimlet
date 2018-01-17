@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Optional;
 
@@ -156,6 +157,33 @@ public class GimletApp extends Application {
         } catch (JAXBException e) {
             logger.error("Unable to unmarshal " + file, e);
             Utils.showError("Invalid Gimlet project file", "The specified file could not be read properly.");
+        } catch (FileNotFoundException e) {
+            logger.error("Could not load Gimlet project file", e);
+            Utils.showExceptionDialog("File could not be found", "The file could not be found.", e);
+            // TODO: fix that the application won't read aliases (which are null) at this point.
+        }
+    }
+
+    /**
+     * Shows a save-as dialog.
+     */
+    private void showSaveAsDialog() {
+        FileChooser chooser = new FileChooser();
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Gimlet project files", "*.gml"));
+        chooser.setTitle("Save Gimlet project as");
+        chooser.setInitialFileName(gimletProject.getName() + ".gml");
+        File file = chooser.showSaveDialog(GimletApp.mainWindow);
+        if (file == null) {
+            return;
+        }
+
+        try {
+            gimletProject.writeToFile(file);
+            gimletProject.setFile(file); // update the file reference so the editor is now opened in that one.
+            FileSavedEvent event = new FileSavedEvent(file);
+            EventDispatcher.getInstance().post(event);
+        } catch (JAXBException e) {
+            e.printStackTrace();
         }
     }
 
@@ -177,7 +205,7 @@ public class GimletApp extends Application {
         fileItemOpen.setOnAction(event -> {
             FileChooser chooser = new FileChooser();
             chooser.setTitle("Select Gimlet project file");
-            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Gimlet project files", "*.xml"));
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Gimlet project files", "*.gml"));
             File file = chooser.showOpenDialog(GimletApp.mainWindow);
             if (file == null) {
                 // user pressed cancel.
@@ -202,9 +230,13 @@ public class GimletApp extends Application {
                     Utils.showExceptionDialog("Failed to write to file", "Could not write to file.", e);
                 }
             } else {
-                // TODO: pop up save-as?
+                // no file to overwrite, so save project as ...
+                showSaveAsDialog();
             }
         });
+
+        MenuItem fileItemSaveAs = new MenuItem("Save as...");
+        fileItemSaveAs.setOnAction(event -> showSaveAsDialog());
 
         MenuItem fileItemExit = new MenuItem("Exit");
         fileItemExit.setAccelerator(KeyCombination.keyCombination("Ctrl+Q"));
@@ -214,6 +246,7 @@ public class GimletApp extends Application {
         menuFile.getItems().add(fileItemNew);
         menuFile.getItems().add(fileItemOpen);
         menuFile.getItems().add(fileItemSave);
+        menuFile.getItems().add(fileItemSaveAs);
         menuFile.getItems().add(new SeparatorMenuItem());
         menuFile.getItems().add(fileItemExit);
 

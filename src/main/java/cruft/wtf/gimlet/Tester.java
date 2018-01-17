@@ -25,7 +25,7 @@ public class Tester extends Application {
     private void createWithResultTable(BorderPane pane) {
         ResultTable rs = new ResultTable();
         List<Column> cols = Arrays.asList(
-                new Column(Types.CHAR, "FIRST"),
+                new Column(Types.CHAR, "FIRST_WITH_UNDERSCORE"),
                 new Column(Types.CHAR, "SECOND"),
                 new Column(Types.CHAR, "THIRD")
         );
@@ -65,7 +65,7 @@ public class Tester extends Application {
         primaryStage.setWidth(800);
         primaryStage.setHeight(600);
 
-        createWithConnectionTabPane(pane);
+        createWithResultTable(pane);
 
         // Show the stage after possibly reading and setting window properties.
         primaryStage.show();

@@ -75,7 +75,7 @@ subqueries.
 1. Drag/drop (or reorder by button or context menu) of aliases.
 1. Query wizard or something: start by a root query, execute sample query, then hit next
 to configure the next query, until finished, then a query tree is a result.
-1. Tab coloring so difference in environment can be made more explicit.
+1. ~~Tab coloring so difference in environment can be made more explicit.~~
 1. Ask for password checkbox.
 
 
