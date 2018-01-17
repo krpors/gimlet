@@ -38,7 +38,6 @@ public class ConnectionTab extends Tab {
 
     public ConnectionTab(final Alias alias) throws SQLException {
         this.alias = alias;
-
         EventDispatcher.getInstance().register(this);
 
         setGraphic(Images.BOLT.imageView());

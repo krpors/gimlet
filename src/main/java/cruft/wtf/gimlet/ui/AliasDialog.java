@@ -176,7 +176,7 @@ public class AliasDialog extends Stage {
             color = Color.valueOf(alias.getColor());
         }
 
-        colorPicker.getCustomColors().add(color);
+        colorPicker.setValue(color);
     }
 
     /**
@@ -191,7 +191,7 @@ public class AliasDialog extends Stage {
         alias.driverClassProperty().set(comboDriverClass.getValue());
         alias.userProperty().set(txtUsername.getText());
         alias.passwordProperty().set(txtPassword.getText());
-        alias.colorProperty().set("#ff00ff");
+        alias.colorProperty().set(Utils.toRgbCode(colorPicker.getValue()));
     }
 
     /**
@@ -208,6 +208,7 @@ public class AliasDialog extends Stage {
         alias.setDriverClass(comboDriverClass.getValue());
         alias.setUser(txtUsername.getText());
         alias.setPassword(txtPassword.getText());
+        alias.setColor(Utils.toRgbCode(colorPicker.getValue()));
         return alias;
     }
 }
