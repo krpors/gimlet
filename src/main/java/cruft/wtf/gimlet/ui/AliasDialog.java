@@ -6,9 +6,17 @@ import cruft.wtf.gimlet.conf.Alias;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
@@ -24,12 +32,13 @@ import java.util.Enumeration;
  */
 public class AliasDialog extends Stage {
 
-    private TextField txtName;
-    private TextField txtDescription;
-    private TextField txtJdbcUrl;
+    private TextField        txtName;
+    private TextField        txtDescription;
+    private TextField        txtJdbcUrl;
     private ComboBox<String> comboDriverClass;
-    private TextField txtUsername;
-    private PasswordField txtPassword;
+    private TextField        txtUsername;
+    private PasswordField    txtPassword;
+    private ColorPicker      colorPicker;
 
     private Button btnOK;
     private Button btnCancel;
@@ -78,7 +87,6 @@ public class AliasDialog extends Stage {
         txtJdbcUrl.setPromptText("JDBC URL, differs per driver");
         pane.add("JDBC URL:", txtJdbcUrl);
 
-
         comboDriverClass= new ComboBox<>();
         comboDriverClass.setEditable(true);
         Enumeration<Driver> ez = DriverManager.getDrivers();
@@ -95,6 +103,9 @@ public class AliasDialog extends Stage {
         txtPassword = new PasswordField();
         txtPassword.setPromptText("The password for the username");
         pane.add("Password:", txtPassword);
+
+        colorPicker = new ColorPicker();
+        pane.add("Tab coloring:", colorPicker);
 
         btnOK = new Button("OK");
         btnOK.setOnAction(event -> {
@@ -160,6 +171,12 @@ public class AliasDialog extends Stage {
         comboDriverClass.setValue(alias.getDriverClass());
         txtUsername.setText(alias.getUser());
         txtPassword.setText(alias.getPassword());
+        Color color = null;
+        if (alias.getColor() != null) {
+            color = Color.valueOf(alias.getColor());
+        }
+
+        colorPicker.getCustomColors().add(color);
     }
 
     /**
@@ -174,6 +191,7 @@ public class AliasDialog extends Stage {
         alias.driverClassProperty().set(comboDriverClass.getValue());
         alias.userProperty().set(txtUsername.getText());
         alias.passwordProperty().set(txtPassword.getText());
+        alias.colorProperty().set("#ff00ff");
     }
 
     /**

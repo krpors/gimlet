@@ -193,16 +193,15 @@ public class GimletApp extends Application {
         fileItemSave.setAccelerator(KeyCombination.keyCombination("Ctrl+S"));
         fileItemSave.setOnAction(event -> {
             if (gimletProject != null && gimletProject.getFile() != null) {
-                // Save in place.
-                System.out.println("Saving in place!");
+                logger.info("Writing project file to '{}'", gimletProject.getFile());
                 try {
                     gimletProject.writeToFile(gimletProject.getFile());
                     EventDispatcher.getInstance().post(new FileSavedEvent(gimletProject.getFile()));
                 } catch (JAXBException e) {
-                    System.out.println("Writing fail0red");
+                    logger.error("Failed to write to file '{}'", gimletProject.getFile());
+                    Utils.showExceptionDialog("Failed to write to file", "Could not write to file.", e);
                 }
             } else {
-
                 // TODO: pop up save-as?
             }
         });
