@@ -10,9 +10,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
-import java.io.PrintStream;
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.List;
 
 @XmlType(propOrder = {
@@ -32,6 +29,19 @@ public class Query {
     private SimpleListProperty<Query> subQueries = new SimpleListProperty<>(FXCollections.observableArrayList());
 
     private Query parentQuery;
+
+    public Query() {
+    }
+
+    public Query(final Query query) {
+        this.nameProperty().set(query.getName());
+        this.descriptionProperty().set(query.getDescription());
+        this.contentProperty().set(query.getContent());
+        for (Query q : query.getSubQueries()) {
+            Query copy = new Query(q);
+            this.addSubQuery(copy);
+        }
+    }
 
     public String getName() {
         return name.get();
@@ -67,6 +77,16 @@ public class Query {
 
     public void setDescription(String description) {
         this.description.set(description);
+    }
+
+    /**
+     * Adds a subquery to this query, and changes the parent immediately.
+     *
+     * @param query The query to add to this query.
+     */
+    public void addSubQuery(final Query query) {
+        query.parentQuery = this;
+        getSubQueries().add(query);
     }
 
     @XmlElementWrapper(name = "queries")
