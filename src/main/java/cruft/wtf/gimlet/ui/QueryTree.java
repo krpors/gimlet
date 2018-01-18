@@ -1,28 +1,16 @@
 package cruft.wtf.gimlet.ui;
 
-import com.google.common.eventbus.Subscribe;
 import cruft.wtf.gimlet.GimletApp;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.QueryExecuteEvent;
-import cruft.wtf.gimlet.event.QuerySavedEvent;
 import cruft.wtf.gimlet.jdbc.NamedParameterPreparedStatement;
-import javafx.collections.ObservableList;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.control.Tooltip;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeCell;
+import javafx.scene.input.ClipboardContent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.TransferMode;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TreeMap;
+import java.util.*;
 
 public class QueryTree extends TreeView<Query> {
 
@@ -30,6 +18,8 @@ public class QueryTree extends TreeView<Query> {
      * The original assigned query list.
      */
     private List<Query> queryList;
+
+    private TreeItem<Query> sourceDraggedItem;
 
     public QueryTree() {
         EventDispatcher.getInstance().register(this);
@@ -127,9 +117,28 @@ public class QueryTree extends TreeView<Query> {
     }
 
     /**
+     * Opens a dialog to add a new query, to be added under the {@code root}.
+     *
+     * @param root The root query.
+     */
+    public void openNewQueryDialog(final Query root) {
+        QueryEditDialog qed = new QueryEditDialog();
+        qed.showAndWait();
+        if (qed.getResult() == ButtonType.OK) {
+            Query theq = qed.getQuery();
+            root.getSubQueries().add(theq);
+
+            TreeItem<Query> selected = getSelectionModel().getSelectedItem();
+            selected.getChildren().add(new TreeItem<>(theq));
+            selected.setExpanded(true);
+            refresh();
+        }
+    }
+
+    /**
      * Opens the {@link QueryEditDialog} based on the current selected {@link Query} in the tree.
      */
-    private void openQueryEditDialog() {
+    private void openEditSelectedQueryDialog() {
         TreeItem<Query> selectedItem = getSelectionModel().getSelectedItem();
         if (selectedItem == null) {
             return;
@@ -143,6 +152,61 @@ public class QueryTree extends TreeView<Query> {
             refresh();
         }
     }
+
+    /**
+     * Moves a {@code source} as a child of {@code target}.
+     *
+     * @param source The source tree item
+     * @param target The new parent tree item where source must reside under.
+     */
+    private void moveTreeItem(final TreeItem<Query> source, final TreeItem<Query> target) {
+        TreeItem<Query> parentOfSource = source.getParent();
+
+        // remove the dragged item from the parent list ...
+        parentOfSource.getChildren().remove(source);
+        // .. and add the dragged item to the target cell as a child.
+        target.getChildren().add(source);
+
+        // We only updated the TreeView's TreeItems. Update the 'backing' query list too.
+        Query qParentOfSource = parentOfSource.getValue();
+        qParentOfSource.getSubQueries().remove(source.getValue());
+        target.getValue().getSubQueries().add(source.getValue());
+
+        // FIXME: there must be a better way to keep the backing tree of queries and the actual
+        // TreeItems in sync! I'm currently doing everything twice when it comes to moving, deleting
+        // etc.!
+    }
+
+    /**
+     * Checks if the given {@code possibleDescendant} is a descendant of the {@code ancestor}. If that's the case,
+     * you're not allowed to move a TreeItem under a new parent. Example:
+     * <pre>
+     *   Ancestor
+     *     └─ Child
+     *          └─ Grandchild
+     *               └─ Grand-grand child
+     * </pre>
+     * Moving {@code Grandchild} (+ {@code Grand-grand child}) under {@code Ancestor} is allowed. However,
+     * moving {@code Child} under {@code Grandchild} is not.
+     *
+     * @param ancestor           The ancestor to check all the descendants from.
+     * @param possibleDescendant The possible descendant to check.
+     * @return true if the possibleDescendant is indeed a descendant of the ancestor.
+     */
+    private boolean isDescendant(final TreeItem<Query> ancestor, final TreeItem<Query> possibleDescendant) {
+        Deque<TreeItem<Query>> deque = new ArrayDeque<>();
+        deque.push(ancestor);
+        while (!deque.isEmpty()) {
+            TreeItem<Query> next = deque.pop();
+            if (next.equals(possibleDescendant)) {
+                return true;
+            }
+            deque.addAll(next.getChildren());
+        }
+
+        return false;
+    }
+
 
     /**
      * Removes the selected query (and its children, ancestors and the whole shebang). This is done by updating the
@@ -178,34 +242,6 @@ public class QueryTree extends TreeView<Query> {
         });
     }
 
-    public void showQueryDialog(final Query root) {
-        QueryEditDialog qed = new QueryEditDialog();
-        qed.showAndWait();
-        if (qed.getResult() == ButtonType.OK) {
-            Query theq = qed.getQuery();
-            root.getSubQueries().add(theq);
-
-            TreeItem<Query> selected = getSelectionModel().getSelectedItem();
-            selected.getChildren().add(new TreeItem<>(theq));
-            selected.setExpanded(true);
-            refresh();
-        }
-    }
-
-
-    /**
-     * When a {@link Query} is saved through a {@link QueryEditDialog}, the {@link EventDispatcher} will notify this
-     * control that it happened. Since there's no bidirectional binding (we only want to save things to the Query once
-     * the user has pressed "OK"), we have to manually refresh the tree.
-     *
-     * @param event The event that the query has been saved.
-     */
-    @Subscribe
-    public void onQuerySaved(QuerySavedEvent event) {
-        // Refresh the tree ourselves. There's no bidirectional binding.
-        refresh();
-    }
-
     /**
      * Contains rendering logic for {@link Query} objects used throughout Gimlet.
      */
@@ -234,9 +270,9 @@ public class QueryTree extends TreeView<Query> {
             // of the editorTabViews's boolean value whether a tab is opened or not.
             menuItemExecute.disableProperty().bind(GimletApp.connectionTabPane.tabSelectedProperty().not());
 
-            menuItemNew.setOnAction(event -> showQueryDialog(getItem()));
+            menuItemNew.setOnAction(event -> openNewQueryDialog(getItem()));
             menuItemExecute.setOnAction(e -> executeSelectedQuery(getItem()));
-            editItem.setOnAction(e -> openQueryEditDialog());
+            editItem.setOnAction(e -> openEditSelectedQueryDialog());
             removeItem.setOnAction(e -> removeSelectedQuery());
         }
 
@@ -256,6 +292,82 @@ public class QueryTree extends TreeView<Query> {
 
             setText(item.getName());
             setTooltip(new Tooltip(item.getDescription()));
+
+            // DRAG AND DROP CODE
+
+            // ======================================================
+            // When dragging is detected, remember the selected item.
+            // ======================================================
+            setOnDragDetected(event -> {
+                QueryConfigurationTreeCell sourceCell = (QueryConfigurationTreeCell) event.getSource();
+                TreeItem<Query> sourceItem = sourceCell.getTreeItem();
+
+                if (sourceItem.getParent().getValue() == null) {
+                    return;
+                }
+
+                Dragboard db = startDragAndDrop(TransferMode.MOVE);
+                ClipboardContent clipboardContent = new ClipboardContent();
+                clipboardContent.putString("herro!");
+                // Note: we MUST set content or else the other events are not fired!
+                db.setContent(clipboardContent);
+                // The clipboard contents can be an object, but must be serializable.
+                // We can't afford that (since fields in Query contain unserializable field),
+                // therefore we assign a reference to he selected treeitem.
+                sourceDraggedItem = getTreeItem();
+            });
+
+            // ===================================================
+            // When a dragged item is entered on another target...
+            // ===================================================
+            setOnDragEntered(event -> {
+                QueryConfigurationTreeCell targetDropCell = (QueryConfigurationTreeCell) event.getSource();
+                TreeItem<Query> targetDropItem = targetDropCell.getTreeItem();
+
+                // If we dragged ourselves unto ourselves ... don't do anything!
+                if (sourceDraggedItem == targetDropItem) {
+                    return;
+                }
+
+                // Check if we can drop the source onto the target, and let the user
+                // somehow see that he's not allowed to. TODO: better graphics
+                if (!isDescendant(sourceDraggedItem, targetDropItem)) {
+                    targetDropCell.setStyle("-fx-background-color: green; -fx-text-fill: white");
+                } else {
+                    targetDropCell.setStyle("-fx-background-color: red; -fx-text-fill: white");
+                }
+            });
+
+            // ===================================================
+            // Accept transfer modes if moved over a node.
+            // ===================================================
+            setOnDragOver(event -> {
+                event.acceptTransferModes(TransferMode.MOVE);
+            });
+
+            // =================================================================
+            // When the mouse cursor is exited over a dragged cell, reset styles.
+            // =================================================================
+            setOnDragExited(event -> {
+                QueryConfigurationTreeCell targetDropCell = (QueryConfigurationTreeCell) event.getSource();
+                targetDropCell.setStyle(null);
+            });
+
+            // =========================================================
+            // When we actually dropped a dragged thing, initiate stuff.
+            // =========================================================
+            setOnDragDropped(event -> {
+                QueryConfigurationTreeCell cellTarget = (QueryConfigurationTreeCell) event.getGestureTarget();
+
+                if (!isDescendant(sourceDraggedItem, cellTarget.getTreeItem())) {
+                    // We're allowed to move it.
+                    moveTreeItem(sourceDraggedItem, cellTarget.getTreeItem());
+                    event.setDropCompleted(true);
+                } else {
+                    event.setDropCompleted(false);
+                }
+
+            });
         }
     }
 }

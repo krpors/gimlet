@@ -8,7 +8,11 @@ import javafx.collections.FXCollections;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import java.io.PrintStream;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
 
 @XmlType(propOrder = {
@@ -79,6 +83,7 @@ public class Query {
         this.subQueries.setAll(subQueries);
     }
 
+    @XmlTransient
     public Query getParentQuery() {
         return parentQuery;
     }

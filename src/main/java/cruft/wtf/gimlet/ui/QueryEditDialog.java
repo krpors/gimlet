@@ -2,7 +2,6 @@ package cruft.wtf.gimlet.ui;
 
 import cruft.wtf.gimlet.GimletApp;
 import cruft.wtf.gimlet.conf.Query;
-import cruft.wtf.gimlet.event.QuerySavedEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -27,7 +26,7 @@ public class QueryEditDialog extends Stage {
 
     private TextField txtName;
     private TextField txtDescription;
-    private TextArea  txtQuery;
+    private TextArea txtQuery;
 
     private ButtonType result;
     private Button btnOK;

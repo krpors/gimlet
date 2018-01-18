@@ -99,7 +99,7 @@ subqueries.
 1. Help file/screen.
 1. New project.
 1. Save project as.
-1. Drag/drop queries to a new parent.
+1. ~~Drag/drop queries to a new parent.~~
 1. Drag/drop (or reorder by button or context menu) of aliases.
 1. Query wizard or something: start by a root query, execute sample query, then hit next
 to configure the next query, until finished, then a query tree is a result.
