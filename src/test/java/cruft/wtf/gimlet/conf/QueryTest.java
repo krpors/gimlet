@@ -50,6 +50,9 @@ public class QueryTest {
         assertEquals("Child 1", query.getSubQueries().get(0).getName());
         assertEquals("Child 1 description", query.getSubQueries().get(0).getDescription());
         assertEquals(0, query.getSubQueries().get(1).getSubQueries().size());
+
+        assertEquals(query, query.getSubQueries().get(0).getParentQuery());
+        assertEquals(query, query.getSubQueries().get(1).getParentQuery());
     }
 
     private void assertDifference(final Query original, final Query copy) {
