@@ -9,15 +9,21 @@ import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
 import javafx.scene.input.TransferMode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 public class QueryTree extends TreeView<Query> {
 
+    private static Logger logger = LoggerFactory.getLogger(QueryTree.class);
+
     /**
      * The original assigned query list.
      */
     private List<Query> queryList;
+
+    private Query copiedQuery;
 
     private TreeItem<Query> sourceDraggedItem;
 
@@ -247,33 +253,45 @@ public class QueryTree extends TreeView<Query> {
      */
     private class QueryConfigurationTreeCell extends TextFieldTreeCell<Query> {
 
-        private MenuItem menuItemExecute;
-
         private ContextMenu menu = new ContextMenu();
 
         public QueryConfigurationTreeCell() {
-            menuItemExecute = new MenuItem("Run query", Images.MEDIA_PLAY.imageView());
-
-            MenuItem menuItemNew = new MenuItem("New query...", Images.PLUS.imageView());
-            MenuItem editItem = new MenuItem("Edit...", Images.PENCIL.imageView());
-            MenuItem removeItem = new MenuItem("Delete...", Images.TRASH.imageView());
+            MenuItem menuItemExecute = new MenuItem("Run", Images.MEDIA_PLAY.imageView());
+            MenuItem menuItemNew = new MenuItem("New...", Images.PLUS.imageView());
+            MenuItem menuItemCut = new MenuItem("Cut", Images.BOLT.imageView());
+            MenuItem menuItemCopy = new MenuItem("Copy", Images.BOLT.imageView());
+            MenuItem menuItemPaste = new MenuItem("Paste", Images.BOLT.imageView());
+            MenuItem menuItemDelete = new MenuItem("Delete...", Images.TRASH.imageView());
+            MenuItem menuItemProperties = new MenuItem("Properties...", Images.PENCIL.imageView());
 
             menu.getItems().addAll(
                     menuItemExecute,
                     new SeparatorMenuItem(),
                     menuItemNew,
-                    editItem,
                     new SeparatorMenuItem(),
-                    removeItem);
+                    menuItemCut,
+                    menuItemCopy,
+                    menuItemPaste,
+                    new SeparatorMenuItem(),
+                    menuItemDelete,
+                    new SeparatorMenuItem(),
+                    menuItemProperties);
 
             // Funky binding. We bind the 'disabled' property of the menu item, to the boolean property
             // of the editorTabViews's boolean value whether a tab is opened or not.
             menuItemExecute.disableProperty().bind(GimletApp.connectionTabPane.tabSelectedProperty().not());
 
-            menuItemNew.setOnAction(event -> openNewQueryDialog(getItem()));
             menuItemExecute.setOnAction(e -> executeSelectedQuery(getItem()));
-            editItem.setOnAction(e -> openEditSelectedQueryDialog());
-            removeItem.setOnAction(e -> removeSelectedQuery());
+            menuItemNew.setOnAction(event -> openNewQueryDialog(getItem()));
+            menuItemCut.setOnAction(event -> {
+                // todo;
+            });
+            menuItemCopy.setOnAction(event -> {
+                copiedQuery = new Query(getItem());
+                logger.info("Copied query '{}'", copiedQuery.getName());
+            });
+            menuItemDelete.setOnAction(e -> removeSelectedQuery());
+            menuItemProperties.setOnAction(e -> openEditSelectedQueryDialog());
         }
 
         @Override
