@@ -4,6 +4,8 @@ import cruft.wtf.gimlet.GimletApp;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.QueryExecuteEvent;
 import cruft.wtf.gimlet.jdbc.NamedParameterPreparedStatement;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.input.ClipboardContent;
@@ -23,7 +25,7 @@ public class QueryTree extends TreeView<Query> {
      */
     private List<Query> queryList;
 
-    private Query copiedQuery;
+    private ObjectProperty<Query> copiedQueryProperty = new SimpleObjectProperty<>();
 
     private TreeItem<Query> sourceDraggedItem;
 
@@ -63,10 +65,10 @@ public class QueryTree extends TreeView<Query> {
     }
 
     /**
-     * Adds queries recursively.
+     * Adds queries recursively to the tree from the given queryList.
      *
-     * @param root
-     * @param queryList
+     * @param root      The root to place the queryList under.
+     * @param queryList The queryList source.
      */
     private void addQuery(final TreeItem<Query> root, List<Query> queryList) {
         if (queryList == null || queryList.size() == 0) {
@@ -228,20 +230,26 @@ public class QueryTree extends TreeView<Query> {
             return;
         }
 
+        Query q = selectedItem.getValue();
+
         Alert alertConfirm = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure?");
         alertConfirm.setTitle("Confirm deletion");
-        alertConfirm.setHeaderText("Delete '" + selectedItem.getValue().getName() + "'?\nThis will delete all children nodes!");
+        alertConfirm.setHeaderText(String.format("Delete '%s'?\nThis will also delete %d descendants.", q.getName(), q.getDescendantCount()));
         ((Button) alertConfirm.getDialogPane().lookupButton(ButtonType.OK)).setDefaultButton(false);
         ((Button) alertConfirm.getDialogPane().lookupButton(ButtonType.CANCEL)).setDefaultButton(true);
         alertConfirm.showAndWait().ifPresent(buttonType -> {
             if (buttonType == ButtonType.OK) {
-                Query parent = selectedItem.getParent().getValue();
-                if (parent == null) {
-                    // the actual parent of parents. This TreeItem does not have a Query value.
+                TreeItem<Query> parent = selectedItem.getParent();
+                // Remove the selected tree item from the parent:
+                parent.getChildren().remove(selectedItem);
+
+                Query parentQuery = parent.getValue();
+                if (parentQuery == null) {
+                    // This is a rooted Query. This does not have a parent.
                     queryList.remove(selectedItem.getValue());
                 } else {
-                    parent.getSubQueries().remove(selectedItem.getValue());
-                    selectedItem.getParent().getChildren().remove(selectedItem);
+                    // There is a parent query.
+                    parent.getValue().getSubQueries().remove(selectedItem.getValue());
                 }
                 refresh();
             }
@@ -287,9 +295,20 @@ public class QueryTree extends TreeView<Query> {
                 // todo;
             });
             menuItemCopy.setOnAction(event -> {
-                copiedQuery = new Query(getItem());
-                logger.info("Copied query '{}'", copiedQuery.getName());
+                copiedQueryProperty.setValue(new Query(getItem()));
+                logger.info("Copied query '{}'", copiedQueryProperty.get().getName());
             });
+            menuItemPaste.setOnAction(event -> {
+                logger.debug("Pasting {} onto {}", copiedQueryProperty.get(), getSelectionModel().getSelectedItem().getValue());
+
+                // Add the copied query (+ it's copied descendants) to the selected tree item's query:
+                TreeItem<Query> selected = getSelectionModel().getSelectedItem();
+                selected.getValue().addSubQuery(copiedQueryProperty.get());
+                addQuery(selected, Arrays.asList(copiedQueryProperty.get()));
+
+                copiedQueryProperty.setValue(null);
+            });
+            menuItemPaste.disableProperty().bind(copiedQueryProperty.isNull());
             menuItemDelete.setOnAction(e -> removeSelectedQuery());
             menuItemProperties.setOnAction(e -> openEditSelectedQueryDialog());
         }

@@ -10,6 +10,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
 
 @XmlType(propOrder = {
@@ -33,6 +35,11 @@ public class Query {
     public Query() {
     }
 
+    /**
+     * Copy constructor to make a deep copy of the given query. The parent query is not copied and is set to null.
+     *
+     * @param query The query to make a copy of.
+     */
     public Query(final Query query) {
         this.nameProperty().set(query.getName());
         this.descriptionProperty().set(query.getDescription());
@@ -101,6 +108,24 @@ public class Query {
 
     public void setSubQueries(List<Query> subQueries) {
         this.subQueries.setAll(subQueries);
+    }
+
+    /**
+     * Gets the amount of descendants this query may have.
+     *
+     * @return The descendants count.
+     */
+    public int getDescendantCount() {
+        Deque<Query> q = new ArrayDeque<>();
+        q.add(this);
+        int counter = -1;
+        while (!q.isEmpty()) {
+            Query next = q.pop();
+            counter++;
+            next.getSubQueries().forEach(q::push);
+        }
+
+        return counter;
     }
 
     @XmlTransient
