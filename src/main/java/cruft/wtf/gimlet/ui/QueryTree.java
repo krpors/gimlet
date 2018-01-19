@@ -366,6 +366,14 @@ public class QueryTree extends TreeView<Query> {
                     return;
                 }
 
+                if (targetDropItem == null) {
+                    // if the target drop item is null (a tree cell without content),
+                    // don't bother displaying to the user that we can't drop here.
+                    // This prevents visual feedback when tree branches are collapsed
+                    // and the user drags onto empty nodes.
+                    return;
+                }
+
                 // Check if we can drop the source onto the target, and let the user
                 // somehow see that he's not allowed to. TODO: better graphics
                 if (!isDescendant(sourceDraggedItem, targetDropItem)) {
@@ -396,6 +404,12 @@ public class QueryTree extends TreeView<Query> {
             setOnDragDropped(event -> {
                 QueryConfigurationTreeCell cellTarget = (QueryConfigurationTreeCell) event.getGestureTarget();
 
+                if (cellTarget.getTreeItem() == null) {
+                    // We dropped on a TreeCell which does not contain an actual item.
+                    event.setDropCompleted(false);
+                    return;
+                }
+
                 if (!isDescendant(sourceDraggedItem, cellTarget.getTreeItem())) {
                     // We're allowed to move it.
                     moveTreeItem(sourceDraggedItem, cellTarget.getTreeItem());
@@ -403,7 +417,6 @@ public class QueryTree extends TreeView<Query> {
                 } else {
                     event.setDropCompleted(false);
                 }
-
             });
         }
     }
