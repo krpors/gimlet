@@ -10,6 +10,10 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.KeyCharacterCombination;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyCodeCombination;
+import javafx.scene.input.KeyCombination;
 
 import java.util.List;
 
@@ -73,7 +77,6 @@ public class AliasList extends ListView<Alias> {
     private class AliasListCell extends ListCell<Alias> {
 
         private ContextMenu contextMenu  = new ContextMenu();
-        private ContextMenu contextMenu2 = new ContextMenu();
 
         public AliasListCell() {
             // We require separate items for the two different context menu's.
@@ -81,30 +84,31 @@ public class AliasList extends ListView<Alias> {
             itemConnect.setGraphic(Images.ACCOUNT_LOGIN.imageView());
             MenuItem newItem = new MenuItem("New");
             newItem.setGraphic(Images.PLUS.imageView());
-            MenuItem editItem = new MenuItem("Edit");
-            editItem.setGraphic(Images.PENCIL.imageView());
             MenuItem duplicateItem = new MenuItem("Duplicate");
             MenuItem deleteItem = new MenuItem("Delete");
             deleteItem.setGraphic(Images.TRASH.imageView());
+            MenuItem editItem = new MenuItem("Properties...");
+            editItem.setGraphic(Images.PENCIL.imageView());
 
             itemConnect.setOnAction(e -> EventDispatcher.getInstance().post(new ConnectEvent(getItem())));
             newItem.setOnAction(e -> openNewDialog());
             editItem.setOnAction(e -> openEditDialog());
             deleteItem.setOnAction(e -> deleteSelectedAlias());
 
+            // When nothing is selected, disable these items. No use to edit a null item.
+            itemConnect.disableProperty().bind(selectedProperty().not());
+            duplicateItem.disableProperty().bind(selectedProperty().not());
+            deleteItem.disableProperty().bind(selectedProperty().not());
+            editItem.disableProperty().bind(selectedProperty().not());
+
             contextMenu.getItems().add(itemConnect);
             contextMenu.getItems().add(new SeparatorMenuItem());
             contextMenu.getItems().add(newItem);
-            contextMenu.getItems().add(editItem);
             contextMenu.getItems().add(duplicateItem);
             contextMenu.getItems().add(new SeparatorMenuItem());
             contextMenu.getItems().add(deleteItem);
-
-            // Second context menu. Pops up when right clicked on a null cell.
-            MenuItem newItem2 = new MenuItem("New");
-            newItem2.setGraphic(Images.PLUS.imageView());
-            newItem2.setOnAction(e -> openNewDialog());
-            contextMenu2.getItems().add(newItem2);
+            contextMenu.getItems().add(new SeparatorMenuItem());
+            contextMenu.getItems().add(editItem);
         }
 
 
@@ -112,18 +116,14 @@ public class AliasList extends ListView<Alias> {
         protected void updateItem(Alias item, boolean empty) {
             super.updateItem(item, empty);
 
+            if (!isEditing()) {
+                setContextMenu(contextMenu);
+            }
+
             if (empty || item == null) {
                 setText(null);
                 setTooltip(null);
-                // When we right-clicked on an empty cell, show a different context menu.
-                if (!isEditing()) {
-                    setContextMenu(contextMenu2);
-                }
                 return;
-            }
-
-            if (!isEditing()) {
-                setContextMenu(contextMenu);
             }
 
             setText(item.getName());
