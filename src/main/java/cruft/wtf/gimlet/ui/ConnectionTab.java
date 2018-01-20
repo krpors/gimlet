@@ -129,6 +129,9 @@ public class ConnectionTab extends Tab {
         // The visible part of this tab is now the normal border pane.
         contentPane.setVisible(true);
         lblConnectionTime.setVisible(false);
+
+        objectsTab.setConnection(connection);
+        objectsTab.doit();
     }
 
     public void setThrowable(final Throwable throwable) {
