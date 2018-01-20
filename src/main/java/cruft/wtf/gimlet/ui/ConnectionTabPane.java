@@ -1,7 +1,6 @@
 package cruft.wtf.gimlet.ui;
 
 import com.google.common.eventbus.Subscribe;
-import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.event.ConnectEvent;
 import cruft.wtf.gimlet.event.FileOpenedEvent;
 import cruft.wtf.gimlet.jdbc.ConnectTask;
@@ -15,7 +14,6 @@ import javafx.scene.input.KeyCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.SQLException;
 import java.util.Optional;
 
 /**
@@ -86,6 +84,7 @@ public class ConnectionTabPane extends TabPane {
         }
 
         connectTask.setOnScheduled(event -> {
+            tab.startTimer();
             getTabs().add(tab);
         });
 
@@ -95,7 +94,7 @@ public class ConnectionTabPane extends TabPane {
 
         connectTask.setOnFailed(event -> {
             logger.error("Failed to connect", connectTask.getException());
-            // TODO: display error on connection tab.
+            tab.setThrowable(connectTask.getException());
         });
 
         Thread t = new Thread(connectTask, "Gimlet connection thread");

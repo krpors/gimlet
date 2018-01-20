@@ -8,11 +8,14 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Timer;
@@ -47,7 +50,9 @@ public class ConnectionTab extends Tab {
     /**
      * Timer to run to give an indication how long we've been trying to connect.
      */
-    private Timer timer;
+    private Timer connectionTimer;
+
+    private TextArea txtError;
 
     /**
      * Stackpane, to either make the label visible (with connect time), or the actual content pane.
@@ -78,7 +83,7 @@ public class ConnectionTab extends Tab {
 
         setOnCloseRequest(e -> {
             EventDispatcher.getInstance().unregister(this);
-            timer.cancel();
+            connectionTimer.cancel();
             try {
                 // Close the connection when the tab is closed.
                 if (connection != null) {
@@ -92,15 +97,14 @@ public class ConnectionTab extends Tab {
         });
 
         setContent(createContent());
-        createAndRunTask();
     }
 
     /**
      * Creates and runs the counter task to see how long we've been trying to connect.
      */
-    private void createAndRunTask() {
-        timer = new Timer(false);
-        timer.scheduleAtFixedRate(new TimerTask() {
+    public void startTimer() {
+        connectionTimer = new Timer(false);
+        connectionTimer.scheduleAtFixedRate(new TimerTask() {
             private long seconds = 0;
 
             @Override
@@ -112,7 +116,7 @@ public class ConnectionTab extends Tab {
 
     /**
      * If we could connect via the {@link cruft.wtf.gimlet.jdbc.ConnectTask}, the connection will be assigned to this
-     * tab. The graphic is changed, the timer is cancelled, and the content pane is made visible.
+     * tab. The graphic is changed, the connectionTimer is cancelled, and the content pane is made visible.
      *
      * @param connection The connection to set.
      */
@@ -120,11 +124,35 @@ public class ConnectionTab extends Tab {
         logger.debug("Established connection in connection tab");
         this.connection = connection;
         setGraphic(Images.BOLT.imageView());
-        // Cancel the counter timer, we're done.
-        timer.cancel();
+        // Cancel the counter connectionTimer, we're done.
+        connectionTimer.cancel();
         // The visible part of this tab is now the normal border pane.
         contentPane.setVisible(true);
         lblConnectionTime.setVisible(false);
+    }
+
+    public void setThrowable(final Throwable throwable) {
+        connectionTimer.cancel();
+        stackPane.getChildren().forEach(node -> {
+            node.setVisible(false);
+        });
+
+        txtError.setVisible(true);
+
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        throwable.printStackTrace(pw);
+
+        StringBuilder err = new StringBuilder();
+        err
+                .append("Unable to connect\n\n")
+                .append("Username: ").append(alias.getUser()).append("\n")
+                .append("URL:      ").append(alias.getUrl()).append("\n")
+                .append("Driver:   ").append(alias.getDriverClass()).append("\n\n")
+                .append("Stacktrace:\n\n")
+                .append(sw.toString());
+
+        txtError.setText(err.toString());
     }
 
     /**
@@ -161,9 +189,17 @@ public class ConnectionTab extends Tab {
 
         contentPane.setCenter(tabPane);
 
+        // Create the textarea for errors.
+        txtError = new TextArea();
+        txtError.setEditable(false);
+        txtError.getStyleClass().add("textarea");
+        txtError.setVisible(false);
+
+        // Stackpane with stacked items which may or may not be visible.
         stackPane = new StackPane();
         stackPane.getChildren().add(lblConnectionTime);
         stackPane.getChildren().add(contentPane);
+        stackPane.getChildren().add(txtError);
         return stackPane;
     }
 
