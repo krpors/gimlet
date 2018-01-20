@@ -91,6 +91,7 @@ public class ConnectionTabPane extends TabPane {
         connectTask.setOnScheduled(event -> {
             tab.startTimer();
             getTabs().add(tab);
+            getSelectionModel().select(tab);
         });
 
         connectTask.setOnSucceeded(event -> {
@@ -98,7 +99,6 @@ public class ConnectionTabPane extends TabPane {
         });
 
         connectTask.setOnFailed(event -> {
-            logger.error("Failed to connect", connectTask.getException());
             tab.setThrowable(connectTask.getException());
         });
 

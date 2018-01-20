@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 
 public class ConnectTask extends Task<Connection> {
 
@@ -27,10 +28,20 @@ public class ConnectTask extends Task<Connection> {
 
     @Override
     protected Connection call() throws Exception {
-        Class.forName(alias.getDriverClass());
+        try {
+            Class.forName(alias.getDriverClass());
+        } catch (ClassNotFoundException ex) {
+            logger.error("JDCB driver class not found", ex);
+            throw ex;
+        }
 
-        Connection c = DriverManager.getConnection(alias.getUrl(), alias.getUser(), password);
-        logger.info("Connection successfully established to {}", alias.getUrl());
-        return c;
+        try {
+            Connection c = DriverManager.getConnection(alias.getUrl(), alias.getUser(), password);
+            logger.info("Connection successfully established to {}", alias.getUrl());
+            return c;
+        } catch (SQLException ex) {
+            logger.error("Could not establish JDBC connection for alias " +  alias.getName(), ex);
+            throw ex;
+        }
     }
 }
