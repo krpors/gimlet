@@ -18,6 +18,7 @@ public class ConnectTask extends Task<Connection> {
 
     public ConnectTask(final Alias aliasToConnectTo) {
         this.alias = aliasToConnectTo;
+        setPassword(aliasToConnectTo.getPassword());
     }
 
     public void setPassword(String password) {

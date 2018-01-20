@@ -80,7 +80,12 @@ public class ConnectionTabPane extends TabPane {
             TextInputDialog dlg = new TextInputDialog("");
             dlg.setHeaderText("Specify password for user '" + evt.getAlias().getUser() + "'");
             Optional<String> pwd = dlg.showAndWait();
-            pwd.ifPresent(connectTask::setPassword);
+            if (pwd.isPresent()) {
+                connectTask.setPassword(pwd.get());
+            } else {
+                // user pressed cancel.
+                return;
+            }
         }
 
         connectTask.setOnScheduled(event -> {
