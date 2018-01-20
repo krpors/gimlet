@@ -9,21 +9,27 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Enumeration;
+import java.util.Optional;
 
 /**
  * The dialog to add/edit an alias in. Probably refactor because the method I used (see {@link #applyTo(Alias)}
  * and {@link #setAliasContent(Alias)} is jus ugly as fuck.
  */
 public class AliasDialog extends Stage {
+
+    private static Logger logger = LoggerFactory.getLogger(AliasDialog.class);
 
     private TextField txtName;
 
@@ -36,6 +42,8 @@ public class AliasDialog extends Stage {
     private TextField txtUsername;
 
     private PasswordField txtPassword;
+
+    private CheckBox chkAskForPassword;
 
     private ColorPicker colorPicker;
 
@@ -105,7 +113,23 @@ public class AliasDialog extends Stage {
 
         txtPassword = new PasswordField();
         txtPassword.setPromptText("The password for the username");
-        pane.add("Password:", txtPassword);
+
+        chkAskForPassword = new CheckBox("Ask for password");
+        chkAskForPassword.setTooltip(new Tooltip("Explicitly ask for password when connecting."));
+
+        HBox pwdBox = new HBox(txtPassword, chkAskForPassword);
+        HBox.setHgrow(txtPassword, Priority.ALWAYS);
+        pwdBox.setSpacing(5);
+        pwdBox.setAlignment(Pos.CENTER_LEFT);
+        pane.add("Password:", pwdBox);
+
+        txtPassword.disableProperty().bind(chkAskForPassword.selectedProperty());
+
+        chkAskForPassword.setOnAction(event -> {
+            if (chkAskForPassword.isSelected()) {
+                txtPassword.setText("");
+            }
+        });
 
         colorPicker = new ColorPicker();
         chkDisableColor = new CheckBox("Disable color");
@@ -135,19 +159,31 @@ public class AliasDialog extends Stage {
 
             try {
                 Class.forName(comboDriverClass.getValue());
-                Connection c = DriverManager.getConnection(txtJdbcUrl.getText(), txtUsername.getText(), txtPassword.getText());
+
+                // TODO: password input dialog.
+                String password = txtPassword.getText();
+                if (chkAskForPassword.isSelected()) {
+                    TextInputDialog dlg = new TextInputDialog("");
+                    dlg.setHeaderText("Specify password for user '" + txtUsername.getText() + "'");
+                    Optional<String> pwd = dlg.showAndWait();
+                    if (pwd.isPresent()) {
+                        password = pwd.get();
+                    }
+                }
+
+                Connection c = DriverManager.getConnection(txtJdbcUrl.getText(), txtUsername.getText(), password);
                 c.close();
                 Alert alert = new Alert(Alert.AlertType.INFORMATION, "Press OK to continue.", ButtonType.OK);
                 alert.setHeaderText("Connection succeeded!");
                 alert.showAndWait();
             } catch (SQLException ex) {
-                ex.printStackTrace();
+                logger.error("Can't connect", ex);
                 Utils.showExceptionDialog(
                         "Connection test failed.",
                         String.format("Failed to connect to '%s'", txtJdbcUrl.getText()),
                         ex);
             } catch (ClassNotFoundException ex) {
-                ex.printStackTrace();
+                logger.error("Class not found", ex);
                 Utils.showExceptionDialog(
                         "Could not instantiate driver.",
                         String.format("Driver class not found: '%s'", comboDriverClass.getValue()),
@@ -181,6 +217,7 @@ public class AliasDialog extends Stage {
         txtPassword.setText(alias.getPassword());
         colorPicker.setValue(Color.valueOf(alias.getColor()));
         chkDisableColor.setSelected(alias.isColorDisabled());
+        chkAskForPassword.setSelected(alias.isAskForPassword());
     }
 
     /**
@@ -197,25 +234,8 @@ public class AliasDialog extends Stage {
         alias.passwordProperty().set(txtPassword.getText());
         alias.colorProperty().set(Utils.toRgbCode(colorPicker.getValue()));
         alias.colorDisabledProperty().set(chkDisableColor.isSelected());
+        alias.askForPasswordProperty().set(chkAskForPassword.isSelected());
     }
 
-    /**
-     * Creates a new {@link Alias} object from the input fields, and returns it. This can be used
-     * when the dialog is used to add a new alias instead of editing one.
-     *
-     * @return The Alias created.
-     */
-    public Alias createAlias() {
-        Alias alias = new Alias();
-        alias.setName(txtName.getText());
-        alias.setDescription(txtDescription.getText());
-        alias.setUrl(txtJdbcUrl.getText());
-        alias.setDriverClass(comboDriverClass.getValue());
-        alias.setUser(txtUsername.getText());
-        alias.setPassword(txtPassword.getText());
-        alias.setColor(Utils.toRgbCode(colorPicker.getValue()));
-        alias.setColorDisabled(chkDisableColor.isSelected());
-        return alias;
-    }
 }
 

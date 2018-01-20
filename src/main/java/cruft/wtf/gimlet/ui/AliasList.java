@@ -3,17 +3,7 @@ package cruft.wtf.gimlet.ui;
 import cruft.wtf.gimlet.conf.Alias;
 import cruft.wtf.gimlet.event.ConnectEvent;
 import javafx.collections.ObservableList;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.Tooltip;
-import javafx.scene.input.KeyCharacterCombination;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyCodeCombination;
-import javafx.scene.input.KeyCombination;
+import javafx.scene.control.*;
 
 import java.util.List;
 
@@ -45,8 +35,9 @@ public class AliasList extends ListView<Alias> {
         AliasDialog dialog = new AliasDialog();
         dialog.showAndWait();
         if (dialog.getResult() == ButtonType.OK) {
-            Alias a = dialog.createAlias();
-            getItems().add(a);
+            Alias alias = new Alias();
+            dialog.applyTo(alias);
+            getItems().add(alias);
         }
     }
 
@@ -76,7 +67,7 @@ public class AliasList extends ListView<Alias> {
      */
     private class AliasListCell extends ListCell<Alias> {
 
-        private ContextMenu contextMenu  = new ContextMenu();
+        private ContextMenu contextMenu = new ContextMenu();
 
         public AliasListCell() {
             // We require separate items for the two different context menu's.

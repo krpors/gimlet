@@ -15,6 +15,7 @@ import javax.xml.bind.annotation.XmlType;
         "driverClass",
         "user",
         "password",
+        "askForPassword",
         "color",
         "colorDisabled"
 })
@@ -35,6 +36,8 @@ public class Alias {
     private StringProperty color = new SimpleStringProperty("#c0c0c0");
 
     private BooleanProperty colorDisabled = new SimpleBooleanProperty(true);
+
+    private BooleanProperty askForPassword = new SimpleBooleanProperty(false);
 
     @XmlElement(name = "name")
     public String getName() {
@@ -132,6 +135,18 @@ public class Alias {
 
     public void setColorDisabled(boolean colorDisabled) {
         this.colorDisabled.set(colorDisabled);
+    }
+
+    public boolean isAskForPassword() {
+        return askForPassword.get();
+    }
+
+    public BooleanProperty askForPasswordProperty() {
+        return askForPassword;
+    }
+
+    public void setAskForPassword(boolean askForPassword) {
+        this.askForPassword.set(askForPassword);
     }
 
     @Override
