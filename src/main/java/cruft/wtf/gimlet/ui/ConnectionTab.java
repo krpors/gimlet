@@ -3,17 +3,20 @@ package cruft.wtf.gimlet.ui;
 import com.google.common.eventbus.Subscribe;
 import cruft.wtf.gimlet.conf.Alias;
 import cruft.wtf.gimlet.event.QueryExecuteEvent;
+import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * This tab is added to the parent tab pane when an SQL connection is established via de Alias thing on the left hand
@@ -36,11 +39,28 @@ public class ConnectionTab extends Tab {
 
     private DrillDownTab drillDownTab;
 
-    public ConnectionTab(final Alias alias) throws SQLException {
-        this.alias = alias;
-        EventDispatcher.getInstance().register(this);
+    /**
+     * The content pane with the tabs etc for the connection.
+     */
+    private BorderPane contentPane;
 
-        setGraphic(Images.BOLT.imageView());
+    /**
+     * Timer to run to give an indication how long we've been trying to connect.
+     */
+    private Timer timer;
+
+    /**
+     * Stackpane, to either make the label visible (with connect time), or the actual content pane.
+     */
+    private StackPane stackPane;
+
+    private Label lblConnectionTime;
+
+    public ConnectionTab(final Alias alias) {
+        this.alias = alias;
+        setGraphic(Images.CLOCK.imageView());
+
+        EventDispatcher.getInstance().register(this);
 
         selectedProperty().addListener((observable, oldValue, newValue) -> {
             if (alias.isColorDisabled()) {
@@ -54,25 +74,57 @@ public class ConnectionTab extends Tab {
             }
         });
 
-        connection = DriverManager.getConnection(alias.getUrl(), alias.getUser(), alias.getPassword());
-        logger.info("Connection successfully established for alias '{}'", alias.getName());
-
-        setText(String.format("%s (%s) as %s", alias.getName(), connection.getCatalog(), alias.getUser()));
+        setText(String.format("%s as %s", alias.getName(), alias.getUser()));
 
         setOnCloseRequest(e -> {
+            EventDispatcher.getInstance().unregister(this);
+            timer.cancel();
             try {
                 // Close the connection when the tab is closed.
-                connection.close();
-                logger.info("Closed connection for '{}'", alias.getName());
-                EventDispatcher.getInstance().unregister(this);
-                logger.debug("Unregistered {} from Event Dispatcher", this);
+                if (connection != null) {
+                    connection.close();
+                    logger.info("Closed connection for '{}'", alias.getName());
+                    logger.debug("Unregistered {} from Event Dispatcher", this);
+                }
             } catch (SQLException e1) {
                 logger.error("Could not close connection ourselves", e1);
             }
         });
 
-
         setContent(createContent());
+        createAndRunTask();
+    }
+
+    /**
+     * Creates and runs the counter task to see how long we've been trying to connect.
+     */
+    private void createAndRunTask() {
+        timer = new Timer(false);
+        timer.scheduleAtFixedRate(new TimerTask() {
+            private long seconds = 0;
+
+            @Override
+            public void run() {
+                Platform.runLater(() -> lblConnectionTime.setText("Trying to connect for " + seconds++ + " seconds"));
+            }
+        }, 0, 1000);
+    }
+
+    /**
+     * If we could connect via the {@link cruft.wtf.gimlet.jdbc.ConnectTask}, the connection will be assigned to this
+     * tab. The graphic is changed, the timer is cancelled, and the content pane is made visible.
+     *
+     * @param connection The connection to set.
+     */
+    public void setConnection(final Connection connection) {
+        logger.debug("Established connection in connection tab");
+        this.connection = connection;
+        setGraphic(Images.BOLT.imageView());
+        // Cancel the counter timer, we're done.
+        timer.cancel();
+        // The visible part of this tab is now the normal border pane.
+        contentPane.setVisible(true);
+        lblConnectionTime.setVisible(false);
     }
 
     /**
@@ -81,7 +133,11 @@ public class ConnectionTab extends Tab {
      * @return The node containing the contents.
      */
     private Node createContent() {
-        BorderPane pane = new BorderPane();
+        lblConnectionTime = new Label();
+
+        // The content pane (which holds everything) is initially invisible when we're trying to connect.
+        contentPane = new BorderPane();
+        contentPane.setVisible(false);
 
         FormPane topPaneWithLabels = new FormPane();
 
@@ -95,7 +151,7 @@ public class ConnectionTab extends Tab {
         topPaneWithLabels.add("Name:", lbl);
         topPaneWithLabels.add("Description:", derp);
 
-        pane.setTop(topPaneWithLabels);
+        contentPane.setTop(topPaneWithLabels);
 
         objectsTab = new ObjectsTab();
         sqlTab = new SQLTab(this);
@@ -103,9 +159,12 @@ public class ConnectionTab extends Tab {
 
         tabPane = new TabPane(objectsTab, sqlTab, drillDownTab);
 
-        pane.setCenter(tabPane);
+        contentPane.setCenter(tabPane);
 
-        return pane;
+        stackPane = new StackPane();
+        stackPane.getChildren().add(lblConnectionTime);
+        stackPane.getChildren().add(contentPane);
+        return stackPane;
     }
 
     /**

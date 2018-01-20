@@ -30,11 +30,6 @@ public class SQLTab extends Tab {
      */
     private final ConnectionTab connectionTab;
 
-    /**
-     * The SQL connection. Delegate from the connection tab.
-     */
-    private Connection connection;
-
     private CheckBox checkMaxRows;
 
     private TextArea txtQuery = new TextArea("select * from feniks_owner.energy_label where id = 111111");
@@ -49,7 +44,6 @@ public class SQLTab extends Tab {
      */
     public SQLTab(final ConnectionTab connectionTab) {
         this.connectionTab = connectionTab;
-        this.connection = connectionTab.getConnection();
 
         setText("SQL");
         setClosable(false);
@@ -100,7 +94,7 @@ public class SQLTab extends Tab {
         if (checkMaxRows.isSelected()) {
             maxRows = 100;
         }
-        SimpleQueryTask task = new SimpleQueryTask(this.connection, query, maxRows);
+        SimpleQueryTask task = new SimpleQueryTask(this.connectionTab.getConnection(), query, maxRows);
 
         // Task is scheduled and about to start. Add the tab and select it.
         task.setOnScheduled(event -> {

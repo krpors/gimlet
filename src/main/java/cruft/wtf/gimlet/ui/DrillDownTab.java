@@ -34,11 +34,6 @@ public class DrillDownTab extends Tab {
      */
     private final ConnectionTab connectionTab;
 
-    /**
-     * The SQL connection. Delegate from the connection tab.
-     */
-    private Connection connection;
-
     private TabPane tabPaneResultSets;
 
     /**
@@ -56,7 +51,6 @@ public class DrillDownTab extends Tab {
      */
     public DrillDownTab(final ConnectionTab connectionTab) {
         this.connectionTab = connectionTab;
-        this.connection = connectionTab.getConnection();
 
         setText("Drill down");
         setClosable(false);
@@ -94,7 +88,11 @@ public class DrillDownTab extends Tab {
         tab.setContent(table);
         tab.setGraphic(Images.CLOCK.imageView());
 
-        NamedQueryTask namedQueryTask = new NamedQueryTask(this.connection, query.getContent(), 100, columnMap);
+        NamedQueryTask namedQueryTask = new NamedQueryTask(
+                this.connectionTab.getConnection(),
+                query.getContent(),
+                100,
+                columnMap);
 
         namedQueryTask.setOnScheduled(event -> {
             tabPaneResultSets.getTabs().add(tab);

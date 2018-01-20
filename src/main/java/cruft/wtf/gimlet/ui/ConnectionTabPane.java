@@ -4,16 +4,19 @@ import com.google.common.eventbus.Subscribe;
 import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.event.ConnectEvent;
 import cruft.wtf.gimlet.event.FileOpenedEvent;
+import cruft.wtf.gimlet.jdbc.ConnectTask;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.KeyCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
+import java.util.Optional;
 
 /**
  * The {@link ConnectionTabPane} contains the tabs associated with {@link ConnectionTab}s.
@@ -72,17 +75,31 @@ public class ConnectionTabPane extends TabPane {
     @SuppressWarnings("unused")
     @Subscribe
     public void onConnectEvent(final ConnectEvent evt) {
-        ConnectionTab tab = null;
-        try {
-            tab = new ConnectionTab(evt.getAlias());
-            getTabs().add(tab);
-            getSelectionModel().select(tab);
-        } catch (SQLException e) {
-            logger.error("Could not connect to '{}'", evt.getAlias().getName());
-            Utils.showExceptionDialog(
-                    String.format("Unable to connect to '%s'", evt.getAlias().getName()),
-                    String.format("Failed to connect to '%s'", evt.getAlias().getUrl()),
-                    e);
+        ConnectionTab tab = new ConnectionTab(evt.getAlias());
+
+        ConnectTask connectTask = new ConnectTask(evt.getAlias());
+        if (evt.getAlias().isAskForPassword()) {
+            TextInputDialog dlg = new TextInputDialog("");
+            dlg.setHeaderText("Specify password for user '" + evt.getAlias().getUser() + "'");
+            Optional<String> pwd = dlg.showAndWait();
+            pwd.ifPresent(connectTask::setPassword);
         }
+
+        connectTask.setOnScheduled(event -> {
+            getTabs().add(tab);
+        });
+
+        connectTask.setOnSucceeded(event -> {
+            tab.setConnection(connectTask.getValue());
+        });
+
+        connectTask.setOnFailed(event -> {
+            logger.error("Failed to connect", connectTask.getException());
+            // TODO: display error on connection tab.
+        });
+
+        Thread t = new Thread(connectTask, "Gimlet connection thread");
+        t.start();
+
     }
 }
