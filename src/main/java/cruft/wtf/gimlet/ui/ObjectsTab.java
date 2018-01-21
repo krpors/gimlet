@@ -28,10 +28,15 @@ public class ObjectsTab extends Tab {
             DatabaseMetaData dmd = connection.getMetaData();
             ResultSet tables = dmd.getTables(null, null, "%", null);
             while (tables.next()) {
-                if (tables.getString(4).equals("TABLE")) {
-                    System.out.println(tables.getString(3));
+                if (tables.getString("TABLE_TYPE").equals("TABLE")) {
+                    System.out.println(tables.getString("TABLE_NAME"));
+                    ResultSet  cols = dmd.getColumns(null, null, tables.getString("TABLE_NAME"), "%");
+                    while(cols.next()) {
+                        System.out.println("\t" + cols.getString("COLUMN_NAME") + " -> " + cols.getString("DATA_TYPE"));
+                    }
                 }
             }
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
