@@ -6,6 +6,7 @@ import cruft.wtf.gimlet.event.FileSavedEvent;
 import cruft.wtf.gimlet.ui.*;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Accordion;
@@ -61,19 +62,9 @@ public class GimletApp extends Application {
     private SplitPane centerPane;
 
     /**
-     * The list containing the aliases.
-     */
-    private AliasList aliasList;
-
-    /**
-     * A TreeView containing the queries.
-     */
-    private QueryTree queryConfigurationTree;
-
-    /**
      * The global reference to the opened GimletProject. Can be null if none is opened... Is there a better way?
      */
-    public static GimletProject gimletProject;
+    private GimletProject gimletProject;
 
     /**
      * Entry point.
@@ -115,15 +106,17 @@ public class GimletApp extends Application {
 
             Optional<String> lastProject = c.getStringProperty(Configuration.Key.LAST_PROJECT_FILE);
             if (lastProject.isPresent()) {
-                GimletApp.gimletProject = GimletProject.read(new File(lastProject.get()));
+                logger.info("Loading up most recent project file '{}'", lastProject.get());
+                loadProjectFile(new File(lastProject.get()));
+                this.gimletProject = GimletProject.read(new File(lastProject.get()));
             } else {
                 // TODO: instead of setting an empty project, display a screen saying CLICK NEW!!!
-                GimletApp.gimletProject = new GimletProject();
+                this.gimletProject = new GimletProject();
             }
         } catch (JAXBException e) {
             e.printStackTrace();
             Utils.showError("Unable to read the most recent project file.", "The file seems to be corrupted. Please inspect!");
-            GimletApp.gimletProject = new GimletProject();
+            this.gimletProject = new GimletProject();
         } catch (IOException e) {
             Utils.showExceptionDialog(
                     "Error!",
@@ -139,16 +132,16 @@ public class GimletApp extends Application {
      */
     public void loadProjectFile(final File file) {
         try {
-            GimletApp.gimletProject = GimletProject.read(file);
+            this.gimletProject = GimletProject.read(file);
 
             Configuration.getInstance().setProperty(Configuration.Key.LAST_PROJECT_FILE, file.getAbsolutePath());
 
-            aliasList.setAliases(GimletApp.gimletProject.aliasesProperty());
-            queryConfigurationTree.setQueryList(GimletApp.gimletProject.queriesProperty());
-
             // Notify our listeners.
             logger.info("Succesfully read '{}'", file);
-            EventDispatcher.getInstance().post(new FileOpenedEvent(file, GimletApp.gimletProject));
+
+            this.primaryStage.titleProperty().bind(Bindings.concat("Gimlet - ", this.gimletProject.nameProperty()));
+
+            EventDispatcher.getInstance().post(new FileOpenedEvent(file, this.gimletProject));
         } catch (JAXBException e) {
             logger.error("Unable to unmarshal " + file, e);
             Utils.showError("Invalid Gimlet project file", "The specified file could not be read properly.");
@@ -258,24 +251,7 @@ public class GimletApp extends Application {
      * @return The {@link Node} containing the left portion of the application.
      */
     private Node createLeft() {
-        TabPane tabPane = new TabPane();
-        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
-
-        aliasList = new AliasList();
-        aliasList.setAliases(gimletProject.aliasesProperty());
-
-        queryConfigurationTree = new QueryTree();
-        queryConfigurationTree.setQueryList(gimletProject.queriesProperty());
-
-        Tab tabAlias = new Tab("Aliases", aliasList);
-        tabAlias.setGraphic(Images.BOLT.imageView());
-        tabPane.getTabs().add(tabAlias);
-
-        Tab tabQueries = new Tab("Queries", queryConfigurationTree);
-        tabQueries.setGraphic(Images.MAGNIFYING_GLASS.imageView());
-        tabPane.getTabs().add(tabQueries);
-
-        return tabPane;
+        return new LeftPane();
     }
 
     /**
@@ -313,7 +289,6 @@ public class GimletApp extends Application {
         this.primaryStage = primaryStage;
 
         addShutdownHook();
-        initConfigs();
 
         BorderPane pane = new BorderPane();
 
@@ -336,6 +311,9 @@ public class GimletApp extends Application {
         primaryStage.setScene(scene);
         primaryStage.setWidth(800);
         primaryStage.setHeight(600);
+
+        // After all controls are created, read the configuration file (if any).
+        initConfigs();
 
         // Read some properties from the user configuration file.
         Configuration config = Configuration.getInstance();
