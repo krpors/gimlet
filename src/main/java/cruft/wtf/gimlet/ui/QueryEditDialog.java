@@ -94,7 +94,6 @@ public class QueryEditDialog extends Stage {
 
         txtQuery = new TextArea();
         txtQuery.getStyleClass().add("query-editor");
-        // TODO: monospaced font for query
         formPane.add("Query:", txtQuery);
 
         btnOK = new Button("OK");

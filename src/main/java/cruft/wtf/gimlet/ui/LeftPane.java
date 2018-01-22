@@ -11,7 +11,7 @@ public class LeftPane extends BorderPane {
     private QueryTree queryTree = new QueryTree();
 
     private TextField txtName = new TextField();
-    private TextField txtDescription = new TextField();
+    private TextArea txtDescription = new TextArea();
 
     private TabPane tabPane;
 
@@ -27,10 +27,12 @@ public class LeftPane extends BorderPane {
         FormPane formPane = new FormPane();
         formPane.add("Name:", txtName);
         formPane.add("Description:", txtDescription);
+        txtDescription.setPrefRowCount(3);
 
         TitledPane titledPane = new TitledPane("Project properties", formPane);
         titledPane.setAnimated(false);
-        titledPane.setCollapsible(false);
+        titledPane.setExpanded(false);
+
         setTop(titledPane);
     }
 

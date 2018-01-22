@@ -131,7 +131,7 @@ public class ConnectionTab extends Tab {
         lblConnectionTime.setVisible(false);
 
         objectsTab.setConnection(connection);
-        objectsTab.doit();
+//        objectsTab.doit();
     }
 
     public void setThrowable(final Throwable throwable) {
