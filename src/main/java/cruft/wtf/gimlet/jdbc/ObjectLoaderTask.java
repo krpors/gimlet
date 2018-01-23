@@ -7,6 +7,8 @@ import javafx.beans.property.StringProperty;
 import javafx.concurrent.Task;
 import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -17,6 +19,8 @@ import java.sql.SQLException;
  * This task is responsible for finding all database objects given a connection.
  */
 public class ObjectLoaderTask extends Task<Void> {
+
+    private static Logger logger = LoggerFactory.getLogger(ObjectLoaderTask.class);
 
     /**
      * The TreeView to add items to.
@@ -68,16 +72,18 @@ public class ObjectLoaderTask extends Task<Void> {
     @Override
     protected Void call() throws Exception {
         TreeItem<DatabaseObject> root = new TreeItem<>(new DatabaseObject(DatabaseObject.ROOT, "Tables"));
-
-        Platform.runLater(() -> treeView.setRoot(root));
+        root.setExpanded(true);
 
         findSchemas(root);
+
+        Platform.runLater(() -> treeView.setRoot(root));
 
         return null;
     }
 
     private void findSchemas(final TreeItem<DatabaseObject> root) throws SQLException {
         DatabaseMetaData dmd = connection.getMetaData();
+        logger.debug("Getting database metadata to determine schemas");
         ResultSet rs = dmd.getSchemas();
         while (rs.next()) {
             if (isCancelled()) {
@@ -86,15 +92,12 @@ public class ObjectLoaderTask extends Task<Void> {
 
             String schema = rs.getString("TABLE_SCHEM");
             loadingSchemaProperty.set("Loading schema " + schema);
+            logger.debug("  Found schema '{}'", schema);
 
             TreeItem<DatabaseObject> item = new TreeItem<>(new DatabaseObject(DatabaseObject.SCHEMA, schema));
-            Platform.runLater(() -> root.getChildren().add(item));
+            root.getChildren().add(item);
 
             findTables(item, schema);
-            if (item.getChildren().size() == 0) {
-                // remove empty schemas
-                root.getChildren().remove(item);
-            }
         }
 
         rs.close();
@@ -112,30 +115,13 @@ public class ObjectLoaderTask extends Task<Void> {
             if ("TABLE".equals(tableType)) {
                 String tableName = tables.getString("TABLE_NAME");
                 loadingTableProperty.set("Loading table " + tableName);
+                logger.debug("    Found table '{}'", tableName);
 
                 TreeItem<DatabaseObject> treeItemTable = new TreeItem<>(new DatabaseObject(DatabaseObject.TABLE, tableName));
-                Platform.runLater(() -> root.getChildren().add(treeItemTable));
-                // findColumns(treeItemTable, tableName);
+                root.getChildren().add(treeItemTable);
             }
         }
 
         tables.close();
-    }
-
-    private void findColumns(final TreeItem<DatabaseObject> root, String tableName) throws SQLException {
-        DatabaseMetaData dmd = connection.getMetaData();
-        ResultSet cols = dmd.getColumns(null, null, tableName, "%");
-
-        while (cols.next()) {
-            if (isCancelled()) {
-                break;
-            }
-
-            String colname = cols.getString("COLUMN_NAME");
-            TreeItem<DatabaseObject> col = new TreeItem<>(new DatabaseObject(DatabaseObject.COLUMN, colname));
-            Platform.runLater(() -> root.getChildren().add(col));
-        }
-
-        cols.close();
     }
 }

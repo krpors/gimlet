@@ -3,11 +3,7 @@ package cruft.wtf.gimlet;
 import cruft.wtf.gimlet.conf.GimletProject;
 import cruft.wtf.gimlet.event.FileOpenedEvent;
 import cruft.wtf.gimlet.event.FileSavedEvent;
-import cruft.wtf.gimlet.ui.ConnectionTabPane;
-import cruft.wtf.gimlet.ui.EventDispatcher;
-import cruft.wtf.gimlet.ui.Images;
-import cruft.wtf.gimlet.ui.LeftPane;
-import cruft.wtf.gimlet.ui.StatusBar;
+import cruft.wtf.gimlet.ui.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -19,6 +15,8 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TitledPane;
 import javafx.scene.input.KeyCombination;
@@ -110,10 +108,15 @@ public class GimletApp extends Application {
             if (lastProject.isPresent()) {
                 logger.info("Loading up most recent project file '{}'", lastProject.get());
                 loadProjectFile(new File(lastProject.get()));
+                this.gimletProject = GimletProject.read(new File(lastProject.get()));
             } else {
                 // TODO: instead of setting an empty project, display a screen saying CLICK NEW!!!
                 this.gimletProject = new GimletProject();
             }
+        } catch (JAXBException e) {
+            e.printStackTrace();
+            Utils.showError("Unable to read the most recent project file.", "The file seems to be corrupted. Please inspect!");
+            this.gimletProject = new GimletProject();
         } catch (IOException e) {
             Utils.showExceptionDialog(
                     "Error!",
@@ -134,13 +137,10 @@ public class GimletApp extends Application {
             Configuration.getInstance().setProperty(Configuration.Key.LAST_PROJECT_FILE, file.getAbsolutePath());
 
             // Notify our listeners.
+            // Notify our listeners.
             logger.info("Succesfully read '{}'", file);
 
             this.primaryStage.titleProperty().bind(Bindings.concat("Gimlet - ", this.gimletProject.nameProperty()));
-
-            this.gimletProject.nameProperty().addListener((observable, oldValue, newValue) -> {
-                System.out.println("Changed to " + newValue);
-            });
 
             EventDispatcher.getInstance().post(new FileOpenedEvent(file, this.gimletProject));
         } catch (JAXBException e) {
@@ -210,7 +210,7 @@ public class GimletApp extends Application {
         fileItemSave.setAccelerator(KeyCombination.keyCombination("Ctrl+S"));
         fileItemSave.setOnAction(event -> {
             if (gimletProject != null && gimletProject.getFile() != null) {
-                logger.info("Writing project '{}' to '{}'", gimletProject.getName(), gimletProject.getFile());
+                logger.info("Writing project file to '{}'", gimletProject.getFile());
                 try {
                     gimletProject.writeToFile(gimletProject.getFile());
                     EventDispatcher.getInstance().post(new FileSavedEvent(gimletProject.getFile()));

@@ -2,6 +2,7 @@ package cruft.wtf.gimlet.ui;
 
 import cruft.wtf.gimlet.Column;
 import cruft.wtf.gimlet.jdbc.ObjectLoaderTask;
+import cruft.wtf.gimlet.jdbc.SqlType;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -103,6 +104,10 @@ public class ObjectsTab extends Tab {
         // When selecting a TABLE display something.
         // TODO: this is not done in a task on the background, and may therefore hang the
         objectTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
+            if (newValue == null) {
+                return;
+            }
+
             table.getColumns().clear();
             table.getItems().clear();
 
@@ -115,9 +120,11 @@ public class ObjectsTab extends Tab {
                     ResultSet rs = dmd.getColumns(null, parent.getName(), obj.getName(), "%");
                     List<Column> col = new ArrayList<>();
                     col.add(new Column(0, "Column name"));
-                    col.add(new Column(0, "Column type"));
-                    col.add(new Column(0, "Type name"));
+                    col.add(new Column(0, "Data type name (Java)"));
+                    col.add(new Column(0, "Type name (DS dependent)"));
+                    col.add(new Column(0, "Column size"));
                     col.add(new Column(0, "Nullable"));
+                    col.add(new Column(0, "Remarks"));
                     table.setColumns(col);
 
                     ObservableList<ObservableList> derp = FXCollections.observableArrayList();
@@ -125,9 +132,11 @@ public class ObjectsTab extends Tab {
                     while(rs.next()) {
                         ObservableList row = FXCollections.observableArrayList();
                         row.add(rs.getString("COLUMN_NAME"));
+                        row.add(SqlType.getType(rs.getInt("DATA_TYPE")));
                         row.add(rs.getString("TYPE_NAME"));
-                        row.add(rs.getString("DATA_TYPE"));
-                        row.add(rs.getString("NULLABLE"));
+                        row.add(rs.getInt("COLUMN_SIZE"));
+                        row.add(rs.getInt("NULLABLE") != 0);
+                        row.add(rs.getString("REMARKS"));
                         derp.add(row);
                     }
 

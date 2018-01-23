@@ -6,6 +6,7 @@ import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.jdbc.SimpleQueryTask;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
+import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import org.slf4j.Logger;
@@ -73,14 +74,14 @@ public class ResultTable extends TableView<ObservableList> {
         public void updateItem(Object item, boolean empty) {
             super.updateItem(item, empty);
 
-            if (empty) {
-                return;
-            }
-
             // a Cell seems to be reused, so clear any state which may have been set.
             getStyleClass().remove("null");
             getStyleClass().remove("truncate");
             setOnMouseClicked(null);
+
+            if (empty) {
+                return;
+            }
 
             // TODO: double click on cells view their full content in a text area
 
@@ -124,6 +125,7 @@ public class ResultTable extends TableView<ObservableList> {
             getDialogPane().getButtonTypes().add(ButtonType.OK);
 
             TextArea derp = new TextArea(content);
+            derp.setPadding(new Insets(5));
             derp.getStyleClass().add("query-editor");
             derp.setEditable(false);
 
