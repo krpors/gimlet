@@ -31,6 +31,7 @@ public enum Images {
     MEDIA_PLAY("/icons/media-play-2x.png"),
     MINUS("/icons/minus-2x.png"),
     PENCIL("/icons/pencil-2x.png"),
+    PERSON("/icons/person-2x.png"),
     PLUS("/icons/plus-2x.png"),
     POWER_STANDBY("/icons/power-standby-2x.png"),
     PULSE("/icons/pulse-2x.png"),

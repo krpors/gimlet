@@ -12,10 +12,14 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 
 public class ObjectsTab extends Tab {
+
+    private static Logger logger = LoggerFactory.getLogger(ObjectsTab.class);
 
     private Connection connection;
 
@@ -33,16 +37,9 @@ public class ObjectsTab extends Tab {
 
     private ObjectLoaderTask taskLoadObjects;
 
-    private EventHandler<ActionEvent> cancel = event -> {
-        System.out.println("cancel!");
-        taskLoadObjects.cancel();
-    };
+    private EventHandler<ActionEvent> handlerCancel;
 
-    private EventHandler<ActionEvent> handler = event -> {
-        populateTree();
-        btnLoadObjects.setText("Cancel");
-        btnLoadObjects.setOnAction(cancel);
-    };
+    private EventHandler<ActionEvent> handlerLoad;
 
     public ObjectsTab() {
         setText("Database Objects");
@@ -60,7 +57,22 @@ public class ObjectsTab extends Tab {
         box.setAlignment(Pos.CENTER);
         bar.setVisible(false);
 
-        btnLoadObjects.setOnAction(handler);
+        // Initialize some actions for swapping loading/cancelling.
+        handlerCancel = event -> {
+            taskLoadObjects.cancel();
+            btnLoadObjects.setText("Load database objects");
+            btnLoadObjects.setOnAction(handlerLoad);
+            lblLoadingSchema.setText("");
+            lblLoadingTable.setText("");
+        };
+
+        handlerLoad = event -> {
+            populateTree();
+            btnLoadObjects.setText("Cancel loading");
+            btnLoadObjects.setOnAction(handlerCancel);
+        };
+
+        btnLoadObjects.setOnAction(handlerLoad);
 
         stackPane.getChildren().add(box);
         stackPane.getChildren().add(objectTree);
@@ -87,12 +99,19 @@ public class ObjectsTab extends Tab {
         });
 
         taskLoadObjects.setOnSucceeded(event -> {
+            logger.debug("Task succeeded");
             stackPane.getChildren().forEach(node -> node.setVisible(false));
             objectTree.setVisible(true);
         });
 
         taskLoadObjects.setOnCancelled(event -> {
-            lblLoadingSchema.setText("Loading cancelled.");
+            logger.debug("Task cancelled");
+            btnLoadObjects.setOnAction(handlerLoad);
+        });
+
+
+        taskLoadObjects.setOnFailed(event -> {
+            logger.error("Task failed", taskLoadObjects.getException());
         });
 
         Thread t = new Thread(taskLoadObjects);

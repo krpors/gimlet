@@ -1,5 +1,6 @@
 package cruft.wtf.gimlet.jdbc;
 
+import cruft.wtf.gimlet.ui.Images;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -66,7 +67,7 @@ public class ObjectLoaderTask extends Task<Void> {
      */
     @Override
     protected Void call() throws Exception {
-        TreeItem<String> root = new TreeItem<>("ROOT!");
+        TreeItem<String> root = new TreeItem<>("Tables", Images.FOLDER.imageView());
 
         long start = System.currentTimeMillis();
         Platform.runLater(() -> treeView.setRoot(root));
@@ -87,7 +88,7 @@ public class ObjectLoaderTask extends Task<Void> {
             String schema = rs.getString("TABLE_SCHEM");
             loadingSchemaProperty.set("Loading schema " + schema);
 
-            TreeItem<String> item = new TreeItem<>(schema);
+            TreeItem<String> item = new TreeItem<>(schema, Images.PERSON.imageView());
             Platform.runLater(() -> root.getChildren().add(item));
 
             findTables(item, schema);
@@ -96,6 +97,8 @@ public class ObjectLoaderTask extends Task<Void> {
                 root.getChildren().remove(item);
             }
         }
+
+        rs.close();
     }
 
     private void findTables(final TreeItem<String> root, String schemaName) throws SQLException {
@@ -111,11 +114,13 @@ public class ObjectLoaderTask extends Task<Void> {
                 String tableName = tables.getString("TABLE_NAME");
                 loadingTableProperty.set("Loading table " + tableName);
 
-                TreeItem<String> treeItemTable = new TreeItem<>(tableName);
+                TreeItem<String> treeItemTable = new TreeItem<>(tableName, Images.SPREADSHEET.imageView());
                 Platform.runLater(() -> root.getChildren().add(treeItemTable));
                 findColumns(treeItemTable, tableName);
             }
         }
+
+        tables.close();
     }
 
     private void findColumns(final TreeItem<String> root, String tableName) throws SQLException {
@@ -128,9 +133,10 @@ public class ObjectLoaderTask extends Task<Void> {
             }
 
             String colname = cols.getString("COLUMN_NAME");
-            TreeItem<String> col = new TreeItem<>(colname);
+            TreeItem<String> col = new TreeItem<>(colname, Images.MINUS.imageView());
             Platform.runLater(() -> root.getChildren().add(col));
-
         }
+
+        cols.close();
     }
 }
