@@ -1,6 +1,6 @@
 package cruft.wtf.gimlet.jdbc;
 
-import cruft.wtf.gimlet.ui.Images;
+import cruft.wtf.gimlet.ui.DatabaseObject;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
@@ -21,7 +21,7 @@ public class ObjectLoaderTask extends Task<Void> {
     /**
      * The TreeView to add items to.
      */
-    private TreeView<String> treeView;
+    private TreeView<DatabaseObject> treeView;
 
     /**
      * The connection to use. Must be open, and non-null.
@@ -38,9 +38,9 @@ public class ObjectLoaderTask extends Task<Void> {
      */
     private StringProperty loadingTableProperty = new SimpleStringProperty("");
 
-    public ObjectLoaderTask(TreeView<String> treeView, Connection connection) {
+    public ObjectLoaderTask(TreeView<DatabaseObject> tree, Connection connection) {
         this.connection = connection;
-        this.treeView = treeView;
+        this.treeView = tree;
     }
 
     public String getLoadingSchemaProperty() {
@@ -67,17 +67,16 @@ public class ObjectLoaderTask extends Task<Void> {
      */
     @Override
     protected Void call() throws Exception {
-        TreeItem<String> root = new TreeItem<>("Tables", Images.FOLDER.imageView());
+        TreeItem<DatabaseObject> root = new TreeItem<>(new DatabaseObject(DatabaseObject.ROOT, "Tables"));
 
-        long start = System.currentTimeMillis();
         Platform.runLater(() -> treeView.setRoot(root));
 
         findSchemas(root);
-        System.out.println("End: " + (System.currentTimeMillis() - start));
+
         return null;
     }
 
-    private void findSchemas(final TreeItem<String> root) throws SQLException {
+    private void findSchemas(final TreeItem<DatabaseObject> root) throws SQLException {
         DatabaseMetaData dmd = connection.getMetaData();
         ResultSet rs = dmd.getSchemas();
         while (rs.next()) {
@@ -88,7 +87,7 @@ public class ObjectLoaderTask extends Task<Void> {
             String schema = rs.getString("TABLE_SCHEM");
             loadingSchemaProperty.set("Loading schema " + schema);
 
-            TreeItem<String> item = new TreeItem<>(schema, Images.PERSON.imageView());
+            TreeItem<DatabaseObject> item = new TreeItem<>(new DatabaseObject(DatabaseObject.SCHEMA, schema));
             Platform.runLater(() -> root.getChildren().add(item));
 
             findTables(item, schema);
@@ -101,7 +100,7 @@ public class ObjectLoaderTask extends Task<Void> {
         rs.close();
     }
 
-    private void findTables(final TreeItem<String> root, String schemaName) throws SQLException {
+    private void findTables(final TreeItem<DatabaseObject> root, String schemaName) throws SQLException {
         DatabaseMetaData dmd = connection.getMetaData();
         ResultSet tables = dmd.getTables(null, schemaName, "%", null);
         while (tables.next()) {
@@ -114,16 +113,16 @@ public class ObjectLoaderTask extends Task<Void> {
                 String tableName = tables.getString("TABLE_NAME");
                 loadingTableProperty.set("Loading table " + tableName);
 
-                TreeItem<String> treeItemTable = new TreeItem<>(tableName, Images.SPREADSHEET.imageView());
+                TreeItem<DatabaseObject> treeItemTable = new TreeItem<>(new DatabaseObject(DatabaseObject.TABLE, tableName));
                 Platform.runLater(() -> root.getChildren().add(treeItemTable));
-                findColumns(treeItemTable, tableName);
+                // findColumns(treeItemTable, tableName);
             }
         }
 
         tables.close();
     }
 
-    private void findColumns(final TreeItem<String> root, String tableName) throws SQLException {
+    private void findColumns(final TreeItem<DatabaseObject> root, String tableName) throws SQLException {
         DatabaseMetaData dmd = connection.getMetaData();
         ResultSet cols = dmd.getColumns(null, null, tableName, "%");
 
@@ -133,7 +132,7 @@ public class ObjectLoaderTask extends Task<Void> {
             }
 
             String colname = cols.getString("COLUMN_NAME");
-            TreeItem<String> col = new TreeItem<>(colname, Images.MINUS.imageView());
+            TreeItem<DatabaseObject> col = new TreeItem<>(new DatabaseObject(DatabaseObject.COLUMN, colname));
             Platform.runLater(() -> root.getChildren().add(col));
         }
 
