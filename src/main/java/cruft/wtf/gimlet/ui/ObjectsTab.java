@@ -228,6 +228,7 @@ public class ObjectsTab extends Tab {
         });
 
         Thread t = new Thread(taskLoadObjects);
+        t.setDaemon(true);
         t.start();
     }
 

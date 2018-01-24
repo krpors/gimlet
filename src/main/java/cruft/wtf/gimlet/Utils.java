@@ -3,6 +3,7 @@ package cruft.wtf.gimlet;
 import cruft.wtf.gimlet.ui.Images;
 import javafx.geometry.Insets;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
@@ -18,6 +19,7 @@ import java.io.StringWriter;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Optional;
 
 /**
  * Utility class with static methods.
@@ -101,6 +103,22 @@ public final class Utils {
         Alert alert = new Alert(Alert.AlertType.INFORMATION, content, ButtonType.OK);
         alert.setHeaderText(header);
         alert.showAndWait();
+    }
+
+    /**
+     * Shows a confirmation dialog.
+     * @param header
+     * @param title
+     * @param content
+     * @return
+     */
+    public static Optional<ButtonType> showConfirm(String header, String title, String content) {
+        Alert alertConfirm = new Alert(Alert.AlertType.CONFIRMATION, content);
+        alertConfirm.setTitle(title);
+        alertConfirm.setHeaderText(header);
+        ((Button) alertConfirm.getDialogPane().lookupButton(ButtonType.OK)).setDefaultButton(false);
+        ((Button) alertConfirm.getDialogPane().lookupButton(ButtonType.CANCEL)).setDefaultButton(true);
+        return alertConfirm.showAndWait();
     }
 
     /**

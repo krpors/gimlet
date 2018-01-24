@@ -1,3 +1,12 @@
+.root {
+/*
+    -fx-font-size: 26pt;
+    -fx-base: rgb(132, 145, 47);
+    -fx-background: rgb(225, 228, 203);
+*/
+}
+
+
 .textarea {
     -fx-font-family: "Monospace";
     -fx-text-fill: red;
@@ -17,12 +26,12 @@
 
 .table-column {
     -fx-alignment: center-left;
-    -fx-font-size: 9pt;
+    /*-fx-font-size: smaller;*/
 }
-
+/*
 .table-row-cell {
     -fx-cell-size: 20px;
-}
+}*/
 
 .table-row-cell .null {
     -fx-background-color: lightgray;

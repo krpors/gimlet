@@ -104,6 +104,7 @@ public class ConnectionTabPane extends TabPane {
         });
 
         Thread t = new Thread(connectTask, "Gimlet connection thread");
+        t.setDaemon(true);
         t.start();
 
     }

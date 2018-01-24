@@ -1,15 +1,22 @@
 package cruft.wtf.gimlet.ui;
 
+import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.conf.Alias;
 import cruft.wtf.gimlet.event.ConnectEvent;
 import javafx.collections.ObservableList;
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.Tooltip;
 
-import java.util.List;
+import java.util.Optional;
 
 public class AliasList extends ListView<Alias> {
 
-    private List<Alias> aliasList;
+    private ObservableList<Alias> aliasList;
 
     public AliasList() {
         setCellFactory(param -> new AliasListCell());
@@ -49,8 +56,13 @@ public class AliasList extends ListView<Alias> {
         if (selected == null) {
             return;
         }
-
-        getItems().remove(selected);
+        Optional<ButtonType> bt = Utils.showConfirm(String.format("Delete '%s'?", selected.getName()), "Confirm deletion", "Ble");
+        bt.ifPresent(buttonType -> {
+            if (buttonType == ButtonType.OK) {
+                aliasList.remove(selected);
+                getItems().remove(selected);
+            }
+        });
     }
 
     /**
@@ -59,6 +71,7 @@ public class AliasList extends ListView<Alias> {
      * @param list
      */
     public void setAliases(final ObservableList<Alias> list) {
+        this.aliasList = list;
         setItems(list);
     }
 
