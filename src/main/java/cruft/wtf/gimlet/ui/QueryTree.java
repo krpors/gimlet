@@ -39,6 +39,8 @@ public class QueryTree extends TreeView<Query> {
      * @param queryList The list of queries.
      */
     public void setQueryList(final List<Query> queryList) {
+        this.queryList = queryList;
+
         TreeItem<Query> root = new TreeItem<>();
 
         addQuery(root, queryList);
@@ -339,7 +341,8 @@ public class QueryTree extends TreeView<Query> {
                 QueryConfigurationTreeCell sourceCell = (QueryConfigurationTreeCell) event.getSource();
                 TreeItem<Query> sourceItem = sourceCell.getTreeItem();
 
-                if (sourceItem.getParent().getValue() == null) {
+
+                if (sourceItem == null || sourceItem.getParent() == null || sourceItem.getParent().getValue() == null) {
                     return;
                 }
 
