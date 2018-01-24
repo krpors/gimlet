@@ -52,3 +52,7 @@
     -fx-background-color: -fx-table-cell-border-color;
     -fx-text-fill: black;
 }
+
+.primary-key {
+    -fx-base: orangered;
+}

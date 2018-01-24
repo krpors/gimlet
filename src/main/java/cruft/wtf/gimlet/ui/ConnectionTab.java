@@ -68,12 +68,8 @@ public class ConnectionTab extends Tab {
         EventDispatcher.getInstance().register(this);
 
         selectedProperty().addListener((observable, oldValue, newValue) -> {
-            if (alias.isColorDisabled()) {
-                return;
-            }
-
-            if (newValue) {
-                setStyle("-fx-background-color: linear-gradient(to top, " + alias.getColor() + ", -fx-background)");
+            if (!alias.isColorDisabled() && newValue) {
+                setStyle("-fx-base: " + alias.getColor());
             } else {
                 setStyle(null);
             }

@@ -9,27 +9,21 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.crypto.Data;
-import java.awt.image.DataBuffer;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * This tab contains information about the schema's, tables, columns and all other database
@@ -53,7 +47,7 @@ public class ObjectsTab extends Tab {
 
     private VBox boxButtons;
 
-    private ResultTable table;
+    private ObjectsTable table;
 
     private SplitPane splitPaneObjects;
 
@@ -108,7 +102,6 @@ public class ObjectsTab extends Tab {
                 return;
             }
 
-            table.getColumns().clear();
             table.getItems().clear();
 
             DatabaseObject obj = newValue.getValue();
@@ -118,26 +111,28 @@ public class ObjectsTab extends Tab {
                 try {
                     DatabaseMetaData dmd = connection.getMetaData();
                     ResultSet rs = dmd.getColumns(null, parent.getName(), obj.getName(), "%");
-                    List<Column> col = new ArrayList<>();
-                    col.add(new Column(0, "Column name"));
-                    col.add(new Column(0, "Data type name (Java)"));
-                    col.add(new Column(0, "Type name (DS dependent)"));
-                    col.add(new Column(0, "Column size"));
-                    col.add(new Column(0, "Nullable"));
-                    col.add(new Column(0, "Remarks"));
-                    table.setColumns(col);
 
-                    ObservableList<ObservableList> derp = FXCollections.observableArrayList();
+                    // Get primary keys of the table.
+                    ResultSet pks = dmd.getPrimaryKeys(null, parent.getName(), obj.getName());
+                    Set<String> setColumnPks = new HashSet<>();
+                    while (pks.next()) {
+                        setColumnPks.add(pks.getString("COLUMN_NAME"));
+                    }
+                    pks.close();
 
-                    while(rs.next()) {
-                        ObservableList row = FXCollections.observableArrayList();
-                        row.add(rs.getString("COLUMN_NAME"));
-                        row.add(SqlType.getType(rs.getInt("DATA_TYPE")));
-                        row.add(rs.getString("TYPE_NAME"));
-                        row.add(rs.getInt("COLUMN_SIZE"));
-                        row.add(rs.getInt("NULLABLE") != 0);
-                        row.add(rs.getString("REMARKS"));
-                        derp.add(row);
+                    ObservableList<ObjectsTableData> derp = FXCollections.observableArrayList();
+
+                    int ordinal = 0;
+                    while (rs.next()) {
+                        ObjectsTableData data = new ObjectsTableData();
+                        data.setOrdinalPosition(ordinal++);
+                        data.setColumnName(rs.getString("COLUMN_NAME"));
+                        data.setDataType(SqlType.getType(rs.getInt("DATA_TYPE")));
+                        data.setTypeName(rs.getString("TYPE_NAME"));
+                        data.setColumnSize(rs.getInt("COLUMN_SIZE"));
+                        data.setNullable(rs.getInt("NULLABLE") != 0);
+                        data.setPrimaryKey(setColumnPks.contains(rs.getString("COLUMN_NAME")));
+                        derp.add(data);
                     }
 
                     table.setItems(derp);
@@ -149,7 +144,7 @@ public class ObjectsTab extends Tab {
             }
         });
 
-        table = new ResultTable();
+        table = new ObjectsTable();
         table.setPlaceholder(null);
 
         splitPaneObjects = new SplitPane(objectTree, table);

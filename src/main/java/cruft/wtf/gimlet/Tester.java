@@ -1,13 +1,10 @@
 package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.conf.Alias;
-import cruft.wtf.gimlet.ui.ConnectionTab;
-import cruft.wtf.gimlet.ui.ConnectionTabPane;
-import cruft.wtf.gimlet.ui.ResultTable;
+import cruft.wtf.gimlet.ui.*;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
@@ -21,6 +18,28 @@ import java.util.List;
  * Simple tester main to quickly test UI elements. Also: http://fxexperience.com/scenic-view/
  */
 public class Tester extends Application {
+
+    private void createWithObjectsTable(BorderPane pane) {
+        ObjectsTable table = new ObjectsTable();
+
+        ObservableList<ObjectsTableData> a = FXCollections.observableArrayList();
+        {
+            ObjectsTableData d = new ObjectsTableData();
+            d.setColumnName("SOME_COL");
+            d.setPrimaryKey(true);
+            a.add(d);
+        }
+        {
+            ObjectsTableData d = new ObjectsTableData();
+            d.setColumnName("NOPRIM");
+            d.setPrimaryKey(false);
+            a.add(d);
+        }
+
+        table.setItems(a);
+
+        pane.setCenter(table);
+    }
 
     private void createWithResultTable(BorderPane pane) {
         ResultTable rs = new ResultTable();
@@ -65,7 +84,7 @@ public class Tester extends Application {
         primaryStage.setWidth(800);
         primaryStage.setHeight(600);
 
-        createWithResultTable(pane);
+        createWithObjectsTable(pane);
 
         // Show the stage after possibly reading and setting window properties.
         primaryStage.show();

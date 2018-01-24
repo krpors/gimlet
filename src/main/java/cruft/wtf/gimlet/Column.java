@@ -6,6 +6,10 @@ public class Column {
 
     private final String columnName;
 
+    public Column(String columnName) {
+        this(-1, columnName);
+    }
+
     public Column(int type, String columnName) {
         this.type = type;
         this.columnName = columnName;
