@@ -94,20 +94,12 @@ public class QueryTree extends TreeView<Query> {
      */
     private Optional<Map<String, Object>> askInputForQuery(final Query query) {
         NamedParameterPreparedStatement.ParseResult result = NamedParameterPreparedStatement.parse(query.getContent());
-
-        Map<String, Object> map = new TreeMap<>();
-        for (String s : result.getUniqueParameters()) {
-            TextInputDialog tid = new TextInputDialog();
-            tid.setHeaderText("Specify input for '" + s + "'");
-            Optional<String> opt = tid.showAndWait();
-            if (!opt.isPresent()) {
-                // bail out. User pressed cancel button.
-                return Optional.empty();
-            } else {
-                map.put(s, opt.get());
-            }
+        if (result.getUniqueParameters().isEmpty()) {
+            return Optional.of(Collections.emptyMap());
         }
-        return Optional.of(map);
+
+        ParamInputDialog dlg = new ParamInputDialog(result.getUniqueParameters());
+        return dlg.showAndWait();
     }
 
     /**

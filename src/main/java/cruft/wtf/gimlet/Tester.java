@@ -11,13 +11,25 @@ import javafx.stage.Stage;
 
 import java.sql.SQLException;
 import java.sql.Types;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 /**
  * Simple tester main to quickly test UI elements. Also: http://fxexperience.com/scenic-view/
  */
 public class Tester extends Application {
+
+    private void withParamInputDialog(BorderPane pane) {
+        Set<String> keys = new HashSet<>(Arrays.asList("PROG_ID", "STUFF_NAME", "CRUFT_BALLS"));
+
+
+        ParamInputDialog dlg = new ParamInputDialog(keys);
+        Optional<Map<String,Object>> map = dlg.showAndWait();
+        if (map.isPresent()) {
+            System.out.println("OK! " + map.get());
+        } else {
+            System.out.println("Naw.");
+        }
+    }
 
     private void createWithObjectsTable(BorderPane pane) {
         ObjectsTable table = new ObjectsTable();
@@ -84,7 +96,7 @@ public class Tester extends Application {
         primaryStage.setWidth(800);
         primaryStage.setHeight(600);
 
-        createWithObjectsTable(pane);
+        withParamInputDialog(pane);
 
         // Show the stage after possibly reading and setting window properties.
         primaryStage.show();
