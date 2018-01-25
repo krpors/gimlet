@@ -168,6 +168,9 @@ public class AliasDialog extends Stage {
                     Optional<String> pwd = dlg.showAndWait();
                     if (pwd.isPresent()) {
                         password = pwd.get();
+                    } else {
+                        // User cancelled.
+                        return;
                     }
                 }
 

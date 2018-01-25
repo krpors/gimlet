@@ -322,6 +322,7 @@ public class QueryTree extends TreeView<Query> {
             if (empty || item == null) {
                 setText(null);
                 setGraphic(null);
+                setContextMenu(null); // set to null so the 'add root query' context menu can be made visible.
                 return;
             }
 
