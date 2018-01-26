@@ -12,6 +12,7 @@ import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.Tooltip;
 
+import java.util.Collections;
 import java.util.Optional;
 
 public class AliasList extends ListView<Alias> {
@@ -30,22 +31,19 @@ public class AliasList extends ListView<Alias> {
 
         AliasDialog dialog = new AliasDialog();
         dialog.setAliasContent(selected);
-        dialog.showAndWait();
-        if (dialog.getResult() == ButtonType.OK) {
-            dialog.applyTo(selected);
+        Optional<Alias> optional = dialog.showAndWait();
+        if (optional.isPresent()) {
+            // replace the edited one with the new one.
+            Collections.replaceAll(aliasList, selected, optional.get());
             refresh();
         }
-    }
 
+    }
 
     private void openNewDialog() {
         AliasDialog dialog = new AliasDialog();
-        dialog.showAndWait();
-        if (dialog.getResult() == ButtonType.OK) {
-            Alias alias = new Alias();
-            dialog.applyTo(alias);
-            getItems().add(alias);
-        }
+        Optional<Alias> optional = dialog.showAndWait();
+        optional.ifPresent(alias -> getItems().add(alias));
     }
 
     /**

@@ -1,18 +1,14 @@
 package cruft.wtf.gimlet.ui;
 
-import cruft.wtf.gimlet.GimletApp;
 import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.conf.Alias;
+import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +23,7 @@ import java.util.Optional;
  * The dialog to add/edit an alias in. Probably refactor because the method I used (see {@link #applyTo(Alias)}
  * and {@link #setAliasContent(Alias)} is jus ugly as fuck.
  */
-public class AliasDialog extends Stage {
+public class AliasDialog extends Dialog<Alias> {
 
     private static Logger logger = LoggerFactory.getLogger(AliasDialog.class);
 
@@ -49,32 +45,49 @@ public class AliasDialog extends Stage {
 
     private CheckBox chkDisableColor;
 
-    private Button btnOK;
-
-    private Button btnCancel;
-
-    private Button btnTestConnection;
-
-    private ButtonType result;
-
     public AliasDialog() {
-        Parent content = createContent();
-
-        Scene scene = new Scene(content);
-        setResizable(false);
-        setScene(scene);
         setTitle("Add alias");
-        initModality(Modality.APPLICATION_MODAL);
-        initOwner(GimletApp.mainWindow);
-        centerOnScreen();
+        setHeaderText("Specify the values for the alias.");
 
-        // Exit the window (close it) without saving changes.
-        scene.setOnKeyPressed(e -> {
-            if (e.getCode() == KeyCode.ESCAPE) {
-                result = ButtonType.CANCEL;
-                close();
-            }
+        getDialogPane().setContent(createContent());
+
+        ButtonType bt = new ButtonType("Test connection");
+        getDialogPane().getButtonTypes().addAll(
+                ButtonType.OK,
+                ButtonType.CANCEL,
+                bt);
+
+        // Lookup the actual button, and consume the event to prevent the closing
+        // of the dialog via the "Test Connection" button.
+        Button button = (Button) getDialogPane().lookupButton(bt);
+        button.setTooltip(new Tooltip("Test the connection to the datasource using the entered values."));
+        button.addEventFilter(ActionEvent.ACTION, event -> {
+            System.out.println("Test connection here.");
+            testConnection();
+            // consume the event so it won't bubble up the chain and close the dialog.
+            event.consume();
         });
+
+        setResultConverter(btnType -> {
+            if (btnType == ButtonType.OK) {
+                return createAliasFromForm();
+            }
+            return null;
+        });
+    }
+
+    private Alias createAliasFromForm() {
+        Alias alias = new Alias();
+        alias.setName(txtName.getText());
+        alias.setDescription(txtDescription.getText());
+        alias.setUrl(txtJdbcUrl.getText());
+        alias.setDriverClass(comboDriverClass.getValue());
+        alias.setUser(txtUsername.getText());
+        alias.setPassword(txtPassword.getText());
+        alias.setColor(Utils.toRgbCode(colorPicker.getValue()));
+        alias.setColorDisabled(chkDisableColor.isSelected());
+        alias.setAskForPassword(chkAskForPassword.isSelected());
+        return alias;
     }
 
     /**
@@ -139,70 +152,53 @@ public class AliasDialog extends Stage {
         box.setAlignment(Pos.CENTER_LEFT);
         pane.add("Tab coloring:", box);
 
-        btnOK = new Button("OK");
-        btnOK.setOnAction(event -> {
-            result = ButtonType.OK;
-            close();
-        });
-        btnCancel = new Button("Cancel");
-        btnCancel.setOnAction(event -> {
-            result = ButtonType.CANCEL;
-            close();
-        });
-        btnTestConnection = new Button("Test connection");
-        btnTestConnection.setTooltip(new Tooltip("Tests the connection to the given JDBC URL"));
-        btnTestConnection.setOnAction(e -> {
-            if (comboDriverClass.getValue() == null || comboDriverClass.getValue().isEmpty()) {
-                new Alert(Alert.AlertType.ERROR, "No driver class is given.", ButtonType.OK).showAndWait();
-                return;
-            }
-
-            try {
-                Class.forName(comboDriverClass.getValue());
-
-                // TODO: password input dialog.
-                String password = txtPassword.getText();
-                if (chkAskForPassword.isSelected()) {
-                    TextInputDialog dlg = new TextInputDialog("");
-                    dlg.setHeaderText("Specify password for user '" + txtUsername.getText() + "'");
-                    Optional<String> pwd = dlg.showAndWait();
-                    if (pwd.isPresent()) {
-                        password = pwd.get();
-                    } else {
-                        // User cancelled.
-                        return;
-                    }
-                }
-
-                Connection c = DriverManager.getConnection(txtJdbcUrl.getText(), txtUsername.getText(), password);
-                c.close();
-                Alert alert = new Alert(Alert.AlertType.INFORMATION, "Press OK to continue.", ButtonType.OK);
-                alert.setHeaderText("Connection succeeded!");
-                alert.showAndWait();
-            } catch (SQLException ex) {
-                logger.error("Can't connect", ex);
-                Utils.showExceptionDialog(
-                        "Connection test failed.",
-                        String.format("Failed to connect to '%s'", txtJdbcUrl.getText()),
-                        ex);
-            } catch (ClassNotFoundException ex) {
-                logger.error("Class not found", ex);
-                Utils.showExceptionDialog(
-                        "Could not instantiate driver.",
-                        String.format("Driver class not found: '%s'", comboDriverClass.getValue()),
-                        ex);
-            }
-        });
-
-        HBox btnBox = new HBox(5, btnOK, btnCancel, btnTestConnection);
-        btnBox.setAlignment(Pos.CENTER_RIGHT);
-        pane.add(btnBox, 1, pane.rowCounter++);
-
         return pane;
     }
 
-    public ButtonType getResult() {
-        return result;
+    /**
+     * Tests a connection using the filled in values in the form.
+     */
+    private void testConnection() {
+        if (comboDriverClass.getValue() == null || comboDriverClass.getValue().isEmpty()) {
+            new Alert(Alert.AlertType.ERROR, "No driver class is given.", ButtonType.OK).showAndWait();
+            return;
+        }
+
+        try {
+            Class.forName(comboDriverClass.getValue());
+
+            // TODO: password input dialog.
+            String password = txtPassword.getText();
+            if (chkAskForPassword.isSelected()) {
+                TextInputDialog dlg = new TextInputDialog("");
+                dlg.setHeaderText("Specify password for user '" + txtUsername.getText() + "'");
+                Optional<String> pwd = dlg.showAndWait();
+                if (pwd.isPresent()) {
+                    password = pwd.get();
+                } else {
+                    // User cancelled.
+                    return;
+                }
+            }
+
+            Connection c = DriverManager.getConnection(txtJdbcUrl.getText(), txtUsername.getText(), password);
+            c.close();
+            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Press OK to continue.", ButtonType.OK);
+            alert.setHeaderText("Connection succeeded!");
+            alert.showAndWait();
+        } catch (SQLException ex) {
+            logger.error("Can't connect", ex);
+            Utils.showExceptionDialog(
+                    "Connection test failed.",
+                    String.format("Failed to connect to '%s'", txtJdbcUrl.getText()),
+                    ex);
+        } catch (ClassNotFoundException ex) {
+            logger.error("Class not found", ex);
+            Utils.showExceptionDialog(
+                    "Could not instantiate driver.",
+                    String.format("Driver class not found: '%s'", comboDriverClass.getValue()),
+                    ex);
+        }
     }
 
     /**

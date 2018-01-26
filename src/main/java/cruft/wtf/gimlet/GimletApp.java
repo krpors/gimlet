@@ -45,13 +45,6 @@ public class GimletApp extends Application {
     private static Logger logger = LoggerFactory.getLogger(GimletApp.class);
 
     /**
-     * Reference to the main window. This should never be null, and is a reference to the top-level window.
-     * This reference can be used to keep certain other windows in a modal state.
-     */
-    public static Window mainWindow;
-
-
-    /**
      * Reference to the primary stage.
      */
     private Stage primaryStage;
@@ -158,7 +151,7 @@ public class GimletApp extends Application {
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Gimlet project files", "*.gml"));
         chooser.setTitle("Save Gimlet project as");
         chooser.setInitialFileName(gimletProject.getName() + ".gml");
-        File file = chooser.showSaveDialog(GimletApp.mainWindow);
+        File file = chooser.showSaveDialog(null);
         if (file == null) {
             return;
         }
@@ -192,7 +185,7 @@ public class GimletApp extends Application {
             FileChooser chooser = new FileChooser();
             chooser.setTitle("Select Gimlet project file");
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Gimlet project files", "*.gml"));
-            File file = chooser.showOpenDialog(GimletApp.mainWindow);
+            File file = chooser.showOpenDialog(null);
             if (file == null) {
                 // user pressed cancel.
                 return;
@@ -301,9 +294,6 @@ public class GimletApp extends Application {
 
         Scene scene = new Scene(pane);
         scene.getStylesheets().add("/css/style.css");
-
-        // We started, set our main window reference!
-        mainWindow = primaryStage.getOwner();
 
         primaryStage.setTitle("Gimlet");
         primaryStage.setScene(scene);

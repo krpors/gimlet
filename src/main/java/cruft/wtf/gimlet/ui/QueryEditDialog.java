@@ -46,7 +46,7 @@ public class QueryEditDialog extends Stage {
         setScene(scene);
         setTitle("Add query");
         initModality(Modality.APPLICATION_MODAL);
-        initOwner(GimletApp.mainWindow);
+//        initOwner(GimletApp.mainWindow);
         centerOnScreen();
 
         // Exit the window (close it) without saving changes.
