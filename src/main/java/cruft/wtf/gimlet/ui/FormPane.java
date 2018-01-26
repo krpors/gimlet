@@ -15,11 +15,12 @@ public class FormPane extends GridPane {
     public FormPane() {
         setHgap(10);
         setVgap(5);
-        setPadding(new Insets(10, 10, 10, 10));
+        setPadding(new Insets(10));
 
         ColumnConstraints col1 = new ColumnConstraints();
         ColumnConstraints col2 = new ColumnConstraints();
-        col1.setMinWidth(80);
+        col1.setMinWidth(90);
+
         col2.setHgrow(Priority.ALWAYS);
 
         getColumnConstraints().addAll(col1, col2);
@@ -27,7 +28,7 @@ public class FormPane extends GridPane {
 
     public void add(String label, Node node) {
         Label lbl = new Label(label);
-        GridPane.setValignment(lbl, VPos.CENTER);
+        GridPane.setValignment(lbl, VPos.TOP);
         super.add(lbl, 0, rowCounter);
         super.add(node, 1, rowCounter);
         rowCounter++;

@@ -16,7 +16,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.sql.Connection;
 
 /**
  * This class is a tab where simple, plain SQL statements can be entered.

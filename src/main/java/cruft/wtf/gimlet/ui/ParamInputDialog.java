@@ -14,7 +14,7 @@ import java.util.TreeMap;
  * Very simple dialog which displays a textfield for each parameter given in the Set.
  * The result type of the dialog is a Map of String mapped to Objects which can be used
  * as parameter values in named queries.
- *
+ * <p>
  * TODO: somehow give data types to the queries so you can display a calendar, or a number field etc.
  */
 public class ParamInputDialog extends Dialog<Map<String, Object>> {

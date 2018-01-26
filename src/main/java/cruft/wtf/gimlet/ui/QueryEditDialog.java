@@ -1,6 +1,5 @@
 package cruft.wtf.gimlet.ui;
 
-import cruft.wtf.gimlet.GimletApp;
 import cruft.wtf.gimlet.conf.Query;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
