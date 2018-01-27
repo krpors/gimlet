@@ -18,6 +18,11 @@ import java.util.*;
  */
 public class Tester extends Application {
 
+    private void withQueryEditDialog(BorderPane pane) {
+        QueryDialog dlg = new QueryDialog();
+        dlg.showAndWait();
+    }
+
     private void withParamInputDialog(BorderPane pane) {
         Set<String> keys = new HashSet<>(Arrays.asList("PROG_ID", "STUFF_NAME", "CRUFT_BALLS"));
 
@@ -96,7 +101,7 @@ public class Tester extends Application {
         primaryStage.setWidth(800);
         primaryStage.setHeight(600);
 
-        withParamInputDialog(pane);
+        withQueryEditDialog(pane);
 
         // Show the stage after possibly reading and setting window properties.
         primaryStage.show();

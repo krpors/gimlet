@@ -24,8 +24,7 @@ public class AliasList extends ListView<Alias> {
         }
 
         AliasDialog dialog = new AliasDialog();
-        dialog.setAliasContent(selected);
-        Optional<Alias> optional = dialog.showAndWait();
+        Optional<Alias> optional = dialog.showEditAlias(selected);
         if (optional.isPresent()) {
             // replace the edited one with the new one.
             Collections.replaceAll(aliasList, selected, optional.get());

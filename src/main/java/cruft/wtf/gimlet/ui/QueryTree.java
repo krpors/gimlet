@@ -53,14 +53,12 @@ public class QueryTree extends TreeView<Query> {
         ContextMenu menu = new ContextMenu();
         MenuItem newRootQuery = new MenuItem("New root query", Images.PLUS.imageView());
         newRootQuery.setOnAction(event -> {
-            QueryEditDialog qed = new QueryEditDialog();
-            qed.showAndWait();
-            if (qed.getResult() == ButtonType.OK) {
-                Query query = qed.getQuery();
-                // Add a TreeItem to the root, and to the root of the querylist.
+            QueryDialog qed = new QueryDialog();
+            Optional<Query> q = qed.showAndWait();
+            q.ifPresent(query -> {
                 getRoot().getChildren().add(new TreeItem<>(query));
                 queryList.add(query);
-            }
+            });
         });
         menu.getItems().add(newRootQuery);
         setContextMenu(menu);
@@ -124,21 +122,19 @@ public class QueryTree extends TreeView<Query> {
      * @param root The root query.
      */
     public void openNewQueryDialog(final Query root) {
-        QueryEditDialog qed = new QueryEditDialog();
-        qed.showAndWait();
-        if (qed.getResult() == ButtonType.OK) {
-            Query theq = qed.getQuery();
-            root.getSubQueries().add(theq);
-
+        QueryDialog qed = new QueryDialog();
+        Optional<Query> q = qed.showAndWait();
+        q.ifPresent(query -> {
+            root.getSubQueries().add(query);
             TreeItem<Query> selected = getSelectionModel().getSelectedItem();
-            selected.getChildren().add(new TreeItem<>(theq));
+            selected.getChildren().add(new TreeItem<>(query));
             selected.setExpanded(true);
             refresh();
-        }
+        });
     }
 
     /**
-     * Opens the {@link QueryEditDialog} based on the current selected {@link Query} in the tree.
+     * Opens the {@link QueryDialog} based on the current selected {@link Query} in the tree.
      */
     private void openEditSelectedQueryDialog() {
         TreeItem<Query> selectedItem = getSelectionModel().getSelectedItem();
@@ -146,13 +142,19 @@ public class QueryTree extends TreeView<Query> {
             return;
         }
 
-        QueryEditDialog qed = new QueryEditDialog();
-        qed.initFromQuery(selectedItem.getValue());
-        qed.showAndWait();
-        if (qed.getResult() == ButtonType.OK) {
-            qed.applyTo(selectedItem.getValue());
-            refresh();
-        }
+        QueryDialog qed = new QueryDialog();
+        Optional<Query> q = qed.showEditdialog(selectedItem.getValue());
+        q.ifPresent(newQuery -> {
+            Query oldQuery = selectedItem.getValue();
+            Query parentQuery = oldQuery.getParentQuery();
+
+            if (parentQuery == null) {
+                Collections.replaceAll(queryList, oldQuery, newQuery);
+            } else {
+                Collections.replaceAll(parentQuery.getSubQueries(), oldQuery, newQuery);
+            }
+            selectedItem.setValue(newQuery);
+        });
     }
 
     /**
@@ -208,7 +210,6 @@ public class QueryTree extends TreeView<Query> {
 
         return false;
     }
-
 
     /**
      * Removes the selected query (and its children, ancestors and the whole shebang). This is done by updating the

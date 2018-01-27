@@ -20,8 +20,7 @@ import java.util.Enumeration;
 import java.util.Optional;
 
 /**
- * The dialog to add/edit an alias in. Probably refactor because the method I used (see {@link #applyTo(Alias)}
- * and {@link #setAliasContent(Alias)} is jus ugly as fuck.
+ * The dialog to add/edit an alias in.
  */
 public class AliasDialog extends Dialog<Alias> {
 
@@ -62,7 +61,6 @@ public class AliasDialog extends Dialog<Alias> {
         Button button = (Button) getDialogPane().lookupButton(bt);
         button.setTooltip(new Tooltip("Test the connection to the datasource using the entered values."));
         button.addEventFilter(ActionEvent.ACTION, event -> {
-            System.out.println("Test connection here.");
             testConnection();
             // consume the event so it won't bubble up the chain and close the dialog.
             event.consume();
@@ -206,7 +204,7 @@ public class AliasDialog extends Dialog<Alias> {
      *
      * @param alias The alias.
      */
-    public void setAliasContent(final Alias alias) {
+    public Optional<Alias> showEditAlias(final Alias alias) {
         setTitle("Edit alias");
         txtName.setText(alias.getName());
         txtDescription.setText(alias.getDescription());
@@ -217,23 +215,7 @@ public class AliasDialog extends Dialog<Alias> {
         colorPicker.setValue(Color.valueOf(alias.getColor()));
         chkDisableColor.setSelected(alias.isColorDisabled());
         chkAskForPassword.setSelected(alias.isAskForPassword());
-    }
-
-    /**
-     * Applies the values in the textfields to the given Alias object
-     *
-     * @param alias The Alias to change.
-     */
-    public void applyTo(Alias alias) {
-        alias.nameProperty().set(txtName.getText());
-        alias.descriptionProperty().set(txtDescription.getText());
-        alias.urlProperty().set(txtJdbcUrl.getText());
-        alias.driverClassProperty().set(comboDriverClass.getValue());
-        alias.userProperty().set(txtUsername.getText());
-        alias.passwordProperty().set(txtPassword.getText());
-        alias.colorProperty().set(Utils.toRgbCode(colorPicker.getValue()));
-        alias.colorDisabledProperty().set(chkDisableColor.isSelected());
-        alias.askForPasswordProperty().set(chkAskForPassword.isSelected());
+        return showAndWait();
     }
 
 }
