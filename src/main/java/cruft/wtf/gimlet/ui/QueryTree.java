@@ -145,15 +145,8 @@ public class QueryTree extends TreeView<Query> {
         QueryDialog qed = new QueryDialog();
         Optional<Query> q = qed.showEditdialog(selectedItem.getValue());
         q.ifPresent(newQuery -> {
-            Query oldQuery = selectedItem.getValue();
-            Query parentQuery = oldQuery.getParentQuery();
-
-            if (parentQuery == null) {
-                Collections.replaceAll(queryList, oldQuery, newQuery);
-            } else {
-                Collections.replaceAll(parentQuery.getSubQueries(), oldQuery, newQuery);
-            }
-            selectedItem.setValue(newQuery);
+            Query existingQuery = selectedItem.getValue();
+            existingQuery.copyFrom(newQuery);
         });
     }
 

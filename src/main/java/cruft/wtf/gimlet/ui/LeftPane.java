@@ -24,10 +24,13 @@ public class LeftPane extends BorderPane {
     public void createCenter() {
         Tab tabProjectProps = new Tab("Project", this.projectPropertiesPane);
         tabProjectProps.setGraphic(Images.COG.imageView());
+        tabProjectProps.setClosable(false);
         Tab tabAliases = new Tab("Aliases", this.aliasList);
         tabAliases.setGraphic(Images.BOLT.imageView());
+        tabAliases.setClosable(false);
         Tab tabQueries = new Tab("Queries", this.queryTree);
         tabQueries.setGraphic(Images.MAGNIFYING_GLASS.imageView());
+        tabQueries.setClosable(false);
         this.tabPane = new TabPane(tabProjectProps, tabAliases, tabQueries);
         setCenter(this.tabPane);
     }

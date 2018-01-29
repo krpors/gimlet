@@ -133,6 +133,17 @@ public class Query {
         return parentQuery;
     }
 
+    /**
+     * Copies values from another query, omitting the subqueries.
+     *
+     * @param other The other query.
+     */
+    public void copyFrom(final Query other) {
+        setName(other.getName());
+        setContent(other.getContent());
+        setDescription(other.getDescription());
+    }
+
     protected void afterUnmarshal(Unmarshaller um, Object parent) {
         if (parent instanceof Query) {
             Query query = (Query) parent;
