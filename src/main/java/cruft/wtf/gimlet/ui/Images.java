@@ -27,6 +27,7 @@ public enum Images {
     ELLIPSES("/icons/ellipses-2x.png"),
     FILE("/icons/file-2x.png"),
     FOLDER("/icons/folder-2x.png"),
+    LOCK_LOCKED_4X("/icons/lock-locked-4x.png"),
     MAGNIFYING_GLASS("/icons/magnifying-glass-2x.png"),
     MEDIA_PLAY("/icons/media-play-2x.png"),
     MINUS("/icons/minus-2x.png"),

@@ -5,7 +5,16 @@ import cruft.wtf.gimlet.conf.Alias;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
@@ -168,8 +177,7 @@ public class AliasDialog extends Dialog<Alias> {
             // TODO: password input dialog.
             String password = txtPassword.getText();
             if (chkAskForPassword.isSelected()) {
-                TextInputDialog dlg = new TextInputDialog("");
-                dlg.setHeaderText("Specify password for user '" + txtUsername.getText() + "'");
+                PasswordInputDialog dlg = new PasswordInputDialog(txtUsername.getText());
                 Optional<String> pwd = dlg.showAndWait();
                 if (pwd.isPresent()) {
                     password = pwd.get();

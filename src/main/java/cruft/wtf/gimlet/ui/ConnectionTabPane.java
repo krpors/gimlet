@@ -78,8 +78,7 @@ public class ConnectionTabPane extends TabPane {
 
         ConnectTask connectTask = new ConnectTask(evt.getAlias());
         if (evt.getAlias().isAskForPassword()) {
-            TextInputDialog dlg = new TextInputDialog("");
-            dlg.setHeaderText("Specify password for user '" + evt.getAlias().getUser() + "'");
+            PasswordInputDialog dlg = new PasswordInputDialog(evt.getAlias().getUser());
             Optional<String> pwd = dlg.showAndWait();
             if (pwd.isPresent()) {
                 connectTask.setPassword(pwd.get());
