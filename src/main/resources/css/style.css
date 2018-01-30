@@ -6,8 +6,11 @@
 */
 }
 
+.context-menu {
+    -fx-font-family: sans-serif;
+}
 
-.textarea {
+.error-text {
     -fx-font-family: "Monospace";
     -fx-text-fill: red;
 }
