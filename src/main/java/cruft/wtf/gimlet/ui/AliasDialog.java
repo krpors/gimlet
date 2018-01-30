@@ -174,7 +174,6 @@ public class AliasDialog extends Dialog<Alias> {
         try {
             Class.forName(comboDriverClass.getValue());
 
-            // TODO: password input dialog.
             String password = txtPassword.getText();
             if (chkAskForPassword.isSelected()) {
                 PasswordInputDialog dlg = new PasswordInputDialog(txtUsername.getText());

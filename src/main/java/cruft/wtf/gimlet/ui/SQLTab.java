@@ -31,7 +31,7 @@ public class SQLTab extends Tab {
 
     private CheckBox checkMaxRows;
 
-    private TextArea txtQuery = new TextArea("select * from feniks_owner.energy_label where id = 111111");
+    private TextArea txtQuery = new TextArea();
 
     private TabPane tabPaneResultSets = new TabPane();
 
@@ -47,6 +47,7 @@ public class SQLTab extends Tab {
         setText("SQL");
         setClosable(false);
         setGraphic(Images.CODE.imageView());
+        txtQuery.textProperty().bindBidirectional(connectionTab.getAlias().queryProperty());
 
         txtQuery.setWrapText(false);
         txtQuery.getStyleClass().add("query-editor");
@@ -108,7 +109,7 @@ public class SQLTab extends Tab {
             StringWriter sw = new StringWriter();
             task.getException().printStackTrace(new PrintWriter(sw));
             TextArea area = new TextArea(sw.toString());
-            area.getStyleClass().add("textarea");
+            area.getStyleClass().add("error-text");
             area.setEditable(false);
             tab.setGraphic(Images.WARNING.imageView());
             tab.setContent(area);

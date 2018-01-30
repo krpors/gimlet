@@ -7,6 +7,7 @@ import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.QueryExecutedEvent;
 import cruft.wtf.gimlet.jdbc.NamedQueryTask;
 import javafx.collections.ListChangeListener;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
@@ -84,7 +85,12 @@ public class DrillDownTab extends Tab {
 
         final DrillResultTable table = new DrillResultTable(this, query);
         final Tab tab = new Tab(query.getName());
-        tab.setContent(table);
+        BorderPane pane = new BorderPane();
+        Label lbl = new Label(query.getDescription());
+        lbl.setPadding(new Insets(10));
+        pane.setTop(lbl);
+        pane.setCenter(table);
+        tab.setContent(pane);
         tab.setGraphic(Images.CLOCK.imageView());
 
         NamedQueryTask namedQueryTask = new NamedQueryTask(
@@ -123,7 +129,7 @@ public class DrillDownTab extends Tab {
                     .append("\nStacktrace:\n\n")
                     .append(sw.toString());
             TextArea area = new TextArea(stringBuilder.toString());
-            area.getStyleClass().add("textarea");
+            area.getStyleClass().add("error-text");
             area.setEditable(false);
             tab.setContent(area);
         });

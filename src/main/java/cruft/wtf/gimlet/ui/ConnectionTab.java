@@ -75,6 +75,8 @@ public class ConnectionTab extends Tab {
             }
         });
 
+        // No two-way binding, since the user might be changed. This would reflect
+        // an untrue situation so keep this tab name static.
         setText(String.format("%s as %s", alias.getName(), alias.getUser()));
 
         setOnCloseRequest(e -> {
@@ -93,6 +95,14 @@ public class ConnectionTab extends Tab {
         });
 
         setContent(createContent());
+    }
+
+    /**
+     * Returns the Alias which was
+     * @return
+     */
+    public Alias getAlias() {
+        return alias;
     }
 
     /**
@@ -191,7 +201,7 @@ public class ConnectionTab extends Tab {
         // Create the textarea for errors.
         txtError = new TextArea();
         txtError.setEditable(false);
-        txtError.getStyleClass().add("textarea");
+        txtError.getStyleClass().add("error-text");
         txtError.setVisible(false);
 
         // Stackpane with stacked items which may or may not be visible.

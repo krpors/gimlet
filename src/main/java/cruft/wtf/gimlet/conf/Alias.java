@@ -17,7 +17,8 @@ import javax.xml.bind.annotation.XmlType;
         "password",
         "askForPassword",
         "color",
-        "colorDisabled"
+        "colorDisabled",
+        "query"
 })
 public class Alias {
 
@@ -38,6 +39,8 @@ public class Alias {
     private BooleanProperty colorDisabled = new SimpleBooleanProperty(true);
 
     private BooleanProperty askForPassword = new SimpleBooleanProperty(false);
+
+    private StringProperty query = new SimpleStringProperty();
 
     @XmlElement(name = "name")
     public String getName() {
@@ -147,6 +150,37 @@ public class Alias {
 
     public void setAskForPassword(boolean askForPassword) {
         this.askForPassword.set(askForPassword);
+    }
+
+    public String getQuery() {
+        return query.get();
+    }
+
+    public StringProperty queryProperty() {
+        return query;
+    }
+
+    public void setQuery(String query) {
+        this.query.set(query);
+    }
+
+    /**
+     * Copies values over from another {@link Alias}. This is to keep the reference intact.
+     *
+     * @param other The values to use to copy to this instance.
+     * @see cruft.wtf.gimlet.ui.AliasDialog
+     */
+    public void copyFrom(final Alias other) {
+        setAskForPassword(other.isAskForPassword());
+        setColor(other.getColor());
+        setColorDisabled(other.isColorDisabled());
+        setDescription(other.getDescription());
+        setDriverClass(other.getDriverClass());
+        setName(other.getName());
+        setPassword(other.getPassword());
+        setQuery(other.getQuery());
+        setUrl(other.getUrl());
+        setUser(other.getUser());
     }
 
     @Override

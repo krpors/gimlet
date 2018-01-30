@@ -51,7 +51,7 @@ public final class Utils {
         Label lbl = new Label(dialog.getContentText());
 
         TextArea textArea = new TextArea(sw.toString());
-        textArea.getStyleClass().add("textarea");
+        textArea.getStyleClass().add("error-text");
         textArea.setEditable(false);
         textArea.setMaxWidth(Double.MAX_VALUE);
         textArea.setMaxHeight(Double.MAX_VALUE);
