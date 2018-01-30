@@ -7,9 +7,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeCell;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
@@ -19,8 +22,11 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * This tab contains information about the schema's, tables, columns and all other database
@@ -46,7 +52,9 @@ public class ObjectsTab extends Tab {
 
     private ObjectsTable table;
 
-    private SplitPane splitPaneObjects;
+    private BorderPane paneObjects;
+
+    private Button btnRemoveEmptySchemas;
 
     private StackPane stackPane;
 
@@ -144,9 +152,27 @@ public class ObjectsTab extends Tab {
         table = new ObjectsTable();
         table.setPlaceholder(null);
 
-        splitPaneObjects = new SplitPane(objectTree, table);
+        SplitPane splitPaneObjects = new SplitPane(objectTree, table);
         SplitPane.setResizableWithParent(objectTree, false);
         splitPaneObjects.setDividerPosition(0, 0.4);
+
+        btnRemoveEmptySchemas = new Button("Remove empty schemas");
+        btnRemoveEmptySchemas.setGraphic(Images.TRASH.imageView());
+        btnRemoveEmptySchemas.setOnAction(event -> {
+            List<TreeItem<DatabaseObject>> collect = objectTree.getRoot().getChildren()
+                    .stream()
+                    .filter(databaseObjectTreeItem -> databaseObjectTreeItem.getChildren().isEmpty())
+                    .collect(Collectors.toList());
+            objectTree.getRoot().getChildren().removeAll(collect);
+            btnRemoveEmptySchemas.setDisable(true);
+        });
+        HBox lolbox = new HBox(btnRemoveEmptySchemas);
+        lolbox.setPadding(new Insets(10));
+
+        paneObjects = new BorderPane();
+        paneObjects.setTop(lolbox);
+        paneObjects.setCenter(splitPaneObjects);
+
     }
 
     /**
@@ -205,8 +231,8 @@ public class ObjectsTab extends Tab {
         taskLoadObjects.setOnSucceeded(event -> {
             logger.debug("Task succeeded");
             stackPane.getChildren().clear();
-            stackPane.getChildren().add(splitPaneObjects);
-            splitPaneObjects.toFront();
+            stackPane.getChildren().add(paneObjects);
+            paneObjects.toFront();
         });
 
         taskLoadObjects.setOnCancelled(event -> {

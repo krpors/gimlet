@@ -1,7 +1,8 @@
-package cruft.wtf.gimlet.ui;
+package cruft.wtf.gimlet.ui.dialog;
 
 import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.conf.Alias;
+import cruft.wtf.gimlet.ui.FormPane;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;

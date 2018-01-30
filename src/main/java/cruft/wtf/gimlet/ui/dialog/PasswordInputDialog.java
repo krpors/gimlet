@@ -1,6 +1,7 @@
-package cruft.wtf.gimlet.ui;
+package cruft.wtf.gimlet.ui.dialog;
 
 
+import cruft.wtf.gimlet.ui.Images;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.PasswordField;

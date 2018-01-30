@@ -1,4 +1,4 @@
-package cruft.wtf.gimlet.ui;
+package cruft.wtf.gimlet.event;
 
 import com.google.common.eventbus.EventBus;
 

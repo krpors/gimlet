@@ -4,7 +4,7 @@ import cruft.wtf.gimlet.conf.GimletProject;
 import cruft.wtf.gimlet.event.FileOpenedEvent;
 import cruft.wtf.gimlet.event.FileSavedEvent;
 import cruft.wtf.gimlet.ui.ConnectionTabPane;
-import cruft.wtf.gimlet.ui.EventDispatcher;
+import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.ui.Images;
 import cruft.wtf.gimlet.ui.LeftPane;
 import cruft.wtf.gimlet.ui.StatusBar;
@@ -25,7 +25,6 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

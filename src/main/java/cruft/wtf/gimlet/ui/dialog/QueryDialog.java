@@ -1,6 +1,7 @@
-package cruft.wtf.gimlet.ui;
+package cruft.wtf.gimlet.ui.dialog;
 
 import cruft.wtf.gimlet.conf.Query;
+import cruft.wtf.gimlet.ui.FormPane;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TextArea;

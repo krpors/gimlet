@@ -2,14 +2,15 @@ package cruft.wtf.gimlet.ui;
 
 import com.google.common.eventbus.Subscribe;
 import cruft.wtf.gimlet.event.ConnectEvent;
+import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.FileOpenedEvent;
 import cruft.wtf.gimlet.jdbc.ConnectTask;
+import cruft.wtf.gimlet.ui.dialog.PasswordInputDialog;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.KeyCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

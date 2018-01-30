@@ -2,8 +2,11 @@ package cruft.wtf.gimlet.ui;
 
 import cruft.wtf.gimlet.GimletApp;
 import cruft.wtf.gimlet.conf.Query;
+import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecuteEvent;
 import cruft.wtf.gimlet.jdbc.NamedParameterPreparedStatement;
+import cruft.wtf.gimlet.ui.dialog.ParamInputDialog;
+import cruft.wtf.gimlet.ui.dialog.QueryDialog;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.*;

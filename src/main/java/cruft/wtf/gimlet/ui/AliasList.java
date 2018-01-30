@@ -3,6 +3,8 @@ package cruft.wtf.gimlet.ui;
 import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.conf.Alias;
 import cruft.wtf.gimlet.event.ConnectEvent;
+import cruft.wtf.gimlet.event.EventDispatcher;
+import cruft.wtf.gimlet.ui.dialog.AliasDialog;
 import javafx.collections.ObservableList;
 import javafx.scene.control.*;
 
