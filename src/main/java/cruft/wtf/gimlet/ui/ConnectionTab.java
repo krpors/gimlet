@@ -2,6 +2,7 @@ package cruft.wtf.gimlet.ui;
 
 import com.google.common.eventbus.Subscribe;
 import cruft.wtf.gimlet.conf.Alias;
+import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecuteEvent;
 import javafx.application.Platform;
 import javafx.scene.Node;

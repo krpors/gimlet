@@ -71,7 +71,7 @@ public class ObjectLoaderTask extends Task<Void> {
      */
     @Override
     protected Void call() throws Exception {
-        TreeItem<DatabaseObject> root = new TreeItem<>(new DatabaseObject(DatabaseObject.ROOT, "Tables"));
+        TreeItem<DatabaseObject> root = new TreeItem<>(new DatabaseObject(DatabaseObject.ROOT, "Schemas"));
         root.setExpanded(true);
 
         findSchemas(root);

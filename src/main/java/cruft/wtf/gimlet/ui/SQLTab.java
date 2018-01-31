@@ -4,6 +4,7 @@ package cruft.wtf.gimlet.ui;
 import com.sun.javafx.scene.control.behavior.TabPaneBehavior;
 import com.sun.javafx.scene.control.skin.TabPaneSkin;
 import cruft.wtf.gimlet.Utils;
+import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecutedEvent;
 import cruft.wtf.gimlet.jdbc.SimpleQueryTask;
 import javafx.geometry.Insets;

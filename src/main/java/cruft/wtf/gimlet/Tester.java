@@ -2,6 +2,8 @@ package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.conf.Alias;
 import cruft.wtf.gimlet.ui.*;
+import cruft.wtf.gimlet.ui.dialog.ParamInputDialog;
+import cruft.wtf.gimlet.ui.dialog.QueryDialog;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
