@@ -8,6 +8,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextFormatter;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
@@ -27,6 +28,22 @@ import java.util.Optional;
 public final class Utils {
 
     private static Logger logger = LoggerFactory.getLogger(Utils.class);
+
+
+    /**
+     * Text formatter to allow numbers only. Used in text fields to only accept numbers.
+     */
+    public static TextFormatter<String> createFormatter() {
+        return new TextFormatter<>(change -> {
+            String text = change.getText();
+            if (text.matches("[0-9]*")) {
+                return change;
+            }
+            return null;
+        });
+    }
+
+
 
     /**
      * Creates and displays a dialog with {@link Exception} details.

@@ -28,7 +28,7 @@ public class FormPane extends GridPane {
 
     public void add(String label, Node node) {
         Label lbl = new Label(label);
-        GridPane.setValignment(lbl, VPos.TOP);
+        GridPane.setValignment(lbl, VPos.CENTER);
         super.add(lbl, 0, rowCounter);
         super.add(node, 1, rowCounter);
         rowCounter++;

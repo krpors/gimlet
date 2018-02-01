@@ -2,18 +2,26 @@ package cruft.wtf.gimlet.ui;
 
 
 import cruft.wtf.gimlet.Column;
+import cruft.wtf.gimlet.Configuration;
 import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.jdbc.SimpleQueryTask;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.TextFieldTableCell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.ResultSet;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This class represents a generic {@link TableView} for SQL queries. The table columns are therefore variadic depending
@@ -93,10 +101,18 @@ public class ResultTable extends TableView<ObservableList> {
                 return;
             }
 
+            System.out.println(item.getClass());
+
             // If the cell content is larger than 32 chars, abbreviate it and mark it as such.
             // User should be able to double click on the cell to display its full data.
             String s = item.toString().replace('\n', ' ').replace('\r', ' ').trim();
-            if (s.length() >= 32) {
+            int truncateSize = 32;
+            Optional<Integer> tsize = Configuration.getInstance().getIntegerProperty(Configuration.Key.TRUNCATE_SIZE);
+            if (tsize.isPresent()) {
+                truncateSize = tsize.get();
+            }
+
+            if (s.length() >= truncateSize) {
                 getStyleClass().add("truncate");
 
                 setOnMouseClicked(event -> {
@@ -109,7 +125,7 @@ public class ResultTable extends TableView<ObservableList> {
                 Tooltip t = new Tooltip("The contents of this cell are truncated.\nDouble click to see the full contents.");
                 t.setGraphic(Images.WARNING.imageView());
                 setTooltip(t);
-                setText(Utils.truncate(s, 32));
+                setText(Utils.truncate(s, truncateSize));
             }
         }
     }

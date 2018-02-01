@@ -146,6 +146,7 @@ public final class Configuration extends Properties {
      */
     public enum Key {
         LAST_PROJECT_FILE,
+        TRUNCATE_SIZE,
         WINDOW_MAXIMIZED,;
 
         public String getName() {

@@ -8,6 +8,7 @@ import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.ui.Images;
 import cruft.wtf.gimlet.ui.LeftPane;
 import cruft.wtf.gimlet.ui.StatusBar;
+import cruft.wtf.gimlet.ui.dialog.SettingsDialog;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -216,6 +217,13 @@ public class GimletApp extends Application {
         MenuItem fileItemSaveAs = new MenuItem("Save as...");
         fileItemSaveAs.setOnAction(event -> showSaveAsDialog());
 
+        MenuItem fileItemSettings = new MenuItem("Settings...");
+        fileItemSettings.setGraphic(Images.COG.imageView());
+        fileItemSettings.setOnAction(event -> {
+            SettingsDialog dlg = new SettingsDialog();
+            dlg.showAndWait();
+        });
+
         MenuItem fileItemExit = new MenuItem("Exit");
         fileItemExit.setAccelerator(KeyCombination.keyCombination("Ctrl+Q"));
         fileItemExit.setOnAction(event -> Platform.exit());
@@ -225,6 +233,8 @@ public class GimletApp extends Application {
         menuFile.getItems().add(fileItemOpen);
         menuFile.getItems().add(fileItemSave);
         menuFile.getItems().add(fileItemSaveAs);
+        menuFile.getItems().add(new SeparatorMenuItem());
+        menuFile.getItems().add(fileItemSettings);
         menuFile.getItems().add(new SeparatorMenuItem());
         menuFile.getItems().add(fileItemExit);
 

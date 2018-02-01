@@ -4,6 +4,7 @@ import cruft.wtf.gimlet.conf.Alias;
 import cruft.wtf.gimlet.ui.*;
 import cruft.wtf.gimlet.ui.dialog.ParamInputDialog;
 import cruft.wtf.gimlet.ui.dialog.QueryDialog;
+import cruft.wtf.gimlet.ui.dialog.SettingsDialog;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -19,6 +20,11 @@ import java.util.*;
  * Simple tester main to quickly test UI elements. Also: http://fxexperience.com/scenic-view/
  */
 public class Tester extends Application {
+
+    private void withSettingsDialog(BorderPane pane) {
+        SettingsDialog settingsDialog = new SettingsDialog();
+        settingsDialog.showAndWait();
+    }
 
     private void withQueryEditDialog(BorderPane pane) {
         QueryDialog dlg = new QueryDialog();
@@ -103,7 +109,7 @@ public class Tester extends Application {
         primaryStage.setWidth(800);
         primaryStage.setHeight(600);
 
-        withQueryEditDialog(pane);
+        withSettingsDialog(pane);
 
         // Show the stage after possibly reading and setting window properties.
         primaryStage.show();
