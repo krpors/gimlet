@@ -5,6 +5,7 @@ import cruft.wtf.gimlet.Column;
 import cruft.wtf.gimlet.Configuration;
 import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.jdbc.SimpleQueryTask;
+import cruft.wtf.gimlet.ui.dialog.ColumnContentDialog;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -91,8 +92,6 @@ public class ResultTable extends TableView<ObservableList> {
                 return;
             }
 
-            // TODO: double click on cells view their full content in a text area
-
             if (item == null) {
                 // add a style class so it's easy to see it's nulled (from the database).
                 getStyleClass().add("null");
@@ -101,10 +100,13 @@ public class ResultTable extends TableView<ObservableList> {
                 return;
             }
 
-            System.out.println(item.getClass());
-
             // If the cell content is larger than 32 chars, abbreviate it and mark it as such.
             // User should be able to double click on the cell to display its full data.
+            // Cells which contain Strings are applicable for truncation only. So check that.
+            if (!(item.getClass().equals(String.class))) {
+                return;
+            }
+
             String s = item.toString().replace('\n', ' ').replace('\r', ' ').trim();
             int truncateSize = 32;
             Optional<Integer> tsize = Configuration.getInstance().getIntegerProperty(Configuration.Key.TRUNCATE_SIZE);
@@ -130,22 +132,4 @@ public class ResultTable extends TableView<ObservableList> {
         }
     }
 
-    /**
-     * This class is a simple dialog for displaying truncated data.
-     */
-    private class ColumnContentDialog extends Dialog {
-        public ColumnContentDialog(String columnName, String content) {
-            getScene().getStylesheets().add("/css/style.css");
-            setTitle("Contents of column " + columnName);
-            setResizable(true);
-            getDialogPane().getButtonTypes().add(ButtonType.OK);
-
-            TextArea derp = new TextArea(content);
-            derp.setPadding(new Insets(5));
-            derp.getStyleClass().add("query-editor");
-            derp.setEditable(false);
-
-            getDialogPane().setContent(derp);
-        }
-    }
 }
