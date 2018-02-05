@@ -1,10 +1,10 @@
 package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.conf.GimletProject;
+import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.FileOpenedEvent;
 import cruft.wtf.gimlet.event.FileSavedEvent;
 import cruft.wtf.gimlet.ui.ConnectionTabPane;
-import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.ui.Images;
 import cruft.wtf.gimlet.ui.LeftPane;
 import cruft.wtf.gimlet.ui.StatusBar;
@@ -15,6 +15,7 @@ import javafx.beans.binding.Bindings;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Accordion;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -226,7 +227,13 @@ public class GimletApp extends Application {
 
         MenuItem fileItemExit = new MenuItem("Exit");
         fileItemExit.setAccelerator(KeyCombination.keyCombination("Ctrl+Q"));
-        fileItemExit.setOnAction(event -> Platform.exit());
+        fileItemExit.setOnAction(event -> {
+            askForClosing().ifPresent(buttonType -> {
+                if (buttonType == ButtonType.OK) {
+                    Platform.exit();
+                }
+            });
+        });
         fileItemExit.setGraphic(Images.ACCOUNT_LOGOUT.imageView());
 
         menuFile.getItems().add(fileItemNew);
@@ -275,6 +282,17 @@ public class GimletApp extends Application {
         return pane;
     }
 
+    /**
+     * Pops up a dialog asking to exit or not.
+     *
+     * @return The result of the confirmation dialog.
+     */
+    private Optional<ButtonType> askForClosing() {
+        return Utils.showConfirm(
+                "Are you sure you want to exit?",
+                "Close Gimlet",
+                "This will discard any unsaved changes.");
+    }
 
     /**
      * Creates the {@link Stage} and all other cruft of the main window.
@@ -318,6 +336,14 @@ public class GimletApp extends Application {
 
         // Show the stage after possibly reading and setting window properties.
         primaryStage.show();
+
+        scene.getWindow().setOnCloseRequest(event -> {
+            askForClosing().ifPresent(buttonType -> {
+                if (buttonType != ButtonType.OK) {
+                    event.consume();
+                }
+            });
+        });
 
         logger.info("Gimlet started and ready");
     }
