@@ -1,6 +1,7 @@
 package cruft.wtf.gimlet.ui;
 
 import com.google.common.eventbus.Subscribe;
+import cruft.wtf.gimlet.event.ConnectEvent;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.FileOpenedEvent;
 import cruft.wtf.gimlet.event.FileSavedEvent;
@@ -42,6 +43,18 @@ public class StatusBar extends HBox {
         String date = sdf.format(new Date());
         String s = String.format(status, fmt);
         Platform.runLater(() -> lblStatus.setText(date + s));
+    }
+
+    @Subscribe
+    public void onConnectEvent(final ConnectEvent event) {
+        switch (event.getType()) {
+            case CLOSED: // lol
+                setStatus("Connection closed to '%s'", event.getAlias().getName());
+                break;
+            case CONNECTED:
+                setStatus("Connected to '%s' (%s)!", event.getAlias().getName(), event.getAlias().getUrl());
+                break;
+        }
     }
 
     @Subscribe

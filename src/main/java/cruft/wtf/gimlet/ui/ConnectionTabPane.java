@@ -75,6 +75,11 @@ public class ConnectionTabPane extends TabPane {
     @SuppressWarnings("unused")
     @Subscribe
     public void onConnectEvent(final ConnectEvent evt) {
+        // Only act on event types which are about to be creating new connections.
+        if (evt.getType() != ConnectEvent.Type.INITATED) {
+            return;
+        }
+
         ConnectionTab tab = new ConnectionTab(evt.getAlias());
 
         ConnectTask connectTask = new ConnectTask(evt.getAlias());
@@ -97,6 +102,8 @@ public class ConnectionTabPane extends TabPane {
 
         connectTask.setOnSucceeded(event -> {
             tab.setConnection(connectTask.getValue());
+            // Publish another connect event, except of type 'CONNECTED'.
+            EventDispatcher.getInstance().post(new ConnectEvent(ConnectEvent.Type.CONNECTED, evt.getAlias()));
         });
 
         connectTask.setOnFailed(event -> {

@@ -6,9 +6,14 @@ import cruft.wtf.gimlet.event.ConnectEvent;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.ui.dialog.AliasDialog;
 import javafx.collections.ObservableList;
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.Tooltip;
 
-import java.util.Collections;
 import java.util.Optional;
 
 public class AliasList extends ListView<Alias> {
@@ -87,7 +92,7 @@ public class AliasList extends ListView<Alias> {
             MenuItem editItem = new MenuItem("Properties...");
             editItem.setGraphic(Images.PENCIL.imageView());
 
-            itemConnect.setOnAction(e -> EventDispatcher.getInstance().post(new ConnectEvent(getItem())));
+            itemConnect.setOnAction(e -> EventDispatcher.getInstance().post(new ConnectEvent(ConnectEvent.Type.INITATED, getItem())));
             newItem.setOnAction(e -> openNewDialog());
             editItem.setOnAction(e -> openEditDialog());
             deleteItem.setOnAction(e -> deleteSelectedAlias());

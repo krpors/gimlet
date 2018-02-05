@@ -2,6 +2,7 @@ package cruft.wtf.gimlet.ui;
 
 import com.google.common.eventbus.Subscribe;
 import cruft.wtf.gimlet.conf.Alias;
+import cruft.wtf.gimlet.event.ConnectEvent;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecuteEvent;
 import javafx.application.Platform;
@@ -15,6 +16,7 @@ import javafx.scene.layout.StackPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.awt.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
@@ -87,6 +89,7 @@ public class ConnectionTab extends Tab {
                 // Close the connection when the tab is closed.
                 if (connection != null) {
                     connection.close();
+                    EventDispatcher.getInstance().post(new ConnectEvent(ConnectEvent.Type.CLOSED, alias));
                     logger.info("Closed connection for '{}'", alias.getName());
                     logger.debug("Unregistered {} from Event Dispatcher", this);
                 }
