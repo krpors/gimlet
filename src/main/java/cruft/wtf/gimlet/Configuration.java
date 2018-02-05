@@ -114,6 +114,14 @@ public final class Configuration extends Properties {
     }
 
     /**
+     * Sets the default values for the configuration.
+     */
+    public void setDefaults() {
+        setProperty(Key.TRUNCATE_SIZE, 32);
+        setProperty(Key.WINDOW_MAXIMIZED, false);
+    }
+
+    /**
      * Loads the property file given by {@link Configuration#CONFIG_FILE}.
      *
      * @throws IOException When the file cannot be read.
@@ -121,6 +129,7 @@ public final class Configuration extends Properties {
     public void load() throws IOException {
         if (!CONFIG_FILE.exists()) {
             logger.info("Configuration file '{}' does not exist; setting default values", CONFIG_FILE);
+            setDefaults();
             return;
         }
         FileInputStream fis = new FileInputStream(CONFIG_FILE);
