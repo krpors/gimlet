@@ -82,7 +82,7 @@ public class ObjectsTab extends Tab {
         bar = new ProgressIndicator();
         bar.setVisible(false);
 
-        btnLoadObjects = new Button("Load database objects", Images.MEDIA_PLAY.imageView());
+        btnLoadObjects = new Button("Load database objects", Images.RUN.imageView());
         btnLoadObjects.setOnAction(handlerLoad);
 
         boxButtons = new VBox(
@@ -192,7 +192,7 @@ public class ObjectsTab extends Tab {
         handlerCancel = event -> {
             taskLoadObjects.cancel();
             btnLoadObjects.setText("Load database objects");
-            btnLoadObjects.setGraphic(Images.MEDIA_PLAY.imageView());
+            btnLoadObjects.setGraphic(Images.RUN.imageView());
             lblLoadingSchema.setText("");
             lblLoadingTable.setText("");
             bar.setVisible(false);

@@ -98,19 +98,12 @@ subqueries.
 1. Splash screen with some funky graphic.
 1. Help file/screen.
 1. New project.
-1. ~~Save project as.~~
-1. ~~Drag/drop queries to a new parent.~~
 1. Drag/drop (or reorder by button or context menu) of aliases.
 1. Query wizard or something: start by a root query, execute sample query, then hit next
 to configure the next query, until finished, then a query tree is a result.
-1. ~~Tab coloring so difference in environment can be made more explicit.~~
-1. Ask for password checkbox.
 1. "Rotated table" view. Handy with many columns.
 1. Easier column selector (hide all/show all)
-1. Query/alias editor window doesn't resize the textarea when resized, so fix that.
 1. Syntax highlighter?
-1. Preferences window.
-    1. Preference option: column content truncate size
 
 
 # Other things

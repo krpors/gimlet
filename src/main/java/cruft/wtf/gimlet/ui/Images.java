@@ -15,40 +15,40 @@ import java.util.Map;
  */
 public enum Images {
 
-    ACCOUNT_LOGIN("/icons/account-login-2x.png"),
-    ACCOUNT_LOGOUT("/icons/account-logout-2x.png"),
-    BOLT("/icons/bolt-2x.png"),
-    CLOCK("/icons/clock-2x.png"),
-    CODE("/icons/code-2x.png"),
-    COG("/icons/cog-2x.png"),
-    DASHBOARD("/icons/dashboard-2x.png"),
-    DIALOG_ERROR("/icons/dialog-error.png"),
-    DOCUMENT("/icons/document-2x.png"),
-    ELLIPSES("/icons/ellipses-2x.png"),
-    FILE("/icons/file-2x.png"),
-    FOLDER("/icons/folder-2x.png"),
-    LOCK_LOCKED_4X("/icons/lock-locked-4x.png"),
-    MAGNIFYING_GLASS("/icons/magnifying-glass-2x.png"),
-    MEDIA_PLAY("/icons/media-play-2x.png"),
-    MINUS("/icons/minus-2x.png"),
-    PENCIL("/icons/pencil-2x.png"),
-    PERSON("/icons/person-2x.png"),
-    PLUS("/icons/plus-2x.png"),
-    POWER_STANDBY("/icons/power-standby-2x.png"),
-    PULSE("/icons/pulse-2x.png"),
-    QUESTION_MARK("/icons/question-mark-2x.png"),
-    RELOAD("/icons/reload-2x.png"),
-    SPREADSHEET("/icons/spreadsheet-2x.png"),
-    TRASH("/icons/trash-2x.png"),
-    WARNING("/icons/warning-2x.png"),
-    WRENCH("/icons/wrench-2x.png"),;
+    ACCOUNT_LOGIN("/icons/lan-connect-24px.png", true),
+    ACCOUNT_LOGOUT("/icons/logout-variant-24px.png", true),
+    CLOCK("/icons/clock-24px.png", true),
+    CODE("/icons/code-not-equal-24px.png", true),
+    COG("/icons/settings-24px.png", true),
+    COPY("/icons/content-copy-24px.png", true),
+    CUT("/icons/content-cut-24px.png", true),
+    DOCUMENT("/icons/database-24px.png", true),
+    FOLDER("/icons/clock-24px.png", true),
+    MAGNIFYING_GLASS("/icons/database-search-24px.png", true),
+    PASTE("/icons/content-paste-24px.png", true),
+    PENCIL("/icons/pencil-24px.png", true),
+    PERSON("/icons/account-24px.png", true),
+    PLUS("/icons/plus-24px.png", true),
+    RUN("/icons/run-24px.png", true),
+    SAVE("/icons/content-save-24px.png", true),
+    SPREADSHEET("/icons/table-large-24px.png", true),
+    TRASH("/icons/delete-forever-24px.png", true),
+    WARNING("/icons/alert-outline-24px.png", true),
 
-    private String path;
+    /**
+     * Other, larger icons.
+     */
+    DIALOG_ERROR("/icons/dialog-error.png", false),
+    LOCK_LOCKED_4X("/icons/lock-48px.png", false);
+
+    private String  path;
+    private boolean resize;
 
     private static Logger logger = LoggerFactory.getLogger(Images.class);
 
-    Images(String path) {
+    Images(String path, boolean resize) {
         this.path = path;
+        this.resize = resize;
     }
 
     private static Map<Images, Image> imageCache;
@@ -67,7 +67,12 @@ public enum Images {
     }
 
     public ImageView imageView() {
-        return new ImageView(imageCache.get(this));
+        ImageView view = new ImageView(imageCache.get(this));
+        if (resize) {
+            view.setFitHeight(16);
+            view.setPreserveRatio(true);
+        }
+        return view;
     }
 
 }

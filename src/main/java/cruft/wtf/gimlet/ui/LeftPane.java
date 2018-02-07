@@ -27,7 +27,7 @@ public class LeftPane extends BorderPane {
         tabProjectProps.setGraphic(Images.COG.imageView());
         tabProjectProps.setClosable(false);
         Tab tabAliases = new Tab("Aliases", this.aliasList);
-        tabAliases.setGraphic(Images.BOLT.imageView());
+        tabAliases.setGraphic(Images.ACCOUNT_LOGIN.imageView());
         tabAliases.setClosable(false);
         Tab tabQueries = new Tab("Queries", this.queryTree);
         tabQueries.setGraphic(Images.MAGNIFYING_GLASS.imageView());

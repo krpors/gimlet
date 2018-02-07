@@ -255,11 +255,11 @@ public class QueryTree extends TreeView<Query> {
         private ContextMenu menu = new ContextMenu();
 
         public QueryConfigurationTreeCell() {
-            MenuItem menuItemExecute = new MenuItem("Run", Images.MEDIA_PLAY.imageView());
+            MenuItem menuItemExecute = new MenuItem("Run", Images.RUN.imageView());
             MenuItem menuItemNew = new MenuItem("New...", Images.PLUS.imageView());
-            MenuItem menuItemCut = new MenuItem("Cut", Images.BOLT.imageView());
-            MenuItem menuItemCopy = new MenuItem("Copy", Images.BOLT.imageView());
-            MenuItem menuItemPaste = new MenuItem("Paste", Images.BOLT.imageView());
+            MenuItem menuItemCut = new MenuItem("Cut", Images.CUT.imageView());
+            MenuItem menuItemCopy = new MenuItem("Copy", Images.COPY.imageView());
+            MenuItem menuItemPaste = new MenuItem("Paste", Images.PASTE.imageView());
             MenuItem menuItemDelete = new MenuItem("Delete...", Images.TRASH.imageView());
             MenuItem menuItemProperties = new MenuItem("Properties...", Images.PENCIL.imageView());
 

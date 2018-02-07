@@ -197,7 +197,7 @@ public class GimletApp extends Application {
             // TODO: invalidate UI, close tabs, connections, etc etc.
         });
 
-        MenuItem fileItemSave = new MenuItem("Save");
+        MenuItem fileItemSave = new MenuItem("Save", Images.SAVE.imageView());
         fileItemSave.setAccelerator(KeyCombination.keyCombination("Ctrl+S"));
         fileItemSave.setOnAction(event -> {
             if (gimletProject != null && gimletProject.getFile() != null) {

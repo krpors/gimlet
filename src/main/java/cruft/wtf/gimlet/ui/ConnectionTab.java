@@ -133,7 +133,7 @@ public class ConnectionTab extends Tab {
     public void setConnection(final Connection connection) {
         logger.debug("Established connection in connection tab");
         this.connection = connection;
-        setGraphic(Images.BOLT.imageView());
+        setGraphic(Images.ACCOUNT_LOGIN.imageView());
         // Cancel the counter connectionTimer, we're done.
         connectionTimer.cancel();
         // The visible part of this tab is now the normal border pane.
