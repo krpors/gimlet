@@ -13,6 +13,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.TransferMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,11 @@ public class QueryTree extends TreeView<Query> {
 
     public QueryTree() {
         EventDispatcher.getInstance().register(this);
+        setOnKeyPressed(event -> {
+            if (event.getCode() == KeyCode.F4) {
+                openEditSelectedQueryDialog();
+            }
+        });
     }
 
     /**
