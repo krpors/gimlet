@@ -4,10 +4,7 @@ import cruft.wtf.gimlet.conf.GimletProject;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.FileOpenedEvent;
 import cruft.wtf.gimlet.event.FileSavedEvent;
-import cruft.wtf.gimlet.ui.ConnectionTabPane;
-import cruft.wtf.gimlet.ui.Images;
-import cruft.wtf.gimlet.ui.LeftPane;
-import cruft.wtf.gimlet.ui.StatusBar;
+import cruft.wtf.gimlet.ui.*;
 import cruft.wtf.gimlet.ui.dialog.SettingsDialog;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -270,10 +267,13 @@ public class GimletApp extends Application {
         BorderPane pane = new BorderPane();
 
         Accordion accordion = new Accordion();
-        TitledPane pane1 = new TitledPane("Messages", new TextArea("Messages published throughout Gimlet"));
+        LogTable table = new LogTable();
+        TitledPane pane1 = new TitledPane("Messages", table);
+        LolAppender.table = table;
         pane1.setAnimated(false);
         TitledPane pane2 = new TitledPane("Scratch", new TextArea("Scratch pad"));
         pane2.setAnimated(false);
+
 
         accordion.getPanes().addAll(pane1, pane2);
 
