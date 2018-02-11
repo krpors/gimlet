@@ -269,7 +269,6 @@ public class GimletApp extends Application {
         Accordion accordion = new Accordion();
         LogTable table = new LogTable();
         TitledPane pane1 = new TitledPane("Messages", table);
-        LolAppender.table = table;
         pane1.setAnimated(false);
         TitledPane pane2 = new TitledPane("Scratch", new TextArea("Scratch pad"));
         pane2.setAnimated(false);
@@ -346,6 +345,7 @@ public class GimletApp extends Application {
         });
 
         logger.info("Gimlet started and ready");
+        logger.error("Whoops");
     }
 
 }

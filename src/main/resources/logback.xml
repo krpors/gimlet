@@ -5,14 +5,10 @@
         </encoder>
     </appender>
 
-    <appender name="LOL" class="cruft.wtf.gimlet.LolAppender">
-        <encoder>
-            <pattern>%msg</pattern>
-        </encoder>
-    </appender>
+    <appender name="EVENTBUS" class="cruft.wtf.gimlet.DispatchAppender"/>
 
     <root level="debug">
         <appender-ref ref="STDOUT"/>
-        <appender-ref ref="LOL"/>
+        <appender-ref ref="EVENTBUS"/>
     </root>
 </configuration>
