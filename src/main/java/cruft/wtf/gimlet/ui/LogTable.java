@@ -29,6 +29,8 @@ public class LogTable extends TableView<ILoggingEvent> {
     public LogTable() {
         EventDispatcher.getInstance().register(this);
 
+        setStyle("-fx-font-size: 8pt");
+
         setEditable(false);
         setTableMenuButtonVisible(true);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
@@ -48,7 +50,6 @@ public class LogTable extends TableView<ILoggingEvent> {
         columnDateTime.setMaxWidth(650);
         columnDateTime.setSortable(false);
         getColumns().add(columnDateTime);
-
 
         TableColumn<ILoggingEvent, String> columnColName = new TableColumn<>("Message");
         columnColName.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getFormattedMessage()));

@@ -9,17 +9,11 @@ import cruft.wtf.gimlet.ui.dialog.SettingsDialog;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.geometry.Orientation;
+import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.Scene;
-import javafx.scene.control.Accordion;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TitledPane;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
@@ -264,21 +258,19 @@ public class GimletApp extends Application {
      * @return
      */
     private Node createBottom() {
-        BorderPane pane = new BorderPane();
+        TabPane tabPane = new TabPane();
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+        tabPane.setSide(Side.BOTTOM);
 
-        Accordion accordion = new Accordion();
-        LogTable table = new LogTable();
-        TitledPane pane1 = new TitledPane("Messages", table);
-        pane1.setAnimated(false);
-        TitledPane pane2 = new TitledPane("Scratch", new TextArea("Scratch pad"));
-        pane2.setAnimated(false);
+        Tab tabProps = new Tab("Project properties", new ProjectPropertiesPane());
+        tabProps.setGraphic(Images.COG.imageView());
 
+        Tab tabLog = new Tab("Logging", new LogTable());
+        tabLog.setGraphic(Images.MAGNIFYING_GLASS.imageView());
 
-        accordion.getPanes().addAll(pane1, pane2);
-
-        pane.setCenter(accordion);
-        pane.setBottom(new StatusBar());
-        return pane;
+        tabPane.getTabs().add(tabProps);
+        tabPane.getTabs().add(tabLog);
+        return tabPane;
     }
 
     /**
@@ -311,12 +303,17 @@ public class GimletApp extends Application {
 
         connectionTabPane = new ConnectionTabPane();
         Node left = createLeft();
+
         centerPane = new SplitPane(left, connectionTabPane);
+
         SplitPane.setResizableWithParent(left, false);
 
+        SplitPane lolPane = new SplitPane(centerPane, createBottom());
+        lolPane.setOrientation(Orientation.VERTICAL);
+        lolPane.setDividerPosition(0, 0.8);
+
         pane.setTop(createMenuBar());
-        pane.setCenter(centerPane);
-        pane.setBottom(createBottom());
+        pane.setCenter(lolPane);
 
         Scene scene = new Scene(pane);
         scene.getStylesheets().add("/css/style.css");

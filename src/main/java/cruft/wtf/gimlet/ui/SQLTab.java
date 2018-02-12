@@ -105,6 +105,7 @@ public class SQLTab extends Tab {
 
         // Task failed:
         task.setOnFailed(event -> {
+            logger.error("Query failed", task.getException());
             // When the query failed, we add a textarea to the tab instead of the table.
             // This textarea contains the stacktrace information.
             StringWriter sw = new StringWriter();
