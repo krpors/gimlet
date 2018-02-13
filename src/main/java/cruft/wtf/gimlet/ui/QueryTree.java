@@ -7,6 +7,7 @@ import cruft.wtf.gimlet.event.QueryExecuteEvent;
 import cruft.wtf.gimlet.jdbc.NamedParameterPreparedStatement;
 import cruft.wtf.gimlet.ui.dialog.ParamInputDialog;
 import cruft.wtf.gimlet.ui.dialog.QueryDialog;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.control.*;
@@ -60,15 +61,8 @@ public class QueryTree extends TreeView<Query> {
         setRoot(root);
 
         ContextMenu menu = new ContextMenu();
-        MenuItem newRootQuery = new MenuItem("New root query", Images.PLUS.imageView());
-        newRootQuery.setOnAction(event -> {
-            QueryDialog qed = new QueryDialog();
-            Optional<Query> q = qed.showAndWait();
-            q.ifPresent(query -> {
-                getRoot().getChildren().add(new TreeItem<>(query));
-                queryList.add(query);
-            });
-        });
+        MenuItem newRootQuery = new MenuItem("New root query...", Images.PLUS.imageView());
+        newRootQuery.setOnAction(event -> openNewRootQueryDialog());
         menu.getItems().add(newRootQuery);
         setContextMenu(menu);
     }
@@ -122,6 +116,15 @@ public class QueryTree extends TreeView<Query> {
             e.setQuery(query);
             e.setColumnnMap(stringObjectMap);
             EventDispatcher.getInstance().post(e);
+        });
+    }
+
+    private void openNewRootQueryDialog() {
+        QueryDialog qed = new QueryDialog();
+        Optional<Query> q = qed.showAndWait();
+        q.ifPresent(query -> {
+            getRoot().getChildren().add(new TreeItem<>(query));
+            queryList.add(query);
         });
     }
 
@@ -262,6 +265,7 @@ public class QueryTree extends TreeView<Query> {
 
         public QueryConfigurationTreeCell() {
             MenuItem menuItemExecute = new MenuItem("Run", Images.RUN.imageView());
+            MenuItem menuItemNewRoot = new MenuItem("New root query...", Images.PLUS.imageView());
             MenuItem menuItemNew = new MenuItem("New...", Images.PLUS.imageView());
             MenuItem menuItemCut = new MenuItem("Cut", Images.CUT.imageView());
             MenuItem menuItemCopy = new MenuItem("Copy", Images.COPY.imageView());
@@ -271,6 +275,8 @@ public class QueryTree extends TreeView<Query> {
 
             menu.getItems().addAll(
                     menuItemExecute,
+                    new SeparatorMenuItem(),
+                    menuItemNewRoot,
                     new SeparatorMenuItem(),
                     menuItemNew,
                     new SeparatorMenuItem(),
@@ -287,6 +293,7 @@ public class QueryTree extends TreeView<Query> {
             menuItemExecute.disableProperty().bind(GimletApp.connectionTabPane.tabSelectedProperty().not());
 
             menuItemExecute.setOnAction(e -> executeSelectedQuery(getItem()));
+            menuItemNewRoot.setOnAction(event -> openNewRootQueryDialog());
             menuItemNew.setOnAction(event -> openNewQueryDialog(getItem()));
             menuItemCut.setOnAction(event -> {
                 // todo;
