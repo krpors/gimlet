@@ -1,5 +1,6 @@
-package cruft.wtf.gimlet.ui;
+package cruft.wtf.gimlet.ui.objects;
 
+import cruft.wtf.gimlet.ui.drilldown.DrillResultTable;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;

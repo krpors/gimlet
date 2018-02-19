@@ -5,6 +5,8 @@ import cruft.wtf.gimlet.ui.*;
 import cruft.wtf.gimlet.ui.dialog.ParamInputDialog;
 import cruft.wtf.gimlet.ui.dialog.QueryDialog;
 import cruft.wtf.gimlet.ui.dialog.SettingsDialog;
+import cruft.wtf.gimlet.ui.objects.ObjectsTable;
+import cruft.wtf.gimlet.ui.objects.ObjectsTableData;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;

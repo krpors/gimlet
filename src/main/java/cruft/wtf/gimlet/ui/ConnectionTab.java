@@ -5,6 +5,8 @@ import cruft.wtf.gimlet.conf.Alias;
 import cruft.wtf.gimlet.event.ConnectEvent;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecuteEvent;
+import cruft.wtf.gimlet.ui.drilldown.DrillDownTab;
+import cruft.wtf.gimlet.ui.objects.ObjectsTab;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
@@ -16,7 +18,6 @@ import javafx.scene.layout.StackPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.awt.*;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;

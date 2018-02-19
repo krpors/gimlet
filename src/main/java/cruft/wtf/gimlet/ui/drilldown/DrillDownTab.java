@@ -1,4 +1,4 @@
-package cruft.wtf.gimlet.ui;
+package cruft.wtf.gimlet.ui.drilldown;
 
 
 import com.sun.javafx.scene.control.behavior.TabPaneBehavior;
@@ -7,6 +7,8 @@ import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecutedEvent;
 import cruft.wtf.gimlet.jdbc.NamedQueryTask;
+import cruft.wtf.gimlet.ui.ConnectionTab;
+import cruft.wtf.gimlet.ui.Images;
 import javafx.collections.ListChangeListener;
 import javafx.geometry.Insets;
 import javafx.scene.Node;

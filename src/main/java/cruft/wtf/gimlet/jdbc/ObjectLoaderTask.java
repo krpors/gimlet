@@ -1,6 +1,6 @@
 package cruft.wtf.gimlet.jdbc;
 
-import cruft.wtf.gimlet.ui.DatabaseObject;
+import cruft.wtf.gimlet.ui.objects.DatabaseObject;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;

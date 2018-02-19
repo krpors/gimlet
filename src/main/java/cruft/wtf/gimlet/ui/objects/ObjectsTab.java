@@ -1,7 +1,8 @@
-package cruft.wtf.gimlet.ui;
+package cruft.wtf.gimlet.ui.objects;
 
 import cruft.wtf.gimlet.jdbc.ObjectLoaderTask;
 import cruft.wtf.gimlet.jdbc.SqlType;
+import cruft.wtf.gimlet.ui.Images;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -22,7 +23,6 @@ import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;

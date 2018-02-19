@@ -1,9 +1,10 @@
-package cruft.wtf.gimlet.ui;
+package cruft.wtf.gimlet.ui.drilldown;
 
 
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecuteEvent;
+import cruft.wtf.gimlet.ui.ResultTable;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;

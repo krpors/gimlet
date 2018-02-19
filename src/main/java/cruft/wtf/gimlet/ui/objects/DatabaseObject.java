@@ -1,4 +1,4 @@
-package cruft.wtf.gimlet.ui;
+package cruft.wtf.gimlet.ui.objects;
 
 public class DatabaseObject {
 
