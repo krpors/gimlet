@@ -105,8 +105,8 @@ to configure the next query, until finished, then a query tree is a result.
 1. Easier column selector (hide all/show all)
 1. Syntax highlighter?
 
-
 # Other things
 
-Mimic network latency: https://wiki.linuxfoundation.org/networking/netem
+* Mimic network latency: https://wiki.linuxfoundation.org/networking/netem
+* Icons: https://materialdesignicons.com/
 

@@ -8,9 +8,12 @@ import cruft.wtf.gimlet.ui.Images;
 import cruft.wtf.gimlet.ui.dialog.ParamInputDialog;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
@@ -58,7 +61,19 @@ public class DrillDownExecutionTab extends Tab {
                 executeQuery();
             }
         });
-        ToolBar bar = new ToolBar(btnRerun);
+
+        ToggleButton btnLol = new ToggleButton();
+        btnLol.setGraphic(Images.TABLE_COLUMN_WIDTH.imageView());
+        btnLol.setTooltip(new Tooltip("Fit columns to table width"));
+        btnLol.setOnAction(event -> {
+            if (btnLol.isSelected()) {
+                table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+            } else {
+                table.setColumnResizePolicy(TableView.UNCONSTRAINED_RESIZE_POLICY);
+            }
+        });
+
+        ToolBar bar = new ToolBar(btnRerun, btnLol);
         VBox box = new VBox(lbl, bar);
         pane.setTop(box);
         pane.setCenter(table);
@@ -83,6 +98,7 @@ public class DrillDownExecutionTab extends Tab {
         namedQueryTask.setOnScheduled(event -> {
             btnRerun.setDisable(true);
             table.getItems().clear();
+            table.getColumns().clear();
         });
 
         namedQueryTask.setOnFailed(event -> {
