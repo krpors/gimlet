@@ -9,7 +9,11 @@ import cruft.wtf.gimlet.event.QueryExecutedEvent;
 import cruft.wtf.gimlet.jdbc.SimpleQueryTask;
 import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
-import javafx.scene.control.*;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
@@ -55,7 +59,6 @@ public class SQLTab extends Tab {
         txtQuery.setPromptText("Enter any SQL query here");
         txtQuery.setOnKeyPressed(e -> {
             if (e.isControlDown() && e.getCode() == KeyCode.ENTER) {
-                logger.debug("Executing query...");
                 executeQuery();
             }
         });
@@ -79,10 +82,19 @@ public class SQLTab extends Tab {
      * Executes the query in a JavaFX task.
      */
     private void executeQuery() {
+        if (txtQuery.getText() == null) {
+            return;
+        }
+
         String query = txtQuery.getText();
         // Check if we selected some text. If so, that's the query we want to run.
         if (txtQuery.getSelection().getLength() != 0) {
             query = txtQuery.getSelectedText();
+        }
+
+        String truncated = Utils.truncate(query, 36);
+        if (truncated.equals("")) {
+            return;
         }
 
         final ResultTable table = new ResultTable();

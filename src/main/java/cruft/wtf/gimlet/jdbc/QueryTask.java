@@ -147,7 +147,7 @@ public abstract class QueryTask extends Task<ObservableList<ObservableList>> {
 
             // When all is finished, add it to the end list. This will notify listeners.
             processingTime.set(System.currentTimeMillis() - before);
-            logger.debug("Task finished in {} ms.", processingTime.get());
+            logger.debug("Task finished in {} ms, resulting in {} rows", processingTime.get(), rowCount);
             return tempList;
         } finally {
             Utils.close(statement);
