@@ -26,13 +26,7 @@ public class DrillResultTable extends ResultTable {
 
     private final Query query;
 
-    /**
-     * The parent tab where this result table is added.
-     */
-    private DrillDownTab drillDownTab;
-
-    public DrillResultTable(final DrillDownTab drillDownTab, final Query query) {
-        this.drillDownTab = drillDownTab;
+    public DrillResultTable(final Query query) {
         this.query = query;
         setRowFactory(param -> new DrillResultTableRow());
     }

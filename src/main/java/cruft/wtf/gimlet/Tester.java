@@ -34,8 +34,10 @@ public class Tester extends Application {
     }
 
     private void withParamInputDialog(BorderPane pane) {
-        Set<String> keys = new HashSet<>(Arrays.asList("PROG_ID", "STUFF_NAME", "CRUFT_BALLS"));
-
+        Map<String, Object> keys = new HashMap<>();
+        keys.put("PROG_ID", "ke");
+        keys.put("STUFF_NAME", "zeoinkg");
+        keys.put("CRUFT_BALLS", "blargh");
 
         ParamInputDialog dlg = new ParamInputDialog(keys);
         Optional<Map<String,Object>> map = dlg.showAndWait();
@@ -111,7 +113,7 @@ public class Tester extends Application {
         primaryStage.setWidth(800);
         primaryStage.setHeight(600);
 
-        withSettingsDialog(pane);
+        withParamInputDialog(pane);
 
         // Show the stage after possibly reading and setting window properties.
         primaryStage.show();

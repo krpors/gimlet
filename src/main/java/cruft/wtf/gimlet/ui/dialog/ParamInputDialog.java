@@ -9,7 +9,6 @@ import javafx.scene.control.Dialog;
 import javafx.scene.control.TextField;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -21,16 +20,20 @@ import java.util.TreeMap;
  */
 public class ParamInputDialog extends Dialog<Map<String, Object>> {
 
-    public ParamInputDialog(Set<String> paramNames) {
+    public ParamInputDialog(Map<String, Object> paramNames) {
         setTitle("Input for query");
         setHeaderText("Specify input for the query:");
         setGraphic(Images.MAGNIFYING_GLASS.imageView());
 
         FormPane pane = new FormPane();
-        paramNames.forEach(s -> {
+        paramNames.forEach((k, v) -> {
             TextField tf = new TextField();
-            tf.setId(s);
-            pane.add(s + ":", tf);
+            tf.setId(k);
+            // if a value is given for the key, pre-fill the contents.
+            if (v != null) {
+                tf.setText(String.valueOf(v));
+            }
+            pane.add(k + ":", tf);
         });
 
         getDialogPane().setContent(pane);

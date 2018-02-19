@@ -4,29 +4,25 @@ package cruft.wtf.gimlet.ui.drilldown;
 import com.sun.javafx.scene.control.behavior.TabPaneBehavior;
 import com.sun.javafx.scene.control.skin.TabPaneSkin;
 import cruft.wtf.gimlet.conf.Query;
-import cruft.wtf.gimlet.event.EventDispatcher;
-import cruft.wtf.gimlet.event.QueryExecutedEvent;
-import cruft.wtf.gimlet.jdbc.NamedQueryTask;
 import cruft.wtf.gimlet.ui.ConnectionTab;
 import cruft.wtf.gimlet.ui.Images;
 import javafx.collections.ListChangeListener;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.Map;
 
 /**
- * This class is a tab where drilldown functionality exists.
+ * This class is a tab where drilldown functionality exists. This tab contains the results
+ * of the drilldown functionalities, which are represented as tabs as well.
+ *
+ * @see DrillDownExecutionTab
  */
 public class DrillDownTab extends Tab {
 
@@ -38,12 +34,6 @@ public class DrillDownTab extends Tab {
     private final ConnectionTab connectionTab;
 
     private TabPane tabPaneResultSets;
-
-    /**
-     * The content pane is a stack pane containing the contents. When no result is shown (i.e. no tabs visible)  an
-     * 'empty' pane is shown with some text provided.
-     */
-    private StackPane contentPane;
 
     private Node emptyPane;
 
@@ -59,7 +49,7 @@ public class DrillDownTab extends Tab {
         setClosable(false);
         setGraphic(Images.MAGNIFYING_GLASS.imageView());
 
-        contentPane = new StackPane();
+        StackPane contentPane = new StackPane();
         emptyPane = createEmptyPane();
 
         tabPaneResultSets = new TabPane();
@@ -84,79 +74,10 @@ public class DrillDownTab extends Tab {
     }
 
     public void executeQuery(final Query query, final Map<String, Object> columnMap) {
-        logger.debug("Execute drilldown!!!!");
-
-        final DrillResultTable table = new DrillResultTable(this, query);
-        final Tab tab = new Tab(query.getName());
-        BorderPane pane = new BorderPane();
-        Label lbl = new Label(query.getDescription());
-        lbl.setPadding(new Insets(10));
-        pane.setTop(lbl);
-        pane.setCenter(table);
-        tab.setContent(pane);
-        tab.setGraphic(Images.CLOCK.imageView());
-
-        NamedQueryTask namedQueryTask = new NamedQueryTask(
-                this.connectionTab.getConnection(),
-                query.getContent(),
-                100,
-                columnMap);
-
-        namedQueryTask.setOnScheduled(event -> {
-            tabPaneResultSets.getTabs().add(tab);
-            tabPaneResultSets.getSelectionModel().select(tab);
-        });
-
-        namedQueryTask.setOnFailed(event -> {
-            tab.setGraphic(Images.WARNING.imageView());
-            // When the query failed, we add a textarea to the tab instead of the table.
-            // This textarea contains the stacktrace information.
-            StringWriter sw = new StringWriter();
-            namedQueryTask.getException().printStackTrace(new PrintWriter(sw));
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder
-                    .append("Source query:\n\n")
-                    .append(namedQueryTask.getQuery())
-                    .append("\n\n");
-
-            if (!namedQueryTask.getNamedProperties().isEmpty()) {
-                stringBuilder.append("Named parameters given:\n\n");
-                namedQueryTask.getNamedProperties().forEach((s, o) -> {
-                    stringBuilder.append(String.format("\t%s = %s\n", s, o));
-                });
-            } else {
-                stringBuilder.append("The query does not contain named parameters.\n");
-            }
-
-            stringBuilder
-                    .append("\nStacktrace:\n\n")
-                    .append(sw.toString());
-            TextArea area = new TextArea(stringBuilder.toString());
-            area.getStyleClass().add("error-text");
-            area.setEditable(false);
-            tab.setContent(area);
-        });
-
-        namedQueryTask.setOnSucceeded(event -> {
-            tab.setGraphic(Images.SPREADSHEET.imageView());
-            table.setColumns(namedQueryTask.columnProperty());
-
-            if (namedQueryTask.getRowCount() <= 0) {
-                table.setPlaceHolderNoResults();
-            } else {
-                table.setItems(namedQueryTask.getValue());
-            }
-
-            QueryExecutedEvent qee = new QueryExecutedEvent();
-            qee.setQuery(namedQueryTask.getQuery());
-            qee.setRuntime(namedQueryTask.getProcessingTime());
-            qee.setRowCount(namedQueryTask.getRowCount());
-            EventDispatcher.getInstance().post(qee);
-        });
-
-        Thread t = new Thread(namedQueryTask, "Gimlet named query task");
-        t.setDaemon(true);
-        t.start();
+        DrillDownExecutionTab tab = new DrillDownExecutionTab(this, query, columnMap);
+        tabPaneResultSets.getTabs().add(tab);
+        tabPaneResultSets.getSelectionModel().select(tab);
+        tab.executeQuery();
     }
 
     /**
@@ -169,5 +90,14 @@ public class DrillDownTab extends Tab {
             TabPaneBehavior b = ((TabPaneSkin) (tabPaneResultSets.getSkin())).getBehavior();
             b.closeTab(selected);
         }
+    }
+
+    /**
+     * Gets the connection tab this drilldown tab is a child of.
+     *
+     * @return The connection tab.
+     */
+    public ConnectionTab getConnectionTab() {
+        return connectionTab;
     }
 }
