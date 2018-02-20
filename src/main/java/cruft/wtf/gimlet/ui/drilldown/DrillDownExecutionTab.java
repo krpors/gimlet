@@ -3,12 +3,12 @@ package cruft.wtf.gimlet.ui.drilldown;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecutedEvent;
+import cruft.wtf.gimlet.jdbc.NamedParameterPreparedStatement;
 import cruft.wtf.gimlet.jdbc.NamedQueryTask;
 import cruft.wtf.gimlet.ui.Images;
 import cruft.wtf.gimlet.ui.dialog.ParamInputDialog;
 import javafx.geometry.Insets;
 import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TableView;
@@ -22,8 +22,10 @@ import javafx.scene.layout.VBox;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * This tab contains the logic for connecting and executing a named and parameterized query.
@@ -36,9 +38,11 @@ public class DrillDownExecutionTab extends Tab {
 
     private final DrillResultTable table;
 
-    private final Map<String, Object> columnMap;
+    private Map<String, Object> columnMap;
 
     private Button btnRerun;
+
+    private Set<String> uniqueParams;
 
     public DrillDownExecutionTab(final DrillDownTab drillDownTab, final Query query, final Map<String, Object> columnMap) {
         this.drillDownTab = drillDownTab;
@@ -49,22 +53,19 @@ public class DrillDownExecutionTab extends Tab {
         BorderPane pane = new BorderPane();
         Label lbl = new Label(query.getDescription());
         lbl.setPadding(new Insets(5));
+
+        // Recompile the query so we know the unique parameters. This is used by the re-running
+        NamedParameterPreparedStatement.ParseResult pr = NamedParameterPreparedStatement.parse(query.getContent());
+        uniqueParams = pr.getUniqueParameters();
+
         btnRerun = new Button();
         btnRerun.setTooltip(new Tooltip("Re-run the query"));
         btnRerun.setGraphic(Images.RUN.imageView());
-        btnRerun.setOnAction(event -> {
-            if (!columnMap.isEmpty()) {
-                ParamInputDialog dlg = new ParamInputDialog(columnMap);
-                Optional<Map<String, Object>> opt = dlg.showAndWait();
-                opt.ifPresent(this::executeQuery);
-            } else {
-                executeQuery();
-            }
-        });
+        btnRerun.setOnAction(event -> openParameterDialog());
 
         ToggleButton btnLol = new ToggleButton();
         btnLol.setGraphic(Images.TABLE_COLUMN_WIDTH.imageView());
-        btnLol.setTooltip(new Tooltip("Fit columns to table width"));
+        btnLol.setTooltip(new Tooltip("Toggle fit columns to table width"));
         btnLol.setOnAction(event -> {
             if (btnLol.isSelected()) {
                 table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
@@ -83,6 +84,31 @@ public class DrillDownExecutionTab extends Tab {
         setContent(pane);
     }
 
+    /**
+     * Opens up the parameters dialog (if uniqueParams is not empty) to request new user input.
+     */
+    private void openParameterDialog() {
+        if (!uniqueParams.isEmpty()) {
+            Map<String, Object> prevValues = new HashMap<>();
+            // Gather the previously entered values:
+            uniqueParams.forEach(s -> prevValues.put(s, this.columnMap.get(s)));
+
+            // Open dialog with the previous entered values.
+            ParamInputDialog dlg = new ParamInputDialog(prevValues);
+            Optional<Map<String, Object>> opt = dlg.showAndWait();
+            opt.ifPresent(stringObjectMap -> {
+                // Update the column map so they are shown when rerunning the query.
+                this.columnMap = stringObjectMap;
+                this.executeQuery(stringObjectMap);
+            });
+        } else {
+            executeQuery();
+        }
+    }
+
+    /**
+     * Executes the query with the columnMap as parameter values.
+     */
     public void executeQuery() {
         this.executeQuery(columnMap);
     }

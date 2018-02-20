@@ -310,7 +310,7 @@ public class GimletApp extends Application {
 
         SplitPane lolPane = new SplitPane(centerPane, createBottom());
         lolPane.setOrientation(Orientation.VERTICAL);
-        lolPane.setDividerPosition(0, 0.8);
+        lolPane.setDividerPosition(0, 0.6);
 
         pane.setTop(createMenuBar());
         pane.setCenter(lolPane);
