@@ -118,8 +118,6 @@ public class GimletApp extends Application {
 
             Configuration.getInstance().setProperty(Configuration.Key.LAST_PROJECT_FILE, file.getAbsolutePath());
 
-            // Notify our listeners.
-            // Notify our listeners.
             logger.info("Succesfully read '{}'", file);
 
             this.primaryStage.titleProperty().bind(Bindings.concat("Gimlet - ", this.gimletProject.nameProperty()));
