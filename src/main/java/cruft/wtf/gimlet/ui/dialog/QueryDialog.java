@@ -1,5 +1,6 @@
 package cruft.wtf.gimlet.ui.dialog;
 
+import cruft.wtf.gimlet.GimletApp;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.ui.FormPane;
 import javafx.scene.control.ButtonType;
@@ -25,6 +26,7 @@ public class QueryDialog extends Dialog<Query> {
     private TextArea txtQuery;
 
     public QueryDialog() {
+        initOwner(GimletApp.window);
         setResizable(true);
         setTitle("Add query");
         setHeaderText("Specify the values for the query.");

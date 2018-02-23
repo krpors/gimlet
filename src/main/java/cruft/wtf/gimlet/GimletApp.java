@@ -18,6 +18,7 @@ import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +46,8 @@ public class GimletApp extends Application {
      * There is only one ConnectionTabPane throughout Gimlet. So once we created it, we can reference to it statically.
      */
     public static ConnectionTabPane connectionTabPane;
+
+    public static Window window;
 
     private SplitPane centerPane;
 
@@ -330,6 +333,8 @@ public class GimletApp extends Application {
 
         // Show the stage after possibly reading and setting window properties.
         primaryStage.show();
+
+        window = scene.getWindow();
 
         scene.getWindow().setOnCloseRequest(event -> {
             askForClosing().ifPresent(buttonType -> {

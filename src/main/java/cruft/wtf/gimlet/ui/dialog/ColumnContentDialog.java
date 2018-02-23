@@ -1,5 +1,6 @@
 package cruft.wtf.gimlet.ui.dialog;
 
+import cruft.wtf.gimlet.GimletApp;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
@@ -12,6 +13,7 @@ import javafx.scene.layout.VBox;
 public class ColumnContentDialog extends Dialog {
 
     public ColumnContentDialog(String columnName, String content) {
+        initOwner(GimletApp.window);
         getDialogPane().getStylesheets().add("/css/style.css");
         setHeaderText("Contents of the column '" + columnName + "'");
         setTitle(columnName);

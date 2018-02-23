@@ -1,6 +1,7 @@
 package cruft.wtf.gimlet.ui;
 
 import cruft.wtf.gimlet.GimletApp;
+import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecuteEvent;
@@ -235,6 +236,7 @@ public class QueryTree extends TreeView<Query> {
         Query q = selectedItem.getValue();
 
         Alert alertConfirm = new Alert(Alert.AlertType.CONFIRMATION, "Are you sure?");
+        alertConfirm.initOwner(GimletApp.window);
         alertConfirm.setTitle("Confirm deletion");
         alertConfirm.setHeaderText(String.format("Delete '%s'?\nThis will also delete %d descendants.", q.getName(), q.getDescendantCount()));
         ((Button) alertConfirm.getDialogPane().lookupButton(ButtonType.OK)).setDefaultButton(false);

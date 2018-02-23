@@ -1,6 +1,7 @@
 package cruft.wtf.gimlet.ui.dialog;
 
 
+import cruft.wtf.gimlet.GimletApp;
 import cruft.wtf.gimlet.ui.Images;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
@@ -13,6 +14,7 @@ import javafx.scene.layout.BorderPane;
 public class PasswordInputDialog extends Dialog<String> {
 
     public PasswordInputDialog(String username) {
+        initOwner(GimletApp.window);
         setTitle("Input for query");
         setHeaderText("Specify password for user '" + username + "'");
         setGraphic(Images.LOCK_LOCKED_4X.imageView());

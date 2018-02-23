@@ -1,5 +1,6 @@
 package cruft.wtf.gimlet.ui.dialog;
 
+import cruft.wtf.gimlet.GimletApp;
 import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.conf.Alias;
 import cruft.wtf.gimlet.ui.FormPane;
@@ -19,6 +20,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,9 +57,9 @@ public class AliasDialog extends Dialog<Alias> {
     private CheckBox chkDisableColor;
 
     public AliasDialog() {
+        initOwner(GimletApp.window);
         setTitle("Add alias");
         setHeaderText("Specify the values for the alias.");
-
         getDialogPane().setContent(createContent());
 
         ButtonType bt = new ButtonType("Test connection");

@@ -54,6 +54,7 @@ public final class Utils {
      */
     public static void showExceptionDialog(String header, String content, Throwable exception) {
         Dialog dialog = new Dialog();
+        dialog.initOwner(GimletApp.window);
         dialog.getDialogPane().getStylesheets().add("/css/style.css");
         dialog.setGraphic(Images.DIALOG_ERROR.imageView());
         dialog.setTitle("Error!");
@@ -106,6 +107,7 @@ public final class Utils {
      */
     public static void showError(String header, String content) {
         Alert alert = new Alert(Alert.AlertType.ERROR, content, ButtonType.OK);
+        alert.initOwner(GimletApp.window);
         alert.setHeaderText(header);
         alert.showAndWait();
     }
@@ -118,6 +120,7 @@ public final class Utils {
      */
     public static void showInfo(String header, String content) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION, content, ButtonType.OK);
+        alert.initOwner(GimletApp.window);
         alert.setHeaderText(header);
         alert.showAndWait();
     }
@@ -131,6 +134,7 @@ public final class Utils {
      */
     public static Optional<ButtonType> showConfirm(String header, String title, String content) {
         Alert alertConfirm = new Alert(Alert.AlertType.CONFIRMATION, content);
+        alertConfirm.initOwner(GimletApp.window);
         alertConfirm.setTitle(title);
         alertConfirm.setHeaderText(header);
         ((Button) alertConfirm.getDialogPane().lookupButton(ButtonType.OK)).setDefaultButton(false);

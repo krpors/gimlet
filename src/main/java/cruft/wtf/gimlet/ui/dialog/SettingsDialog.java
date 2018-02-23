@@ -2,6 +2,7 @@ package cruft.wtf.gimlet.ui.dialog;
 
 
 import cruft.wtf.gimlet.Configuration;
+import cruft.wtf.gimlet.GimletApp;
 import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.ui.FormPane;
 import cruft.wtf.gimlet.ui.Images;
@@ -24,6 +25,7 @@ public class SettingsDialog extends Dialog<String> {
     private TextField txtTruncateSize;
 
     public SettingsDialog() {
+        initOwner(GimletApp.window);
         setTitle("Settings");
         setHeaderText("Gimlet settings");
         setGraphic(Images.PERSON.imageView());

@@ -1,6 +1,7 @@
 package cruft.wtf.gimlet.ui.dialog;
 
 
+import cruft.wtf.gimlet.GimletApp;
 import cruft.wtf.gimlet.ui.FormPane;
 import cruft.wtf.gimlet.ui.Images;
 import javafx.application.Platform;
@@ -21,6 +22,7 @@ import java.util.TreeMap;
 public class ParamInputDialog extends Dialog<Map<String, Object>> {
 
     public ParamInputDialog(Map<String, Object> paramNames) {
+        initOwner(GimletApp.window);
         setTitle("Input for query");
         setHeaderText("Specify input for the query:");
         setGraphic(Images.MAGNIFYING_GLASS.imageView());
