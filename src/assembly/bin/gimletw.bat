@@ -1,0 +1,1 @@
+javaw -cp "..\lib\*" cruft.wtf.gimlet.GimletApp
