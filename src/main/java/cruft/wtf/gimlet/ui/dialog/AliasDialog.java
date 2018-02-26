@@ -170,7 +170,7 @@ public class AliasDialog extends Dialog<Alias> {
      */
     private void testConnection() {
         if (comboDriverClass.getValue() == null || comboDriverClass.getValue().isEmpty()) {
-            new Alert(Alert.AlertType.ERROR, "No driver class is given.", ButtonType.OK).showAndWait();
+            Utils.showError("No driver class is given.", "Please select a JDBC driver class.");
             return;
         }
 
@@ -191,9 +191,7 @@ public class AliasDialog extends Dialog<Alias> {
 
             Connection c = DriverManager.getConnection(txtJdbcUrl.getText(), txtUsername.getText(), password);
             c.close();
-            Alert alert = new Alert(Alert.AlertType.INFORMATION, "Press OK to continue.", ButtonType.OK);
-            alert.setHeaderText("Connection succeeded!");
-            alert.showAndWait();
+            Utils.showInfo("Connection succeeded!", "Press OK to continue.");
         } catch (SQLException ex) {
             logger.error("Can't connect", ex);
             Utils.showExceptionDialog(

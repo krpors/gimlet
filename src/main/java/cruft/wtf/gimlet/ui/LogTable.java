@@ -70,13 +70,13 @@ public class LogTable extends TableView<ILoggingEvent> {
     }
 
     public void scrollToEnd() {
-        scrollTo(getItems().size());
-
         // TODO: configurable, and wha'ever. Pick better values.
         // arbitrary value for now. When amount of items exceed 30, remove the first 10.
         if (getItems().size() >= 250) {
             getItems().remove(0, 50);
         }
+
+        scrollTo(getItems().size());
     }
 
     private static class Row extends TableRow<ILoggingEvent> {
@@ -100,6 +100,9 @@ public class LogTable extends TableView<ILoggingEvent> {
         @Override
         public void updateItem(Level item, boolean empty) {
             super.updateItem(item, empty);
+
+            setText("");
+            setGraphic(null);
 
             if (item == null || empty) {
                 return;
