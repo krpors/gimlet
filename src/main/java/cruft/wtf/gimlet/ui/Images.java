@@ -17,6 +17,9 @@ public enum Images {
 
     ACCOUNT_LOGIN("/icons/lan-connect-24px.png", true),
     ACCOUNT_LOGOUT("/icons/logout-variant-24px.png", true),
+    ARROW_DOWN("/icons/arrow-down-24px.png", true),
+    ARROW_UP("/icons/arrow-up-24px.png", true),
+    CANCEL("/icons/cancel-24px.png", true),
     CLOCK("/icons/clock-24px.png", true),
     CODE("/icons/code-not-equal-24px.png", true),
     COG("/icons/settings-24px.png", true),

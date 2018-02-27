@@ -1,17 +1,23 @@
 package cruft.wtf.gimlet.ui;
 
 import cruft.wtf.gimlet.GimletApp;
-import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecuteEvent;
 import cruft.wtf.gimlet.jdbc.NamedParameterPreparedStatement;
 import cruft.wtf.gimlet.ui.dialog.ParamInputDialog;
 import cruft.wtf.gimlet.ui.dialog.QueryDialog;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.Tooltip;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
@@ -20,7 +26,14 @@ import javafx.scene.input.TransferMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class QueryTree extends TreeView<Query> {
 
@@ -220,6 +233,61 @@ public class QueryTree extends TreeView<Query> {
     }
 
     /**
+     * Enumeration to clarify movement direction.
+     */
+    private enum Direction {
+        UP(-1),
+        DOWN(1);
+
+        private final int dir;
+
+        Direction(int dir) {
+            this.dir = dir;
+        }
+    }
+
+    /**
+     * Moves the current selected TreeItem into the direction given. The movement only applies within the bounds of the
+     * children of the parent of the selected node. For example:
+     * <pre>
+     * Ancestor
+     *     └─ Child
+     *          └─ Grandchild 1  <---\
+     *          └─ Grandchild 2  <----- movement happens between 1, 2 and 3
+     *          └─ Grandchild 3  <---/
+     * </pre>
+     * Grandchild 1 can not be moved 'up' (there is no previous sibling), and Grandchild 3 cannot be moved 'down' (there is no
+     * next sibling).
+     *
+     * @param dir The direction the selected tree node should be moved towards (i.e. it will swap entries in the collections).
+     */
+    private void moveSelectedNode(Direction dir) {
+        TreeItem<Query> selectedItem = getSelectionModel().getSelectedItem();
+        TreeItem<Query> parent = selectedItem.getParent();
+        int childCount = parent.getChildren().size();
+        int index = parent.getChildren().indexOf(selectedItem);
+        boolean isTopLevel = parent.getValue() == null;
+
+        if ((index <= 0 && dir == Direction.UP) || (index >= childCount - 1 && dir == Direction.DOWN)) {
+            // moving out of bounds here (up or down) so return prematurely.
+            logger.debug("Unable to move node in direction {} (will go out of bounds)", dir);
+            return;
+        }
+
+        // Swap the TREE items
+        Collections.swap(parent.getChildren(), index, index + dir.dir);
+        // Swap the backing List
+        if (isTopLevel) {
+            Collections.swap(queryList, index, index + dir.dir);
+        } else {
+            Collections.swap(parent.getValue().getSubQueries(), index, index + dir.dir);
+        }
+
+        getSelectionModel().select(selectedItem);
+    }
+
+
+    /**
      * Removes the selected query (and its children, ancestors and the whole shebang). This is done by updating the
      * model (the query list) and then forcefully refreshing the whole tree by re-adding the query list again.
      * <p>
@@ -275,6 +343,8 @@ public class QueryTree extends TreeView<Query> {
             MenuItem menuItemCopy = new MenuItem("Copy", Images.COPY.imageView());
             MenuItem menuItemPaste = new MenuItem("Paste", Images.PASTE.imageView());
             MenuItem menuItemDelete = new MenuItem("Delete...", Images.TRASH.imageView());
+            MenuItem menuItemMoveUp = new MenuItem("Move up", Images.ARROW_UP.imageView());
+            MenuItem menuItemMoveDown = new MenuItem("Move down", Images.ARROW_DOWN.imageView());
             MenuItem menuItemProperties = new MenuItem("Properties...", Images.PENCIL.imageView());
 
             menu.getItems().addAll(
@@ -289,6 +359,9 @@ public class QueryTree extends TreeView<Query> {
                     menuItemPaste,
                     new SeparatorMenuItem(),
                     menuItemDelete,
+                    new SeparatorMenuItem(),
+                    menuItemMoveUp,
+                    menuItemMoveDown,
                     new SeparatorMenuItem(),
                     menuItemProperties);
 
@@ -318,6 +391,11 @@ public class QueryTree extends TreeView<Query> {
             });
             menuItemPaste.disableProperty().bind(copiedQueryProperty.isNull());
             menuItemDelete.setOnAction(e -> removeSelectedQuery());
+            menuItemMoveUp.setOnAction(e -> moveSelectedNode(Direction.UP));
+            // TODO: accelerators work, but are still triggered when the tree isn't even visible.
+            // menuItemMoveUp.setAccelerator(new KeyCodeCombination(KeyCode.K, KeyCombination.CONTROL_DOWN));
+            menuItemMoveDown.setOnAction(e -> moveSelectedNode(Direction.DOWN));
+            // menuItemMoveDown.setAccelerator(new KeyCodeCombination(KeyCode.J, KeyCombination.CONTROL_DOWN));
             menuItemProperties.setOnAction(e -> openEditSelectedQueryDialog());
         }
 
@@ -325,6 +403,7 @@ public class QueryTree extends TreeView<Query> {
         public void updateItem(Query item, boolean empty) {
             // super call is required, see documentation.
             super.updateItem(item, empty);
+
             if (empty || item == null) {
                 setText(null);
                 setGraphic(null);
@@ -348,7 +427,6 @@ public class QueryTree extends TreeView<Query> {
             setOnDragDetected(event -> {
                 QueryConfigurationTreeCell sourceCell = (QueryConfigurationTreeCell) event.getSource();
                 TreeItem<Query> sourceItem = sourceCell.getTreeItem();
-
 
                 if (sourceItem == null || sourceItem.getParent() == null || sourceItem.getParent().getValue() == null) {
                     return;
@@ -388,9 +466,9 @@ public class QueryTree extends TreeView<Query> {
                 // Check if we can drop the source onto the target, and let the user
                 // somehow see that he's not allowed to. TODO: better graphics
                 if (!isDescendant(sourceDraggedItem, targetDropItem)) {
-                    targetDropCell.setStyle("-fx-background-color: green; -fx-text-fill: white");
+                    targetDropCell.setStyle("-fx-base: green;");
                 } else {
-                    targetDropCell.setStyle("-fx-background-color: red; -fx-text-fill: white");
+                    targetDropCell.setStyle("-fx-base: red;");
                 }
             });
 
