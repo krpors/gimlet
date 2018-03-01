@@ -18,7 +18,6 @@ import java.util.Date;
 /**
  * This statusbar is located under the main window and is used for reporting application status to the user.
  */
-@SuppressWarnings("unused")
 public class StatusBar extends HBox {
 
     private Label lblStatus;

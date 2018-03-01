@@ -259,6 +259,8 @@ public class GimletApp extends Application {
      * @return
      */
     private Node createBottom() {
+        BorderPane pane = new BorderPane();
+
         TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         tabPane.setSide(Side.BOTTOM);
@@ -271,7 +273,11 @@ public class GimletApp extends Application {
 
         tabPane.getTabs().add(tabProps);
         tabPane.getTabs().add(tabLog);
-        return tabPane;
+
+        pane.setCenter(tabPane);
+        pane.setBottom(new StatusBar());
+
+        return pane;
     }
 
     /**
