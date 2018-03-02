@@ -6,14 +6,19 @@ import cruft.wtf.gimlet.event.ConnectEvent;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.ui.dialog.AliasDialog;
 import javafx.collections.ObservableList;
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 
+import java.util.Collections;
 import java.util.Optional;
 
 public class AliasList extends ListView<Alias> {
-
-    private ObservableList<Alias> aliasList;
 
     public AliasList() {
         setCellFactory(param -> new AliasListCell());
@@ -22,6 +27,31 @@ public class AliasList extends ListView<Alias> {
                 openEditDialog();
             }
         });
+    }
+
+    /**
+     * Moves the selected alias up ({@code dir < 0}) or down ({@code dir > 0}) in the list.
+     *
+     * @param dir The direction. Less than zero to move it up, larger than zero to move it down.
+     */
+    public void moveAlias(int dir) {
+        final Alias selected = getSelectionModel().getSelectedItem();
+        int selectedIndex = getSelectionModel().getSelectedIndex();
+        if (selectedIndex < 0) {
+            // nothing selected.. yet.
+            return;
+        }
+
+        if (dir < 0 && selectedIndex > 0) {
+            // move up
+            Collections.swap(getItems(), selectedIndex, selectedIndex - 1);
+        }
+        if (dir > 0 && selectedIndex < getItems().size() - 1) {
+            Collections.swap(getItems(), selectedIndex, selectedIndex + 1);
+        }
+
+        // reselect the selected.
+        getSelectionModel().select(selected);
     }
 
     private void openEditDialog() {
@@ -57,7 +87,6 @@ public class AliasList extends ListView<Alias> {
         Optional<ButtonType> bt = Utils.showConfirm(String.format("Delete '%s'?", selected.getName()), "Confirm deletion", "Ble");
         bt.ifPresent(buttonType -> {
             if (buttonType == ButtonType.OK) {
-                aliasList.remove(selected);
                 getItems().remove(selected);
             }
         });
@@ -69,7 +98,6 @@ public class AliasList extends ListView<Alias> {
      * @param list
      */
     public void setAliases(final ObservableList<Alias> list) {
-        this.aliasList = list;
         setItems(list);
     }
 

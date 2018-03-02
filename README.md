@@ -98,12 +98,12 @@ subqueries.
 1. Splash screen with some funky graphic.
 1. Help file/screen.
 1. New project.
-1. Drag/drop (or reorder by button or context menu) of aliases.
 1. Query wizard or something: start by a root query, execute sample query, then hit next
 to configure the next query, until finished, then a query tree is a result.
 1. "Rotated table" view. Handy with many columns.
 1. Easier column selector (hide all/show all)
 1. Syntax highlighter?
+1. Recent queries: save them in different file.
 
 # Other things
 
