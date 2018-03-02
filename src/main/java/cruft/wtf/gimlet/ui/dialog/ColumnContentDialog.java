@@ -28,6 +28,7 @@ public class ColumnContentDialog extends Dialog {
         derp.setEditable(false);
 
         CheckBox chkWrap = new CheckBox("Wrap contents");
+        chkWrap.setSelected(true);
         derp.wrapTextProperty().bind(chkWrap.selectedProperty());
 
         Label lblDataType = new Label("Length: " + content.length());

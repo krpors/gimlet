@@ -8,13 +8,9 @@ import cruft.wtf.gimlet.jdbc.SimpleQueryTask;
 import cruft.wtf.gimlet.ui.dialog.ColumnContentDialog;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
-import javafx.geometry.Insets;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.cell.TextFieldTableCell;
 import org.slf4j.Logger;
@@ -100,6 +96,13 @@ public class ResultTable extends TableView<ObservableList> {
                 return;
             }
 
+            setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2) {
+                    ColumnContentDialog d = new ColumnContentDialog(getTableColumn().getText(), String.valueOf(item));
+                    d.showAndWait();
+                }
+            });
+
             // If the cell content is larger than 32 chars, abbreviate it and mark it as such.
             // User should be able to double click on the cell to display its full data.
             // Cells which contain Strings are applicable for truncation only. So check that.
@@ -107,22 +110,17 @@ public class ResultTable extends TableView<ObservableList> {
                 return;
             }
 
-            String s = item.toString().replace('\n', ' ').replace('\r', ' ').trim();
+            String s = item.toString().replace("\n", "\\n").replace("\r", "\\r").trim();
             int truncateSize = 32;
             Optional<Integer> tsize = Configuration.getInstance().getIntegerProperty(Configuration.Key.TRUNCATE_SIZE);
             if (tsize.isPresent()) {
                 truncateSize = tsize.get();
             }
 
+            setText(s);
+
             if (s.length() >= truncateSize) {
                 getStyleClass().add("truncate");
-
-                setOnMouseClicked(event -> {
-                    if (event.getClickCount() == 2) {
-                        ColumnContentDialog d = new ColumnContentDialog(getTableColumn().getText(), item.toString());
-                        d.showAndWait();
-                    }
-                });
 
                 Tooltip t = new Tooltip("The contents of this cell are truncated.\nDouble click to see the full contents.");
                 t.setGraphic(Images.WARNING.imageView());
