@@ -222,7 +222,7 @@ public class GimletApp extends Application {
         fileItemExit.setOnAction(event -> {
             askForClosing().ifPresent(buttonType -> {
                 if (buttonType == ButtonType.OK) {
-                    Platform.exit();
+                    exit();
                 }
             });
         });
@@ -292,6 +292,24 @@ public class GimletApp extends Application {
                 "This will discard any unsaved changes.");
     }
 
+    private void exit() {
+        // TODO: also!! The configuration API is ugly as hell!
+        Configuration c = Configuration.getInstance();
+        c.getBooleanProperty(Configuration.Key.SAVE_ON_EXIT).ifPresent(aBoolean -> {
+            if (aBoolean && this.gimletProject != null) {
+                try {
+                    this.gimletProject.writeToFile(this.gimletProject.getFile());
+                    logger.info("Written to file {} at exit", this.gimletProject.getFile());
+                } catch (JAXBException e) {
+                    logger.error("Unable to save file", e);
+                    Utils.showExceptionDialog("Unable to save", "Argh", e);
+                }
+            }
+        });
+
+        Platform.exit();
+    }
+
     /**
      * Creates the {@link Stage} and all other cruft of the main window.
      *
@@ -346,7 +364,10 @@ public class GimletApp extends Application {
             askForClosing().ifPresent(buttonType -> {
                 if (buttonType != ButtonType.OK) {
                     event.consume();
+                    return;
                 }
+
+                exit();
             });
         });
 

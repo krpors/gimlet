@@ -7,6 +7,7 @@ import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.ui.FormPane;
 import cruft.wtf.gimlet.ui.Images;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Tooltip;
@@ -24,6 +25,8 @@ public class SettingsDialog extends Dialog<String> {
 
     private TextField txtTruncateSize;
 
+    private CheckBox chkSaveOnExit;
+
     public SettingsDialog() {
         initOwner(GimletApp.window);
         setTitle("Settings");
@@ -39,6 +42,11 @@ public class SettingsDialog extends Dialog<String> {
         txtTruncateSize.setTooltip(new Tooltip("The amount of characters to display in columns until they are truncated."));
 
         pane.add("Column truncate length", txtTruncateSize);
+
+        chkSaveOnExit = new CheckBox();
+        chkSaveOnExit.setSelected(c.getBooleanProperty(Configuration.Key.SAVE_ON_EXIT, false));
+
+        pane.add("Save project automatically on exit", chkSaveOnExit);
 
         getDialogPane().setContent(pane);
         getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CLOSE);
@@ -56,6 +64,7 @@ public class SettingsDialog extends Dialog<String> {
         Configuration c = Configuration.getInstance();
         try {
             c.setProperty(Configuration.Key.TRUNCATE_SIZE, txtTruncateSize.getText());
+            c.setProperty(Configuration.Key.SAVE_ON_EXIT, chkSaveOnExit.isSelected());
             c.write();
         } catch (IOException e) {
             logger.error("Unable to write configuration file", e);

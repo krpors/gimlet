@@ -71,6 +71,11 @@ public final class Configuration extends Properties {
         return Optional.of(Boolean.valueOf(property));
     }
 
+    public boolean getBooleanProperty(Key key, boolean def) {
+        return getBooleanProperty(key).orElse(def);
+
+    }
+
     /**
      * Gets an {@link Optional} double property from the map of properties.
      *
@@ -156,6 +161,7 @@ public final class Configuration extends Properties {
     public enum Key {
         LAST_PROJECT_FILE,
         TRUNCATE_SIZE,
+        SAVE_ON_EXIT,
         WINDOW_MAXIMIZED,;
 
         public String getName() {
