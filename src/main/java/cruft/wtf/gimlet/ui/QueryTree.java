@@ -9,15 +9,7 @@ import cruft.wtf.gimlet.ui.dialog.ParamInputDialog;
 import cruft.wtf.gimlet.ui.dialog.QueryDialog;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.Tooltip;
-import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
@@ -26,14 +18,7 @@ import javafx.scene.input.TransferMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class QueryTree extends TreeView<Query> {
 
@@ -233,20 +218,6 @@ public class QueryTree extends TreeView<Query> {
     }
 
     /**
-     * Enumeration to clarify movement direction.
-     */
-    private enum Direction {
-        UP(-1),
-        DOWN(1);
-
-        private final int dir;
-
-        Direction(int dir) {
-            this.dir = dir;
-        }
-    }
-
-    /**
      * Moves the current selected TreeItem into the direction given. The movement only applies within the bounds of the
      * children of the parent of the selected node. For example:
      * <pre>
@@ -261,8 +232,11 @@ public class QueryTree extends TreeView<Query> {
      *
      * @param dir The direction the selected tree node should be moved towards (i.e. it will swap entries in the collections).
      */
-    private void moveSelectedNode(Direction dir) {
+    void moveSelectedNode(Direction dir) {
         TreeItem<Query> selectedItem = getSelectionModel().getSelectedItem();
+        if (selectedItem == null) {
+            return;
+        }
         TreeItem<Query> parent = selectedItem.getParent();
         int childCount = parent.getChildren().size();
         int index = parent.getChildren().indexOf(selectedItem);

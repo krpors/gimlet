@@ -5,6 +5,7 @@ import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.FileOpenedEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ToolBar;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.BorderPane;
 
 /**
@@ -18,15 +19,13 @@ public class AliasPane extends BorderPane {
     public AliasPane() {
         this.aliasList = new AliasList();
 
-        Button btnUp = new Button();
-        btnUp.setGraphic(Images.ARROW_UP.imageView());
-        btnUp.setOnAction(event -> {
-            this.aliasList.moveAlias(-1);
-        });
+        Button btnUp = new Button("", Images.ARROW_UP.imageView());
+        btnUp.setOnAction(event -> this.aliasList.moveAlias(Direction.UP));
+        btnUp.setTooltip(new Tooltip("Move selected alias up"));
 
-        Button btnDown = new Button();
-        btnDown.setGraphic(Images.ARROW_DOWN.imageView());
-        btnDown.setOnAction(event -> this.aliasList.moveAlias(1));
+        Button btnDown = new Button("", Images.ARROW_DOWN.imageView());
+        btnDown.setOnAction(event -> this.aliasList.moveAlias(Direction.DOWN));
+        btnDown.setTooltip(new Tooltip("Move selected alias down"));
 
         ToolBar bar = new ToolBar(btnUp, btnDown);
 

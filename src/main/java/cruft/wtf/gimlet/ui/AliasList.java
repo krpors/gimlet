@@ -34,7 +34,7 @@ public class AliasList extends ListView<Alias> {
      *
      * @param dir The direction. Less than zero to move it up, larger than zero to move it down.
      */
-    public void moveAlias(int dir) {
+    void moveAlias(Direction dir) {
         final Alias selected = getSelectionModel().getSelectedItem();
         int selectedIndex = getSelectionModel().getSelectedIndex();
         if (selectedIndex < 0) {
@@ -42,11 +42,11 @@ public class AliasList extends ListView<Alias> {
             return;
         }
 
-        if (dir < 0 && selectedIndex > 0) {
+        if (dir == Direction.UP && selectedIndex > 0) {
             // move up
             Collections.swap(getItems(), selectedIndex, selectedIndex - 1);
         }
-        if (dir > 0 && selectedIndex < getItems().size() - 1) {
+        if (dir == Direction.DOWN && selectedIndex < getItems().size() - 1) {
             Collections.swap(getItems(), selectedIndex, selectedIndex + 1);
         }
 
