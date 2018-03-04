@@ -3,6 +3,7 @@ package cruft.wtf.gimlet.ui.dialog;
 import cruft.wtf.gimlet.GimletApp;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.ui.FormPane;
+import javafx.application.Platform;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.TextArea;
@@ -78,6 +79,8 @@ public class QueryDialog extends Dialog<Query> {
         formPane.add("Query:", txtQuery);
 
         getDialogPane().setContent(formPane);
+
+        setOnShown(event -> Platform.runLater(() -> txtName.requestFocus()));
     }
 }
 
