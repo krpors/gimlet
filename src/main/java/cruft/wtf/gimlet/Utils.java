@@ -15,6 +15,7 @@ import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.ResultSet;
@@ -159,6 +160,15 @@ public final class Utils {
             return trim.substring(0, maxlen - 3).concat("...");
         }
         return trim;
+    }
+
+    public String fileExtension(final File file) {
+        int idx = file.getName().lastIndexOf('.');
+        if (idx < 0) {
+            return "";
+        }
+
+        return file.getName().substring(idx);
     }
 
     /**

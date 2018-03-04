@@ -171,6 +171,19 @@ public class GimletApp extends Application {
 
         MenuItem fileItemNew = new MenuItem("New");
         fileItemNew.setAccelerator(KeyCombination.keyCombination("Ctrl+N"));
+        fileItemNew.setOnAction(event -> {
+            FileChooser chooser = new FileChooser();
+            chooser.setTitle("Select location for the new Gimlet project");
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Gimlet project files", "*.gml"));
+            File file = chooser.showSaveDialog(window);
+            if (file == null) {
+                // user pressed cancel.
+                return;
+            }
+            // TODO: add .gml to file if not explicitly given.
+
+            this.gimletProject.setFile(file);
+        });
 
         MenuItem fileItemOpen = new MenuItem("Open...");
         fileItemOpen.setAccelerator(KeyCombination.keyCombination("Ctrl+O"));
@@ -178,7 +191,7 @@ public class GimletApp extends Application {
             FileChooser chooser = new FileChooser();
             chooser.setTitle("Select Gimlet project file");
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Gimlet project files", "*.gml"));
-            File file = chooser.showOpenDialog(null);
+            File file = chooser.showOpenDialog(window);
             if (file == null) {
                 // user pressed cancel.
                 return;
@@ -296,7 +309,7 @@ public class GimletApp extends Application {
         // TODO: also!! The configuration API is ugly as hell!
         Configuration c = Configuration.getInstance();
         c.getBooleanProperty(Configuration.Key.SAVE_ON_EXIT).ifPresent(aBoolean -> {
-            if (aBoolean && this.gimletProject != null) {
+            if (aBoolean && this.gimletProject != null && this.gimletProject.getFile() != null) {
                 try {
                     this.gimletProject.writeToFile(this.gimletProject.getFile());
                     logger.info("Written to file {} at exit", this.gimletProject.getFile());
