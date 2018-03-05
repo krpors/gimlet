@@ -160,6 +160,7 @@ public class QueryTree extends TreeView<Query> {
         q.ifPresent(newQuery -> {
             Query existingQuery = selectedItem.getValue();
             existingQuery.copyFrom(newQuery);
+            refresh();
         });
     }
 
