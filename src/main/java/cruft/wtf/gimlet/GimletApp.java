@@ -346,7 +346,9 @@ public class GimletApp extends Application {
 
         SplitPane.setResizableWithParent(left, false);
 
-        SplitPane lolPane = new SplitPane(centerPane, createBottom());
+        Node bottom = createBottom();
+        SplitPane.setResizableWithParent(bottom, false);
+        SplitPane lolPane = new SplitPane(centerPane, bottom);
         lolPane.setOrientation(Orientation.VERTICAL);
         lolPane.setDividerPosition(0, 0.6);
 
