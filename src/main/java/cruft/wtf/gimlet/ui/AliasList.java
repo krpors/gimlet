@@ -23,7 +23,7 @@ public class AliasList extends ListView<Alias> {
     public AliasList() {
         setCellFactory(param -> new AliasListCell());
         setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.F4) {
+            if (isFocused() && event.getCode() == KeyCode.F4) {
                 openEditDialog();
             }
         });

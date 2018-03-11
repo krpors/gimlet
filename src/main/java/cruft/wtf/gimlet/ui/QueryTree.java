@@ -36,7 +36,7 @@ public class QueryTree extends TreeView<Query> {
     public QueryTree() {
         EventDispatcher.getInstance().register(this);
         setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.F4) {
+            if (isFocused() && event.getCode() == KeyCode.F4) {
                 openEditSelectedQueryDialog();
             }
         });
