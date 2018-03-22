@@ -10,7 +10,12 @@ import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * A JavaFX task to run a simple query (i.e. a typed query, without named parameters).
@@ -149,6 +154,9 @@ public abstract class QueryTask extends Task<ObservableList<ObservableList>> {
             processingTime.set(System.currentTimeMillis() - before);
             logger.debug("Task finished in {} ms, resulting in {} rows", processingTime.get(), rowCount);
             return tempList;
+        } catch (SQLException ex) {
+            logger.error("SQL Exception", ex);
+            throw ex;
         } finally {
             Utils.close(statement);
             logger.debug("Closed statement");

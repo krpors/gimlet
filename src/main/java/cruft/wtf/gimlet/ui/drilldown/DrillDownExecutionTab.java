@@ -4,6 +4,7 @@ import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecutedEvent;
 import cruft.wtf.gimlet.jdbc.NamedParameterPreparedStatement;
+import cruft.wtf.gimlet.jdbc.ParseResult;
 import cruft.wtf.gimlet.jdbc.task.NamedQueryTask;
 import cruft.wtf.gimlet.ui.Images;
 import cruft.wtf.gimlet.ui.dialog.ParamInputDialog;
@@ -42,7 +43,7 @@ public class DrillDownExecutionTab extends Tab {
 
     private Button btnRerun;
 
-    private Set<String> uniqueParams;
+    private Set<ParseResult.Param> uniqueParams;
 
     public DrillDownExecutionTab(final DrillDownTab drillDownTab, final Query query, final Map<String, Object> columnMap) {
         this.drillDownTab = drillDownTab;
@@ -55,7 +56,7 @@ public class DrillDownExecutionTab extends Tab {
         lbl.setPadding(new Insets(5));
 
         // Recompile the query so we know the unique parameters. This is used by the re-running
-        NamedParameterPreparedStatement.ParseResult pr = NamedParameterPreparedStatement.parse(query.getContent());
+        ParseResult pr = ParseResult.parse(query.getContent());
         uniqueParams = pr.getUniqueParameters();
 
         btnRerun = new Button();
@@ -91,7 +92,7 @@ public class DrillDownExecutionTab extends Tab {
         if (!uniqueParams.isEmpty()) {
             Map<String, Object> prevValues = new HashMap<>();
             // Gather the previously entered values:
-            uniqueParams.forEach(s -> prevValues.put(s, this.columnMap.get(s)));
+            uniqueParams.forEach(s -> prevValues.put(s.getName(), this.columnMap.get(s.getName())));
 
             // Open dialog with the previous entered values.
             ParamInputDialog dlg = new ParamInputDialog(prevValues);

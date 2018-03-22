@@ -5,6 +5,7 @@ import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecuteEvent;
 import cruft.wtf.gimlet.jdbc.NamedParameterPreparedStatement;
+import cruft.wtf.gimlet.jdbc.ParseResult;
 import cruft.wtf.gimlet.ui.dialog.ParamInputDialog;
 import cruft.wtf.gimlet.ui.dialog.QueryDialog;
 import javafx.beans.property.ObjectProperty;
@@ -93,13 +94,13 @@ public class QueryTree extends TreeView<Query> {
      * @return An optional map of string mapped to objects. If an empty Optional is returned, the user has any of the input dialogs.
      */
     private Optional<Map<String, Object>> askInputForQuery(final Query query) {
-        NamedParameterPreparedStatement.ParseResult result = NamedParameterPreparedStatement.parse(query.getContent());
+        ParseResult result = ParseResult.parse(query.getContent());
         if (result.getUniqueParameters().isEmpty()) {
             return Optional.of(Collections.emptyMap());
         }
 
         Map<String, Object> paramNames = new HashMap<>();
-        result.getUniqueParameters().forEach(s -> paramNames.put(s, null));
+        result.getUniqueParameters().forEach(s -> paramNames.put(s.getName(), null));
         ParamInputDialog dlg = new ParamInputDialog(paramNames);
         return dlg.showAndWait();
     }

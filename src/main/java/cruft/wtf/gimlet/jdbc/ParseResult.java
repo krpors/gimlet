@@ -2,6 +2,8 @@ package cruft.wtf.gimlet.jdbc;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 public final class ParseResult {
 
@@ -17,7 +19,7 @@ public final class ParseResult {
         DATETIME;
     }
 
-    public static class Param {
+    public static class Param implements Comparable<Param> {
         private final String name;
 
         private final Type dataType;
@@ -41,6 +43,15 @@ public final class ParseResult {
                     "name='" + name + '\'' +
                     ", dataType=" + dataType +
                     '}';
+        }
+
+        @Override
+        public int compareTo(Param o) {
+            if (o == null) {
+                return -1;
+            }
+
+            return getName().compareTo(o.getName());
         }
     }
 
@@ -149,7 +160,11 @@ public final class ParseResult {
         return sql;
     }
 
-    public List<Param> getParameters() {
+    List<Param> getParameters() {
         return parameters;
+    }
+
+    public Set<Param> getUniqueParameters() {
+        return new TreeSet<>(parameters);
     }
 }

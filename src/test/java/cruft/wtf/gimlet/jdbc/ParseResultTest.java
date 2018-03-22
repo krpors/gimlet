@@ -3,6 +3,8 @@ package cruft.wtf.gimlet.jdbc;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Set;
+
 import static org.junit.Assert.assertEquals;
 
 public class ParseResultTest {
@@ -45,6 +47,13 @@ public class ParseResultTest {
 
         assertEquals("num", prs.getParameters().get(1).getName());
         assertEquals(ParseResult.Type.NUMBER, prs.getParameters().get(1).getDataType());
+    }
+
+    @Test
+    public void uniqueParameters() {
+        ParseResult prs = ParseResult.parse("select * from herro where id = :id[DATE] and stuff = :id[DATE] and a = :clazz[NUMBER]");
+        Set<ParseResult.Param> uniques = prs.getUniqueParameters();
+        System.out.println(uniques);
     }
 
 
