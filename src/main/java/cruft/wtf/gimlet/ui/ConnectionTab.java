@@ -5,11 +5,13 @@ import cruft.wtf.gimlet.conf.Alias;
 import cruft.wtf.gimlet.event.ConnectEvent;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecuteEvent;
+import cruft.wtf.gimlet.jdbc.task.ConnectTask;
 import cruft.wtf.gimlet.ui.drilldown.DrillDownTab;
 import cruft.wtf.gimlet.ui.objects.ObjectsTab;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TextArea;
@@ -62,6 +64,8 @@ public class ConnectionTab extends Tab {
      * Stackpane, to either make the label visible (with connect time), or the actual content pane.
      */
     private StackPane stackPane;
+
+    private ProgressIndicator progressIndicator;
 
     private Label lblConnectionTime;
 
@@ -126,7 +130,7 @@ public class ConnectionTab extends Tab {
     }
 
     /**
-     * If we could connect via the {@link cruft.wtf.gimlet.jdbc.ConnectTask}, the connection will be assigned to this
+     * If we could connect via the {@link ConnectTask}, the connection will be assigned to this
      * tab. The graphic is changed, the connectionTimer is cancelled, and the content pane is made visible.
      *
      * @param connection The connection to set.
@@ -174,6 +178,7 @@ public class ConnectionTab extends Tab {
      * @return The node containing the contents.
      */
     private Node createContent() {
+        progressIndicator = new ProgressIndicator();
         lblConnectionTime = new Label();
 
         // The content pane (which holds everything) is initially invisible when we're trying to connect.

@@ -1,4 +1,4 @@
-package cruft.wtf.gimlet.jdbc;
+package cruft.wtf.gimlet.jdbc.task;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;

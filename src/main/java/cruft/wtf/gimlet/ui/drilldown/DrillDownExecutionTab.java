@@ -4,7 +4,7 @@ import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecutedEvent;
 import cruft.wtf.gimlet.jdbc.NamedParameterPreparedStatement;
-import cruft.wtf.gimlet.jdbc.NamedQueryTask;
+import cruft.wtf.gimlet.jdbc.task.NamedQueryTask;
 import cruft.wtf.gimlet.ui.Images;
 import cruft.wtf.gimlet.ui.dialog.ParamInputDialog;
 import javafx.geometry.Insets;

@@ -1,4 +1,4 @@
-package cruft.wtf.gimlet.jdbc;
+package cruft.wtf.gimlet.jdbc.task;
 
 import cruft.wtf.gimlet.ui.objects.DatabaseObject;
 import javafx.application.Platform;

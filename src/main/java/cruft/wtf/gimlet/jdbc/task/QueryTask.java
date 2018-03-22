@@ -1,4 +1,4 @@
-package cruft.wtf.gimlet.jdbc;
+package cruft.wtf.gimlet.jdbc.task;
 
 import cruft.wtf.gimlet.Column;
 import cruft.wtf.gimlet.Utils;

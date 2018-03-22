@@ -1,6 +1,6 @@
 package cruft.wtf.gimlet.ui.objects;
 
-import cruft.wtf.gimlet.jdbc.ObjectLoaderTask;
+import cruft.wtf.gimlet.jdbc.task.ObjectLoaderTask;
 import cruft.wtf.gimlet.jdbc.SqlType;
 import cruft.wtf.gimlet.ui.Images;
 import javafx.application.Platform;

@@ -4,7 +4,7 @@ import com.google.common.eventbus.Subscribe;
 import cruft.wtf.gimlet.event.ConnectEvent;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.FileOpenedEvent;
-import cruft.wtf.gimlet.jdbc.ConnectTask;
+import cruft.wtf.gimlet.jdbc.task.ConnectTask;
 import cruft.wtf.gimlet.ui.dialog.PasswordInputDialog;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
