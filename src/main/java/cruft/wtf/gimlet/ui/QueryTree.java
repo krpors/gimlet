@@ -99,9 +99,7 @@ public class QueryTree extends TreeView<Query> {
             return Optional.of(Collections.emptyMap());
         }
 
-        Map<String, Object> paramNames = new HashMap<>();
-        result.getUniqueParameters().forEach(s -> paramNames.put(s.getName(), null));
-        ParamInputDialog dlg = new ParamInputDialog(paramNames);
+        ParamInputDialog dlg = new ParamInputDialog(result.getUniqueParameters());
         return dlg.showAndWait();
     }
 

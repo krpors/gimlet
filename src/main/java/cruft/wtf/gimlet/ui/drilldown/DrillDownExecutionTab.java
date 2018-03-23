@@ -3,20 +3,12 @@ package cruft.wtf.gimlet.ui.drilldown;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecutedEvent;
-import cruft.wtf.gimlet.jdbc.NamedParameterPreparedStatement;
 import cruft.wtf.gimlet.jdbc.ParseResult;
 import cruft.wtf.gimlet.jdbc.task.NamedQueryTask;
 import cruft.wtf.gimlet.ui.Images;
 import cruft.wtf.gimlet.ui.dialog.ParamInputDialog;
 import javafx.geometry.Insets;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToolBar;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 
@@ -95,7 +87,8 @@ public class DrillDownExecutionTab extends Tab {
             uniqueParams.forEach(s -> prevValues.put(s.getName(), this.columnMap.get(s.getName())));
 
             // Open dialog with the previous entered values.
-            ParamInputDialog dlg = new ParamInputDialog(prevValues);
+            ParamInputDialog dlg = new ParamInputDialog(uniqueParams);
+            dlg.prefill(prevValues);
             Optional<Map<String, Object>> opt = dlg.showAndWait();
             opt.ifPresent(stringObjectMap -> {
                 // Update the column map so they are shown when rerunning the query.

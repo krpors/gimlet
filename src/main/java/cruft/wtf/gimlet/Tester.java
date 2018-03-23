@@ -1,6 +1,7 @@
 package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.conf.Alias;
+import cruft.wtf.gimlet.jdbc.ParseResult;
 import cruft.wtf.gimlet.ui.*;
 import cruft.wtf.gimlet.ui.dialog.ParamInputDialog;
 import cruft.wtf.gimlet.ui.dialog.QueryDialog;
@@ -34,12 +35,14 @@ public class Tester extends Application {
     }
 
     private void withParamInputDialog(BorderPane pane) {
-        Map<String, Object> keys = new HashMap<>();
-        keys.put("PROG_ID", "ke");
-        keys.put("STUFF_NAME", "zeoinkg");
-        keys.put("CRUFT_BALLS", "blargh");
+        Set<ParseResult.Param> set = new TreeSet<>();
+        set.add(new ParseResult.Param("ID", ParseResult.Type.NUMBER));
+        set.add(new ParseResult.Param("NAME", ParseResult.Type.STRING));
+        set.add(new ParseResult.Param("DATE", ParseResult.Type.DATE));
+        set.add(new ParseResult.Param("NUM", ParseResult.Type.NUMBER));
+        set.add(new ParseResult.Param("NONE", ParseResult.Type.NONE));
 
-        ParamInputDialog dlg = new ParamInputDialog(keys);
+        ParamInputDialog dlg = new ParamInputDialog(set);
         Optional<Map<String,Object>> map = dlg.showAndWait();
         if (map.isPresent()) {
             System.out.println("OK! " + map.get());
