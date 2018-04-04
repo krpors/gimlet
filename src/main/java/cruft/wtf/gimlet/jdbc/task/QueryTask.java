@@ -112,40 +112,13 @@ public abstract class QueryTask extends Task<ObservableList<ObservableList>> {
             while (rs.next()) {
                 ObservableList<Object> list = FXCollections.observableArrayList();
                 for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                    // Based on the column type, add a different type of data (int, long, string, etc).
-                    switch (rsmd.getColumnType(i)) {
-                        case Types.BIGINT:
-                            list.add(rs.getLong(i));
-                            break;
-                        case Types.NUMERIC:
-                            list.add(rs.getLong(i));
-                            break;
-                        case Types.SMALLINT:
-                        case Types.TINYINT:
-                        case Types.INTEGER:
-                            list.add(rs.getInt(i));
-                            break;
-                        case Types.CHAR:
-                        case Types.LONGNVARCHAR:
-                        case Types.LONGVARCHAR:
-                        case Types.VARCHAR:
-                            list.add(rs.getString(i));
-                            break;
-                        case Types.TIMESTAMP:
-                        case Types.TIMESTAMP_WITH_TIMEZONE:
-                            list.add(rs.getTimestamp(i));
-                            break;
-                        case Types.DATE:
-                            list.add(rs.getDate(i));
-                            break;
-                        case Types.TIME:
-                            list.add(rs.getTime(i));
-                            break;
-                        default:
-                            list.add(rs.getString(i));
-                    }
+                    // Just add it as an Object. This also retains nullable numeric values for instance.
+                    // If we do explicit gets, for ex. rs.getLong(), when the column is effectively NULL,
+                    // the list will add a '0' instead. This will not retain NULL.
+                    list.add(rs.getObject(i));
                 }
 
+                logger.debug("{}", list);
                 tempList.add(list);
                 rowCount.set(rowCount.get() + 1);
             }
