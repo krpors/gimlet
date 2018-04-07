@@ -42,6 +42,19 @@ public class ResultTable extends TableView<ObservableList> {
     }
 
     /**
+     * Sets the items.
+     * @param columns
+     * @param data
+     */
+    public void setItems(List<Column> columns, ObservableList<ObservableList> data) {
+        setColumns(columns);
+        setItems(data);
+        if (data.size() <= 0) {
+            setPlaceHolderNoResults();
+        }
+    }
+
+    /**
      * Sets the columns.
      * <p>
      * TODO: since we now got a SimpleObjectProperty, do we really need the Column type? Maybe later.
@@ -49,7 +62,7 @@ public class ResultTable extends TableView<ObservableList> {
      * @param columnList The list of columns.
      */
     @SuppressWarnings("unchecked")
-    public void setColumns(List<Column> columnList) {
+    private void setColumns(List<Column> columnList) {
         for (int i = 0; i < columnList.size(); i++) {
             final int colnum = i;
             TableColumn<ObservableList, Object> col = new TableColumn<>(columnList.get(colnum).getColumnName());

@@ -157,13 +157,7 @@ public class DrillDownExecutionTab extends Tab {
         namedQueryTask.setOnSucceeded(event -> {
             btnRerun.setDisable(false);
             setGraphic(Images.SPREADSHEET.imageView());
-            table.setColumns(namedQueryTask.columnProperty());
-
-            if (namedQueryTask.getRowCount() <= 0) {
-                table.setPlaceHolderNoResults();
-            } else {
-                table.setItems(namedQueryTask.getValue());
-            }
+            table.setItems(namedQueryTask.columnProperty(), namedQueryTask.getValue());
 
             QueryExecutedEvent qee = new QueryExecutedEvent();
             qee.setQuery(namedQueryTask.getQuery());

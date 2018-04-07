@@ -99,8 +99,7 @@ public class Tester extends Application {
                 FXCollections.observableArrayList(Arrays.asList("Kevin", null, "Rulez")),
                 FXCollections.observableArrayList(Arrays.asList("Kevin", "zzz", null))
         );
-        rs.setColumns(cols);
-        rs.setItems(rowData);
+        rs.setItems(cols, rowData);
 
         pane.setCenter(rs);
     }

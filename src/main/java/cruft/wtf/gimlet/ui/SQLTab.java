@@ -65,6 +65,7 @@ public class SQLTab extends Tab {
 
         BorderPane bpane = new BorderPane();
         checkMaxRows = new CheckBox("Enable max rows 100");
+        checkMaxRows.setSelected(true);
         checkMaxRows.setPadding(new Insets(5, 5, 5, 5));
         bpane.setTop(checkMaxRows);
         bpane.setCenter(txtQuery);
@@ -98,9 +99,14 @@ public class SQLTab extends Tab {
         }
 
         final ResultTable table = new ResultTable();
+        final RotatedTable rotatedTable = new RotatedTable();
+        final TabPane tablePane = new TabPane();
+        tablePane.getTabs().add(new Tab("NORMAL", table));
+        tablePane.getTabs().add(new Tab("ROTATED", rotatedTable));
+
         final Tab tab = new Tab(Utils.truncate(query, 36));
         tab.setGraphic(Images.CLOCK.imageView());
-        tab.setContent(table);
+        tab.setContent(tablePane);
 
         // TODO: parameterize the maxRows properly (via the UI)
         int maxRows = 0;
@@ -132,13 +138,8 @@ public class SQLTab extends Tab {
         task.setOnSucceeded(event -> {
             tab.setGraphic(Images.SPREADSHEET.imageView());
 
-            table.setColumns(task.columnProperty());
-
-            if (task.getValue().size() <= 0) {
-                table.setPlaceHolderNoResults();
-            } else {
-                table.setItems(task.getValue());
-            }
+            table.setItems(task.columnProperty(), task.getValue());
+//            rotatedTable.setItems(task.columnProperty(), task.getValue());
 
             QueryExecutedEvent e = new QueryExecutedEvent();
             e.setQuery(task.getQuery());
