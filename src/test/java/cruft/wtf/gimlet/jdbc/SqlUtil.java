@@ -4,8 +4,12 @@ import cruft.wtf.gimlet.jdbc.task.SimpleQueryTask;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * EXTREMELY simple class to parse SQL files into separate statements. I don't need the overhead
@@ -39,5 +43,17 @@ public final class SqlUtil {
         is.close();
 
         return queryList;
+    }
+
+    public static void runSql(final String resource, final Connection connection) throws IOException, SQLException {
+        Objects.requireNonNull(connection);
+
+        List<String> statements = parseQueries(resource);
+        for (String s : statements) {
+            Statement stmt = connection.createStatement();
+            stmt.execute(s);
+            System.out.printf("Executed query: %s\n", s);
+            stmt.close();
+        }
     }
 }

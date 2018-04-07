@@ -71,11 +71,6 @@ public final class Configuration extends Properties {
         return Optional.of(Boolean.valueOf(property));
     }
 
-    public boolean getBooleanProperty(Key key, boolean def) {
-        return getBooleanProperty(key).orElse(def);
-
-    }
-
     /**
      * Gets an {@link Optional} double property from the map of properties.
      *

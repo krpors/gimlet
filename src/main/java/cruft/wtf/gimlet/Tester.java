@@ -51,6 +51,18 @@ public class Tester extends Application {
         }
     }
 
+    private void withRotatedTable(BorderPane pane) {
+        RotatedTable table = new RotatedTable();
+        ObservableList<ObservableList> rowData = FXCollections.observableArrayList();
+        rowData.addAll(
+                FXCollections.observableArrayList("1", "Crufty"),
+                FXCollections.observableArrayList("2", "Chainz"),
+                FXCollections.observableArrayList("3", "Trippy")
+        );
+        table.setItems(Arrays.asList(new Column("Index"), new Column("Namesake")), rowData);
+        pane.setCenter(table);
+    }
+
     private void createWithObjectsTable(BorderPane pane) {
         ObjectsTable table = new ObjectsTable();
 
@@ -116,7 +128,7 @@ public class Tester extends Application {
         primaryStage.setWidth(800);
         primaryStage.setHeight(600);
 
-        withParamInputDialog(pane);
+        withRotatedTable(pane);
 
         // Show the stage after possibly reading and setting window properties.
         primaryStage.show();

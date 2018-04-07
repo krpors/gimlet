@@ -44,7 +44,7 @@ public class SettingsDialog extends Dialog<String> {
         pane.add("Column truncate length", txtTruncateSize);
 
         chkSaveOnExit = new CheckBox();
-        chkSaveOnExit.setSelected(c.getBooleanProperty(Configuration.Key.SAVE_ON_EXIT, false));
+        chkSaveOnExit.setSelected(c.getBooleanProperty(Configuration.Key.SAVE_ON_EXIT).orElse(false));
 
         pane.add("Save project automatically on exit", chkSaveOnExit);
 
