@@ -118,7 +118,6 @@ public abstract class QueryTask extends Task<ObservableList<ObservableList>> {
                     list.add(rs.getObject(i));
                 }
 
-                logger.debug("{}", list);
                 tempList.add(list);
                 rowCount.set(rowCount.get() + 1);
             }

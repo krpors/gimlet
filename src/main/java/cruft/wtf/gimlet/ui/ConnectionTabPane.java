@@ -62,6 +62,7 @@ public class ConnectionTabPane extends TabPane {
             }
         });
 
+        // FIXME: this can be executed outside of an FX thread!?
         getTabs().clear();
     }
 

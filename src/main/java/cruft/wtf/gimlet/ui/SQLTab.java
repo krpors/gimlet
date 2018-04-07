@@ -98,15 +98,11 @@ public class SQLTab extends Tab {
             return;
         }
 
-        final ResultTable table = new ResultTable();
-        final RotatedTable rotatedTable = new RotatedTable();
-        final TabPane tablePane = new TabPane();
-        tablePane.getTabs().add(new Tab("NORMAL", table));
-        tablePane.getTabs().add(new Tab("ROTATED", rotatedTable));
+        Derpington derpington = new Derpington(this.connectionTab);
 
         final Tab tab = new Tab(Utils.truncate(query, 36));
         tab.setGraphic(Images.CLOCK.imageView());
-        tab.setContent(tablePane);
+        tab.setContent(derpington);
 
         // TODO: parameterize the maxRows properly (via the UI)
         int maxRows = 0;
@@ -138,8 +134,7 @@ public class SQLTab extends Tab {
         task.setOnSucceeded(event -> {
             tab.setGraphic(Images.SPREADSHEET.imageView());
 
-            table.setItems(task.columnProperty(), task.getValue());
-//            rotatedTable.setItems(task.columnProperty(), task.getValue());
+            derpington.setItems(task.columnProperty(), task.getValue());
 
             QueryExecutedEvent e = new QueryExecutedEvent();
             e.setQuery(task.getQuery());

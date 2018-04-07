@@ -7,7 +7,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,23 +64,15 @@ import java.util.List;
  * </tr>
  * </table>
  */
-public class RotatedTable extends TableView<ObservableList> {
+public class RotatedTable extends ResultTable {
 
     private static Logger logger = LoggerFactory.getLogger(RotatedTable.class);
 
-    public RotatedTable() {
-        setEditable(false);
-        // FIXME: table menu button shows columns, but mnemonic is parsed (_). Disable that somehow.
-        setTableMenuButtonVisible(true);
-        setPlaceholder(new Label("Query is running..."));
-        setColumnResizePolicy(UNCONSTRAINED_RESIZE_POLICY);
-    }
+    private boolean loaded = false;
 
-    /**
-     * Sets the placeholder to mention that there are no results found.
-     */
-    public void setPlaceHolderNoResults() {
-        setPlaceholder(new Label("No results for query."));
+    public RotatedTable() {
+        setPlaceholder(new Label("Rotating original results..."));
+        setTableMenuButtonVisible(false);
     }
 
     /**
@@ -90,7 +81,19 @@ public class RotatedTable extends TableView<ObservableList> {
      * @param columnList The column list.
      * @param list       The initial, non-rotated table data.
      */
+    @Override
     public void setItems(List<Column> columnList, ObservableList<ObservableList> list) {
+        if (!loaded) {
+            loaded = true;
+        } else {
+            return;
+        }
+
+        if (list.size() <= 0) {
+            setPlaceHolderNoResults();
+            return;
+        }
+
         // Start by adding the columns. They're known before hand.
         TableColumn<ObservableList, Object> sup = new TableColumn<>("Column name");
         sup.setCellValueFactory(param -> new SimpleObjectProperty<>(param.getValue().get(0)));

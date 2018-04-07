@@ -25,6 +25,7 @@ public class ResultTable extends TableView<ObservableList> {
 
     private static Logger logger = LoggerFactory.getLogger(ResultTable.class);
 
+    private List<Column> columnList;
 
     public ResultTable() {
         setEditable(false);
@@ -32,6 +33,15 @@ public class ResultTable extends TableView<ObservableList> {
         setTableMenuButtonVisible(true);
         setPlaceholder(new Label("Query is running..."));
         setColumnResizePolicy(UNCONSTRAINED_RESIZE_POLICY);
+    }
+
+    /**
+     * Gets the assigned column list.
+     *
+     * @return The list of columns.
+     */
+    public List<Column> getColumnList() {
+        return columnList;
     }
 
     /**
@@ -43,6 +53,7 @@ public class ResultTable extends TableView<ObservableList> {
 
     /**
      * Sets the items.
+     *
      * @param columns
      * @param data
      */
@@ -63,6 +74,8 @@ public class ResultTable extends TableView<ObservableList> {
      */
     @SuppressWarnings("unchecked")
     private void setColumns(List<Column> columnList) {
+        this.columnList = columnList;
+
         for (int i = 0; i < columnList.size(); i++) {
             final int colnum = i;
             TableColumn<ObservableList, Object> col = new TableColumn<>(columnList.get(colnum).getColumnName());
