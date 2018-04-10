@@ -16,18 +16,14 @@ public class NumberTextField extends TextField {
     private Number number = 0;
 
     public NumberTextField() {
-        setText("0");
+        this(0);
+    }
 
-        setOnKeyReleased(event -> {
-            try {
-                this.number = decimalFormat.parse(getText());
-                setStyle("");
-            } catch (ParseException e) {
-                // Number cannot be parsed. Mark it as such.
-                number = null;
-                setStyle("-fx-base: orangered");
-            }
-        });
+    public NumberTextField(int initial) {
+        setText(String.valueOf(initial));
+        setNumber(getText());
+
+        setOnKeyReleased(event -> setNumber(getText()));
 
         // When the text field loses focus, set the value of the text field to
         // the parsed number, just in case. The parse function does not have to
@@ -41,6 +37,17 @@ public class NumberTextField extends TextField {
                 }
             }
         });
+    }
+
+    private void setNumber(String text) {
+        try {
+            this.number = decimalFormat.parse(text);
+            setStyle("");
+        } catch (ParseException e) {
+            // Number cannot be parsed. Mark it as such.
+            number = null;
+            setStyle("-fx-base: orangered");
+        }
     }
 
     /**
