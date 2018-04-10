@@ -9,6 +9,10 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+/**
+ * The {@link ConnectTask} will try to initiate a (read only) SQL {@link Connection} using the given {@link Alias}
+ * in the constructor.
+ */
 public class ConnectTask extends Task<Connection> {
 
     private static Logger logger = LoggerFactory.getLogger(ConnectTask.class);
@@ -37,6 +41,7 @@ public class ConnectTask extends Task<Connection> {
 
         try {
             Connection c = DriverManager.getConnection(alias.getUrl(), alias.getUser(), password);
+            c.setReadOnly(true);
             logger.info("Connection successfully established to {}", alias.getUrl());
             return c;
         } catch (SQLException ex) {

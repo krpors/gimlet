@@ -6,16 +6,16 @@ import cruft.wtf.gimlet.event.ConnectEvent;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecuteEvent;
 import cruft.wtf.gimlet.jdbc.task.ConnectTask;
+import cruft.wtf.gimlet.ui.controls.NumberTextField;
 import cruft.wtf.gimlet.ui.drilldown.DrillDownTab;
 import cruft.wtf.gimlet.ui.objects.ObjectsTab;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +24,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -39,6 +40,10 @@ public class ConnectionTab extends Tab {
     private final Alias alias;
 
     private Connection connection;
+
+    private CheckBox chkLimitRows;
+
+    private NumberTextField numMaxRowCount;
 
     private TabPane tabPane = new TabPane();
 
@@ -65,6 +70,7 @@ public class ConnectionTab extends Tab {
      */
     private StackPane stackPane;
 
+    // TODO: progress indicator during connecting.
     private ProgressIndicator progressIndicator;
 
     private Label lblConnectionTime;
@@ -108,6 +114,7 @@ public class ConnectionTab extends Tab {
 
     /**
      * Returns the Alias which was
+     *
      * @return
      */
     public Alias getAlias() {
@@ -185,17 +192,13 @@ public class ConnectionTab extends Tab {
         contentPane = new BorderPane();
         contentPane.setVisible(false);
 
-        FormPane topPaneWithLabels = new FormPane();
-
-        Label lbl = new Label();
-        lbl.getStyleClass().add("value-label");
-        lbl.textProperty().bindBidirectional(alias.nameProperty());
-
-        Label derp = new Label();
-        derp.getStyleClass().add("value-label");
-        derp.textProperty().bindBidirectional(alias.descriptionProperty());
-        topPaneWithLabels.add("Name:", lbl);
-        topPaneWithLabels.add("Description:", derp);
+        chkLimitRows = new CheckBox("Limit rows");
+        chkLimitRows.setSelected(true);
+        numMaxRowCount = new NumberTextField(100);
+        HBox topPaneWithLabels = new HBox(chkLimitRows, numMaxRowCount);
+        topPaneWithLabels.setPadding(new Insets(5));
+        topPaneWithLabels.setAlignment(Pos.CENTER_LEFT);
+        numMaxRowCount.disableProperty().bind(chkLimitRows.selectedProperty().not());
 
         contentPane.setTop(topPaneWithLabels);
 
@@ -230,6 +233,29 @@ public class ConnectionTab extends Tab {
         return connection;
     }
 
+    /**
+     * Gets the maximum number of rows. If the value could not be parsed, return
+     * the default 100.
+     *
+     * @return The maximum rows to return.
+     */
+    public int getLimitMaxRows() {
+        if (!chkLimitRows.isSelected()) {
+            return 0; // Anita Doth his ass!
+        }
+
+        Optional<Number> num = numMaxRowCount.getNumber();
+        if (num.isPresent()) {
+            return num.get().intValue();
+        } else {
+            logger.debug("Unable to properly parse '{}' as a number, using default 100", numMaxRowCount.getText());
+            return 100;
+        }
+    }
+
+    /**
+     * Closes the selected result table, depending on which tab is selected.
+     */
     public void closeSelectedResultTable() {
         if (sqlTab.isSelected()) {
             sqlTab.closeSelectedResultTable();

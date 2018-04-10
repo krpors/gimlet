@@ -11,6 +11,8 @@ import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -24,6 +26,8 @@ import java.util.Set;
  * This tab contains the logic for connecting and executing a named and parameterized query.
  */
 public class DrillDownExecutionTab extends Tab {
+
+    private static final Logger logger = LoggerFactory.getLogger(DrillDownExecutionTab.class);
 
     private final Query query;
 
@@ -113,7 +117,12 @@ public class DrillDownExecutionTab extends Tab {
     public void executeQuery(final Map<String, Object> columnMap) {
         Connection connection = this.drillDownTab.getConnectionTab().getConnection();
 
-        NamedQueryTask namedQueryTask = new NamedQueryTask(connection, query.getContent(), 100, columnMap);
+        // Get the max rows from the ConnectionTab (parent, parent). 0 will mean no row limit.
+        // TODO: is there an easier way to get this, instead of going up the chain of parents?
+        int maxRows = drillDownTab.getConnectionTab().getLimitMaxRows();
+        logger.debug("Limiting  maximum amount of  rows to {} for query '{}'", maxRows, query.getName());
+
+        NamedQueryTask namedQueryTask = new NamedQueryTask(connection, query.getContent(), maxRows, columnMap);
 
         namedQueryTask.setOnScheduled(event -> {
             btnRerun.setDisable(true);
@@ -131,6 +140,7 @@ public class DrillDownExecutionTab extends Tab {
             namedQueryTask.getException().printStackTrace(new PrintWriter(sw));
             StringBuilder stringBuilder = new StringBuilder();
             stringBuilder
+                    .append(namedQueryTask.getException().getMessage()).append("\n\n")
                     .append("Source query:\n\n")
                     .append(namedQueryTask.getQuery())
                     .append("\n\n");
@@ -163,6 +173,8 @@ public class DrillDownExecutionTab extends Tab {
             qee.setQuery(namedQueryTask.getQuery());
             qee.setRuntime(namedQueryTask.getProcessingTime());
             qee.setRowCount(namedQueryTask.getRowCount());
+
+            // Posting the event on the bus will result in a new tab
             EventDispatcher.getInstance().post(qee);
         });
 

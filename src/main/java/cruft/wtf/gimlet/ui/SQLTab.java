@@ -63,17 +63,10 @@ public class SQLTab extends Tab {
             }
         });
 
-        BorderPane bpane = new BorderPane();
-        checkMaxRows = new CheckBox("Enable max rows 100");
-        checkMaxRows.setSelected(true);
-        checkMaxRows.setPadding(new Insets(5, 5, 5, 5));
-        bpane.setTop(checkMaxRows);
-        bpane.setCenter(txtQuery);
-
         SplitPane pane = new SplitPane();
         pane.setOrientation(Orientation.VERTICAL);
         pane.setDividerPosition(0, 0.30);
-        pane.getItems().add(bpane);
+        pane.getItems().add(txtQuery);
         pane.getItems().add(tabPaneResultSets);
 
         setContent(pane);
@@ -104,11 +97,9 @@ public class SQLTab extends Tab {
         tab.setGraphic(Images.CLOCK.imageView());
         tab.setContent(derpington);
 
-        // TODO: parameterize the maxRows properly (via the UI)
-        int maxRows = 0;
-        if (checkMaxRows.isSelected()) {
-            maxRows = 100;
-        }
+        int maxRows = connectionTab.getLimitMaxRows();
+        logger.debug("Limiting maximum amount of rows to {}", maxRows);
+
         SimpleQueryTask task = new SimpleQueryTask(this.connectionTab.getConnection(), query, maxRows);
 
         // Task is scheduled and about to start. Add the tab and select it.
