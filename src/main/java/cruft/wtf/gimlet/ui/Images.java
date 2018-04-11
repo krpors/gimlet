@@ -34,6 +34,7 @@ public enum Images {
     PLUS("/icons/plus-24px.png", true),
     RUN("/icons/run-24px.png", true),
     SAVE("/icons/content-save-24px.png", true),
+    SKULL("/icons/skull-24px.png", true),
     SPREADSHEET("/icons/table-large-24px.png", true),
     TABLE_COLUMN_WIDTH("/icons/table-column-width-24px.png", true),
     TRASH("/icons/delete-forever-24px.png", true),

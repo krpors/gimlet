@@ -1,6 +1,7 @@
 package cruft.wtf.gimlet.ui;
 
 import com.google.common.eventbus.Subscribe;
+import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.conf.Alias;
 import cruft.wtf.gimlet.event.ConnectEvent;
 import cruft.wtf.gimlet.event.EventDispatcher;
@@ -13,7 +14,12 @@ import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.*;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -140,6 +146,8 @@ public class ConnectionTab extends Tab {
      * If we could connect via the {@link ConnectTask}, the connection will be assigned to this
      * tab. The graphic is changed, the connectionTimer is cancelled, and the content pane is made visible.
      *
+     * We're also starting a timer task in the background to continuously check whether we still have a connection.
+     *
      * @param connection The connection to set.
      */
     public void setConnection(final Connection connection) {
@@ -153,8 +161,48 @@ public class ConnectionTab extends Tab {
         lblConnectionTime.setVisible(false);
 
         objectsTab.setConnection(connection);
+
+        startConnectionValidityChecker();
     }
 
+    /**
+     * This method will start a timer task which checks the validity of the connection
+     * every 30 seconds. The design of the feedback to the user has to be finetuned I
+     * suppose, but I reckon this is better than nothing. Currently, only an error
+     * dialog is displayed, and the icon of the tab is set to something different.
+     * <p>
+     * TODO: get rid of the magic numbers, they're arbitrarily chosen.
+     */
+    private void startConnectionValidityChecker() {
+        Timer timer = new Timer("Connection validity checker for " + getAlias().getName(), true);
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    if (!connection.isValid(10000)) {
+                        cancel();
+                        Platform.runLater(() -> {
+                            getContent().setDisable(true);
+                            setGraphic(Images.SKULL.imageView());
+                            Utils.showError(
+                                    String.format("Connection to '%s'was closed (by peer?)", getAlias().getName()),
+                                    "Please close the tab and reconnect.");
+                        });
+                        connection.close();
+                    }
+                } catch (SQLException e) {
+                    logger.error("The connection was closed", e);
+                }
+            }
+        }, 0, 30000);
+    }
+
+    /**
+     * In case of a connection error, a throwable is set and the content of the tab
+     * is changed with information as to why it failed.
+     *
+     * @param throwable The throwable.
+     */
     public void setThrowable(final Throwable throwable) {
         connectionTimer.cancel();
         stackPane.getChildren().forEach(node -> {
@@ -167,16 +215,15 @@ public class ConnectionTab extends Tab {
         PrintWriter pw = new PrintWriter(sw);
         throwable.printStackTrace(pw);
 
-        StringBuilder err = new StringBuilder();
-        err
-                .append("Unable to connect\n\n")
-                .append("Username: ").append(alias.getUser()).append("\n")
-                .append("URL:      ").append(alias.getUrl()).append("\n")
-                .append("Driver:   ").append(alias.getDriverClass()).append("\n\n")
-                .append("Stacktrace:\n\n")
-                .append(sw.toString());
+        String err =
+                "Unable to connect\n\n" +
+                        "Username: " + alias.getUser() + "\n" +
+                        "URL:      " + alias.getUrl() + "\n" +
+                        "Driver:   " + alias.getDriverClass() + "\n\n" +
+                        "Stacktrace:\n\n" +
+                        sw.toString();
 
-        txtError.setText(err.toString());
+        txtError.setText(err);
     }
 
     /**

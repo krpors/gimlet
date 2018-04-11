@@ -245,7 +245,7 @@ public class ObjectsTab extends Tab {
             logger.error("Task failed", taskLoadObjects.getException());
         });
 
-        Thread t = new Thread(taskLoadObjects);
+        Thread t = new Thread(taskLoadObjects, "Database objects loader");
         t.setDaemon(true);
         t.start();
     }
