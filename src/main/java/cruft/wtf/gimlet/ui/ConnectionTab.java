@@ -1,12 +1,12 @@
 package cruft.wtf.gimlet.ui;
 
 import com.google.common.eventbus.Subscribe;
-import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.conf.Alias;
 import cruft.wtf.gimlet.event.ConnectEvent;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecuteEvent;
 import cruft.wtf.gimlet.jdbc.task.ConnectTask;
+import cruft.wtf.gimlet.jdbc.task.ConnectionValidityTimer;
 import cruft.wtf.gimlet.ui.controls.NumberTextField;
 import cruft.wtf.gimlet.ui.drilldown.DrillDownTab;
 import cruft.wtf.gimlet.ui.objects.ObjectsTab;
@@ -30,6 +30,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -69,6 +70,8 @@ public class ConnectionTab extends Tab {
      */
     private Timer connectionTimer;
 
+    private ConnectionValidityTimer connectionValidityTimer;
+
     private TextArea txtError;
 
     /**
@@ -81,8 +84,14 @@ public class ConnectionTab extends Tab {
 
     private Label lblConnectionTime;
 
+    /**
+     * Creates the {@link ConnectionTab} using the given {@link Alias}.
+     *
+     * @param alias The alias containing the connection information.
+     */
     public ConnectionTab(final Alias alias) {
-        this.alias = alias;
+        this.alias = Objects.requireNonNull(alias);
+
         setGraphic(Images.CLOCK.imageView());
 
         EventDispatcher.getInstance().register(this);
@@ -102,6 +111,7 @@ public class ConnectionTab extends Tab {
         setOnCloseRequest(e -> {
             EventDispatcher.getInstance().unregister(this);
             connectionTimer.cancel();
+            connectionValidityTimer.cancel();
             try {
                 // Close the connection when the tab is closed.
                 if (connection != null) {
@@ -174,27 +184,8 @@ public class ConnectionTab extends Tab {
      * TODO: get rid of the magic numbers, they're arbitrarily chosen.
      */
     private void startConnectionValidityChecker() {
-        Timer timer = new Timer("Connection validity checker for " + getAlias().getName(), true);
-        timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    if (!connection.isValid(10000)) {
-                        cancel();
-                        Platform.runLater(() -> {
-                            getContent().setDisable(true);
-                            setGraphic(Images.SKULL.imageView());
-                            Utils.showError(
-                                    String.format("Connection to '%s'was closed (by peer?)", getAlias().getName()),
-                                    "Please close the tab and reconnect.");
-                        });
-                        connection.close();
-                    }
-                } catch (SQLException e) {
-                    logger.error("The connection was closed", e);
-                }
-            }
-        }, 0, 30000);
+        connectionValidityTimer = new ConnectionValidityTimer(this, 10000);
+        connectionValidityTimer.schedule();
     }
 
     /**

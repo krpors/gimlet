@@ -168,7 +168,7 @@ public class Alias {
      * Copies values over from another {@link Alias}. This is to keep the reference intact.
      *
      * @param other The values to use to copy to this instance.
-     * @see cruft.wtf.gimlet.ui.AliasDialog
+     * @see cruft.wtf.gimlet.ui.dialog.AliasDialog
      */
     public void copyFrom(final Alias other) {
         setAskForPassword(other.isAskForPassword());
