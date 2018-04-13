@@ -6,6 +6,7 @@ import cruft.wtf.gimlet.jdbc.task.SimpleQueryTask;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Label;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import org.slf4j.Logger;
@@ -33,6 +34,8 @@ public class ResultTable extends TableView<ObservableList> {
         setTableMenuButtonVisible(true);
         setPlaceholder(new Label("Query is running..."));
         setColumnResizePolicy(UNCONSTRAINED_RESIZE_POLICY);
+        getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        setRowFactory(param -> new ResultTableRow());
     }
 
     /**

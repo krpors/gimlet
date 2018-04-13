@@ -141,7 +141,7 @@ public final class ParseResult {
                     }
 
                     parameters.add(new Param(name, dataType));
-                    c = '?'; // replace the parameter with a question mark
+                    c = '?'; // replaceChars the parameter with a question mark
                     i += name.length() + skip; // skip past the end of the parameter
                 }
             }

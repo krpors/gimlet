@@ -5,11 +5,11 @@ import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecuteEvent;
 import cruft.wtf.gimlet.ui.ResultTable;
+import cruft.wtf.gimlet.ui.ResultTableRow;
 import javafx.collections.ObservableList;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,18 +32,22 @@ public class DrillResultTable extends ResultTable {
     }
 
     /**
-     * TableRow for this {@link DrillResultTable}. Contains context menus etc.
+     * TableRow for this {@link DrillResultTable}, and is a specialization on the basic {@link ResultTableRow}.
+     * This table row contains extra items in the context menu for the drilldown functionality.
      */
-    private class DrillResultTableRow extends TableRow<ObservableList> {
-
-        private ContextMenu menu = new ContextMenu();
+    private class DrillResultTableRow extends ResultTableRow {
 
         public DrillResultTableRow() {
+
+            if (!query.getSubQueries().isEmpty()) {
+                contextMenu.getItems().add(new SeparatorMenuItem());
+            }
+
             // Create a context menu, containing the direct sub queries for the original query.
             for (Query subQuery : query.getSubQueries()) {
                 MenuItem item = new MenuItem(subQuery.getName());
                 item.setMnemonicParsing(false);
-                menu.getItems().add(item);
+                contextMenu.getItems().add(item);
                 item.setOnAction(event -> {
                     executeDrillDown(subQuery);
                 });
@@ -80,7 +84,7 @@ public class DrillResultTable extends ResultTable {
                 return;
             }
 
-            setContextMenu(menu);
+            setContextMenu(contextMenu);
         }
     }
 }
