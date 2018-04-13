@@ -2,7 +2,10 @@ package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.conf.Alias;
 import cruft.wtf.gimlet.jdbc.ParseResult;
-import cruft.wtf.gimlet.ui.*;
+import cruft.wtf.gimlet.ui.ConnectionTab;
+import cruft.wtf.gimlet.ui.ConnectionTabPane;
+import cruft.wtf.gimlet.ui.ResultTable;
+import cruft.wtf.gimlet.ui.RotatedTable;
 import cruft.wtf.gimlet.ui.dialog.ParamInputDialog;
 import cruft.wtf.gimlet.ui.dialog.QueryDialog;
 import cruft.wtf.gimlet.ui.dialog.SettingsDialog;
@@ -12,6 +15,10 @@ import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.ScrollPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
@@ -23,6 +30,20 @@ import java.util.*;
  * Simple tester main to quickly test UI elements. Also: http://fxexperience.com/scenic-view/
  */
 public class Tester extends Application {
+
+    private void withCrap(BorderPane pane) {
+        TabPane tp = new TabPane();
+        Tab one = new Tab("Tab 1");
+        Tab two = new Tab("Tab 1");
+        Tab thr = new Tab("Tab 1");
+        tp.setPrefWidth(250);
+
+        tp.getTabs().addAll(one, two, thr);
+
+        pane.setLeft(tp);
+
+        pane.setCenter(new Button("HERRO"));
+    }
 
     private void withSettingsDialog(BorderPane pane) {
         SettingsDialog settingsDialog = new SettingsDialog();
@@ -43,7 +64,7 @@ public class Tester extends Application {
         set.add(new ParseResult.Param("NONE", ParseResult.Type.NONE));
 
         ParamInputDialog dlg = new ParamInputDialog(set);
-        Optional<Map<String,Object>> map = dlg.showAndWait();
+        Optional<Map<String, Object>> map = dlg.showAndWait();
         if (map.isPresent()) {
             System.out.println("OK! " + map.get());
         } else {
@@ -127,7 +148,7 @@ public class Tester extends Application {
         primaryStage.setWidth(800);
         primaryStage.setHeight(600);
 
-        withRotatedTable(pane);
+        withCrap(pane);
 
         // Show the stage after possibly reading and setting window properties.
         primaryStage.show();

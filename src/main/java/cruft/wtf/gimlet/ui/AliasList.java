@@ -6,13 +6,7 @@ import cruft.wtf.gimlet.event.ConnectEvent;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.ui.dialog.AliasDialog;
 import javafx.collections.ObservableList;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 
 import java.util.Collections;
@@ -27,6 +21,14 @@ public class AliasList extends ListView<Alias> {
                 openEditDialog();
             }
         });
+
+        // When no aliases are visible, this context menu will be triggered.
+        // When aliases are available, the context menu in the AliasListCell is used.
+        ContextMenu contextMenu = new ContextMenu();
+        MenuItem menuItemNew = new MenuItem("New", Images.PLUS.imageView());
+        menuItemNew.setOnAction(e -> openNewDialog());
+        contextMenu.getItems().add(menuItemNew);
+        setContextMenu(contextMenu);
     }
 
     /**
@@ -110,15 +112,11 @@ public class AliasList extends ListView<Alias> {
 
         public AliasListCell() {
             // We require separate items for the two different context menu's.
-            MenuItem itemConnect = new MenuItem("Connect");
-            itemConnect.setGraphic(Images.ACCOUNT_LOGIN.imageView());
-            MenuItem newItem = new MenuItem("New");
-            newItem.setGraphic(Images.PLUS.imageView());
+            MenuItem itemConnect = new MenuItem("Connect", Images.ACCOUNT_LOGIN.imageView());
+            MenuItem newItem = new MenuItem("New", Images.PLUS.imageView());
             MenuItem duplicateItem = new MenuItem("Duplicate");
-            MenuItem deleteItem = new MenuItem("Delete");
-            deleteItem.setGraphic(Images.TRASH.imageView());
-            MenuItem editItem = new MenuItem("Properties...");
-            editItem.setGraphic(Images.PENCIL.imageView());
+            MenuItem deleteItem = new MenuItem("Delete", Images.TRASH.imageView());
+            MenuItem editItem = new MenuItem("Properties...", Images.PENCIL.imageView());
 
             itemConnect.setOnAction(e -> EventDispatcher.getInstance().post(new ConnectEvent(ConnectEvent.Type.INITATED, getItem())));
             newItem.setOnAction(e -> openNewDialog());

@@ -12,16 +12,9 @@ import cruft.wtf.gimlet.ui.drilldown.DrillDownTab;
 import cruft.wtf.gimlet.ui.objects.ObjectsTab;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
-import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ProgressIndicator;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,6 +102,7 @@ public class ConnectionTab extends Tab {
         setText(String.format("%s as %s", alias.getName(), alias.getUser()));
 
         setOnCloseRequest(e -> {
+            // FIXME if not registered (cannot connect) this throws illegal arg exc.
             EventDispatcher.getInstance().unregister(this);
             connectionTimer.cancel();
             connectionValidityTimer.cancel();
@@ -155,7 +149,7 @@ public class ConnectionTab extends Tab {
     /**
      * If we could connect via the {@link ConnectTask}, the connection will be assigned to this
      * tab. The graphic is changed, the connectionTimer is cancelled, and the content pane is made visible.
-     *
+     * <p>
      * We're also starting a timer task in the background to continuously check whether we still have a connection.
      *
      * @param connection The connection to set.
@@ -233,9 +227,8 @@ public class ConnectionTab extends Tab {
         chkLimitRows = new CheckBox("Limit rows");
         chkLimitRows.setSelected(true);
         numMaxRowCount = new NumberTextField(100);
-        HBox topPaneWithLabels = new HBox(chkLimitRows, numMaxRowCount);
+        ToolBar topPaneWithLabels = new ToolBar(chkLimitRows, numMaxRowCount);
         topPaneWithLabels.setPadding(new Insets(5));
-        topPaneWithLabels.setAlignment(Pos.CENTER_LEFT);
         numMaxRowCount.disableProperty().bind(chkLimitRows.selectedProperty().not());
 
         contentPane.setTop(topPaneWithLabels);

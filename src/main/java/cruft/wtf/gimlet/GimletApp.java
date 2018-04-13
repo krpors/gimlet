@@ -12,6 +12,7 @@ import javafx.beans.binding.Bindings;
 import javafx.geometry.Orientation;
 import javafx.geometry.Side;
 import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCombination;
@@ -49,12 +50,11 @@ public class GimletApp extends Application {
 
     public static Window window;
 
-    private SplitPane centerPane;
-
     /**
      * The global reference to the opened GimletProject. Can be null if none is opened... Is there a better way?
      */
     private GimletProject gimletProject;
+
 
     /**
      * Entry point.
@@ -78,7 +78,7 @@ public class GimletApp extends Application {
                 Configuration c = Configuration.getInstance();
                 c.setProperty(Configuration.Key.WINDOW_MAXIMIZED, primaryStage.isMaximized());
                 c.write();
-            } catch (IOException e) {
+            } catch (Exception e) {
                 System.err.println("Unable to write the properties file at JVM exit!");
                 e.printStackTrace();
             }
@@ -107,6 +107,29 @@ public class GimletApp extends Application {
                     "Error!",
                     "Could not load properties file " + Configuration.getInstance().getConfigFile(),
                     e);
+        }
+    }
+
+    /**
+     * Creates a new project file, by showing a dialog first.
+     */
+    private void newProjectFile() {
+        FileChooser chooser = new FileChooser();
+        chooser.setTitle("Select location for the new Gimlet project");
+        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Gimlet project files", "*.gml"));
+        File file = chooser.showSaveDialog(window);
+        if (file == null) {
+            // user pressed cancel.
+            return;
+        }
+        // TODO: add .gml to file if not explicitly given.
+        GimletProject temp = new GimletProject();
+        temp.setFile(file);
+        try {
+            temp.writeToFile();
+            loadProjectFile(file);
+        } catch (JAXBException e) {
+            logger.error("Unable to write project to file", e);
         }
     }
 
@@ -175,25 +198,7 @@ public class GimletApp extends Application {
 
         MenuItem fileItemNew = new MenuItem("New");
         fileItemNew.setAccelerator(KeyCombination.keyCombination("Ctrl+N"));
-        fileItemNew.setOnAction(event -> {
-            FileChooser chooser = new FileChooser();
-            chooser.setTitle("Select location for the new Gimlet project");
-            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Gimlet project files", "*.gml"));
-            File file = chooser.showSaveDialog(window);
-            if (file == null) {
-                // user pressed cancel.
-                return;
-            }
-            // TODO: add .gml to file if not explicitly given.
-            this.gimletProject = new GimletProject();
-            try {
-                this.gimletProject.setFile(file);
-                this.gimletProject.writeToFile();
-            } catch (JAXBException e) {
-                logger.error("Unable to write project to file", e);
-            }
-
-        });
+        fileItemNew.setOnAction(event -> newProjectFile());
 
         MenuItem fileItemOpen = new MenuItem("Open...");
         fileItemOpen.setAccelerator(KeyCombination.keyCombination("Ctrl+O"));
@@ -209,8 +214,6 @@ public class GimletApp extends Application {
             }
 
             loadProjectFile(file);
-
-            // TODO: invalidate UI, close tabs, connections, etc etc.
         });
 
         MenuItem fileItemSave = new MenuItem("Save", Images.SAVE.imageView());
@@ -274,7 +277,9 @@ public class GimletApp extends Application {
      * @return The {@link Node} containing the left portion of the application.
      */
     private Node createLeft() {
-        return new LeftPane();
+        LeftPane left = new LeftPane();
+        left.setPrefWidth(320);
+        return left;
     }
 
     /**
@@ -335,6 +340,35 @@ public class GimletApp extends Application {
     }
 
     /**
+     * This method creates the main content: the splitpanes.
+     *
+     * @return The BorderPane containing the menu bar and the actual program contents.
+     */
+    private Parent createMainContent() {
+        connectionTabPane = new ConnectionTabPane();
+
+        Node left = createLeft();
+
+        Node bottom = createBottom();
+        SplitPane.setResizableWithParent(bottom, false);
+
+        // The pane containing menu bar, and the splitpanes.
+        BorderPane pane = new BorderPane();
+        pane.setTop(createMenuBar());
+        pane.setLeft(left);
+        pane.setCenter(connectionTabPane);
+
+
+        // The splitpane, containing the upper borderpane (alias/query + connections)
+        // and the bottom part, containing logging and project properties.
+        SplitPane mainContentPane = new SplitPane(pane, bottom);
+        mainContentPane.setOrientation(Orientation.VERTICAL);
+        mainContentPane.setDividerPosition(0, 0.6);
+
+        return mainContentPane;
+    }
+
+    /**
      * Creates the {@link Stage} and all other cruft of the main window.
      *
      * @param primaryStage
@@ -348,25 +382,7 @@ public class GimletApp extends Application {
 
         addShutdownHook();
 
-        BorderPane pane = new BorderPane();
-
-        connectionTabPane = new ConnectionTabPane();
-        Node left = createLeft();
-
-        centerPane = new SplitPane(left, connectionTabPane);
-
-        SplitPane.setResizableWithParent(left, false);
-
-        Node bottom = createBottom();
-        SplitPane.setResizableWithParent(bottom, false);
-        SplitPane lolPane = new SplitPane(centerPane, bottom);
-        lolPane.setOrientation(Orientation.VERTICAL);
-        lolPane.setDividerPosition(0, 0.6);
-
-        pane.setTop(createMenuBar());
-        pane.setCenter(lolPane);
-
-        Scene scene = new Scene(pane);
+        Scene scene = new Scene(createMainContent());
         scene.getStylesheets().add("/css/style.css");
 
         primaryStage.setTitle("Gimlet");
@@ -398,7 +414,6 @@ public class GimletApp extends Application {
         });
 
         logger.info("Gimlet started and ready");
-        logger.error("Whoops");
     }
 
 }

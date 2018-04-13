@@ -66,6 +66,11 @@ public class ConnectionTabPane extends TabPane {
         Platform.runLater(() -> getTabs().clear());
     }
 
+    /**
+     * When a new file is opened, we will close all tabs, thus also closing all connections.
+     *
+     * @param event The event.
+     */
     @SuppressWarnings("unused")
     @Subscribe
     public void onFileOpenedEvent(final FileOpenedEvent event) {
