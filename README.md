@@ -90,23 +90,40 @@ In the Alias editor dialog, the combobox *should* then list all available driver
 
 A list of things to be done, or some ideas. Not in any particular order.
 
-1. Fix the way the `QueryTree` and the backed `Query` object tree works?
+#### Milestones for 1.0 release
+
+1. Splash screen with some funky graphic (should be allowed to be disabled).
+1. Finish up the 'new project' functionality. Initial startup should show
+   some kind of landing page.
+
+#### Next versions
+
+1. Recent queries: save them in different file.
+1. Multiple select, and multiple sub-query execution. For instance, select 4 rows, right
+   click and then select a sub query. This will result in 4 new tabs with results.
+
+#### Nice to haves
+
+1. Add some kind of list of known JDBC drivers + connection strings. This eases up the
+   initial setup of a JDBC connection.
 1. Re-use (make a reference to) a query structure so you can make sort of
 duplicates, where you make a reference to another query structure for the
 subqueries.
-1. Add some kind of list of known JDBC drivers + connection strings.
-1. Splash screen with some funky graphic.
 1. Help file/screen.
-1. New project.
+
 1. Query wizard or something: start by a root query, execute sample query, then hit next
 to configure the next query, until finished, then a query tree is a result.
-1. "Rotated table" view. Handy with many columns.
 1. Easier column selector (hide all/show all)
 1. Syntax highlighter?
-1. Recent queries: save them in different file.
+
+#### Code cleanups
+
+1. Fix the way the `QueryTree` and the backed `Query` object tree work?
+1. Moar Javadoc.
 
 # Other things
 
 * Mimic network latency: https://wiki.linuxfoundation.org/networking/netem
 * Icons: https://materialdesignicons.com/
-
+* Mimic network cutoffs by using `socat` as a TCP proxy between Gimlet and
+  the target database host.
