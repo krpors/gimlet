@@ -1,5 +1,6 @@
 package cruft.wtf.gimlet.ui;
 
+import cruft.wtf.gimlet.DataExporter;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -7,6 +8,9 @@ import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
+
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * This is a generic row for any result table. It contains a basic context menu with copy/paste actions
@@ -24,17 +28,25 @@ public class ResultTableRow extends TableRow<ObservableList> {
         contextMenu.getItems().add(itemCopy);
 
         itemCopy.setOnAction(event -> {
-            StringBuilder sb = new StringBuilder();
+            // The data:
             TableView<ObservableList> tv = getTableView();
             ObservableList<ObservableList> lol = tv.getSelectionModel().getSelectedItems();
-            for (ObservableList rowData : lol) {
-                System.out.println(rowData);
-                sb.append(rowData.toString());
-                sb.append("\n");
-            }
+
+            // The column names:
+            List<String> colNames = new LinkedList<>();
+            getTableView().getColumns().forEach(col -> colNames.add(col.getText()));
+
+            DataExporter.Options opts = new DataExporter.Options();
+            opts.columnSeparator = " | ";
+            opts.includeColNames = true;
+            opts.fitWidth = true;
+
+            // Export string here.
+            String yo = DataExporter.exportToBasicString(colNames.toArray(new String[colNames.size()]), lol, opts);
 
             final ClipboardContent clipboardContent = new ClipboardContent();
-            clipboardContent.putString(sb.toString());
+
+            clipboardContent.putString(yo);
             Clipboard.getSystemClipboard().setContent(clipboardContent);
         });
 
@@ -52,3 +64,5 @@ public class ResultTableRow extends TableRow<ObservableList> {
         setContextMenu(contextMenu);
     }
 }
+
+

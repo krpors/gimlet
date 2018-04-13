@@ -1,0 +1,7 @@
+LARGE_FIRST_COLUMN_NAME |Two                                    |
+=================================================================
+Kevin                   |Pors                                   |
+Derpy                   |Derpington                             |
+Cruft and all           |Jazzy newsflash                        |
+Ozzy                    |Bozzy                                  |
+This col                |The other column, contains a newline!! |

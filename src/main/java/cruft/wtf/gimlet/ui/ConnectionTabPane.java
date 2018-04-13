@@ -6,6 +6,7 @@ import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.FileOpenedEvent;
 import cruft.wtf.gimlet.jdbc.task.ConnectTask;
 import cruft.wtf.gimlet.ui.dialog.PasswordInputDialog;
+import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyBooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.Event;
@@ -62,8 +63,7 @@ public class ConnectionTabPane extends TabPane {
             }
         });
 
-        // FIXME: this can be executed outside of an FX thread!?
-        getTabs().clear();
+        Platform.runLater(() -> getTabs().clear());
     }
 
     @SuppressWarnings("unused")
