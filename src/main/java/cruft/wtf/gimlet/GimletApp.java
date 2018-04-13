@@ -88,7 +88,7 @@ public class GimletApp extends Application {
     /**
      * Read configuration file, and read the last opened project file and reopen it, if present.
      */
-    public void initConfigs() {
+    private void initConfigs() {
         try {
             logger.debug("Loading Gimlet configuration");
             Configuration c = Configuration.getInstance();
@@ -115,13 +115,13 @@ public class GimletApp extends Application {
      *
      * @param file The file to (attempt) to open. When it fails, the user is notified.
      */
-    public void loadProjectFile(final File file) {
+    private void loadProjectFile(final File file) {
         try {
             this.gimletProject = GimletProject.read(file);
 
             Configuration.getInstance().setProperty(Configuration.Key.LAST_PROJECT_FILE, file.getAbsolutePath());
 
-            logger.info("Succesfully read '{}'", file);
+            logger.info("Successfully read '{}'", file);
 
             this.primaryStage.titleProperty().bind(Bindings.concat("Gimlet - ", this.gimletProject.nameProperty()));
 
@@ -150,10 +150,14 @@ public class GimletApp extends Application {
         }
 
         try {
-            gimletProject.writeToFile(file);
             gimletProject.setFile(file); // update the file reference so the editor is now opened in that one.
+            gimletProject.writeToFile();
+
             FileSavedEvent event = new FileSavedEvent(file);
             EventDispatcher.getInstance().post(event);
+
+            // Initiate the loading sequence.
+            loadProjectFile(file);
         } catch (JAXBException e) {
             e.printStackTrace();
         }
@@ -164,7 +168,7 @@ public class GimletApp extends Application {
      *
      * @return The {@link MenuBar}.
      */
-    public MenuBar createMenuBar() {
+    private MenuBar createMenuBar() {
         MenuBar menuBar = new MenuBar();
 
         Menu menuFile = new Menu("File");
@@ -181,8 +185,14 @@ public class GimletApp extends Application {
                 return;
             }
             // TODO: add .gml to file if not explicitly given.
+            this.gimletProject = new GimletProject();
+            try {
+                this.gimletProject.setFile(file);
+                this.gimletProject.writeToFile();
+            } catch (JAXBException e) {
+                logger.error("Unable to write project to file", e);
+            }
 
-            this.gimletProject.setFile(file);
         });
 
         MenuItem fileItemOpen = new MenuItem("Open...");
@@ -191,6 +201,7 @@ public class GimletApp extends Application {
             FileChooser chooser = new FileChooser();
             chooser.setTitle("Select Gimlet project file");
             chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Gimlet project files", "*.gml"));
+            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
             File file = chooser.showOpenDialog(window);
             if (file == null) {
                 // user pressed cancel.
@@ -208,7 +219,7 @@ public class GimletApp extends Application {
             if (gimletProject != null && gimletProject.getFile() != null) {
                 logger.info("Writing project file to '{}'", gimletProject.getFile());
                 try {
-                    gimletProject.writeToFile(gimletProject.getFile());
+                    gimletProject.writeToFile();
                     EventDispatcher.getInstance().post(new FileSavedEvent(gimletProject.getFile()));
                 } catch (JAXBException e) {
                     logger.error("Failed to write to file '{}'", gimletProject.getFile());
@@ -311,7 +322,7 @@ public class GimletApp extends Application {
         c.getBooleanProperty(Configuration.Key.SAVE_ON_EXIT).ifPresent(aBoolean -> {
             if (aBoolean && this.gimletProject != null && this.gimletProject.getFile() != null) {
                 try {
-                    this.gimletProject.writeToFile(this.gimletProject.getFile());
+                    this.gimletProject.writeToFile();
                     logger.info("Written to file {} at exit", this.gimletProject.getFile());
                 } catch (JAXBException e) {
                     logger.error("Unable to save file", e);
@@ -330,7 +341,7 @@ public class GimletApp extends Application {
      * @throws IOException
      */
     @Override
-    public void start(Stage primaryStage) throws IOException {
+    public void start(Stage primaryStage) {
         logger.info("Starting up Gimlet");
 
         this.primaryStage = primaryStage;

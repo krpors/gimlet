@@ -29,9 +29,9 @@ import java.util.List;
 })
 public class GimletProject {
 
-    private StringProperty name = new SimpleStringProperty();
+    private StringProperty name = new SimpleStringProperty("");
 
-    private StringProperty description = new SimpleStringProperty();
+    private StringProperty description = new SimpleStringProperty("");
 
     private SimpleListProperty<Alias> aliases = new SimpleListProperty<>(FXCollections.observableArrayList());
 
@@ -131,11 +131,11 @@ public class GimletProject {
         return gp;
     }
 
-    public void writeToFile(final File file) throws JAXBException {
+    public void writeToFile() throws JAXBException {
         JAXBContext ctx = JAXBContext.newInstance(GimletProject.class);
         Marshaller marshaller = ctx.createMarshaller();
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
-        marshaller.marshal(this, file);
+        marshaller.marshal(this, getFile());
     }
 }
