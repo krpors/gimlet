@@ -1,6 +1,7 @@
 package cruft.wtf.gimlet.ui;
 
 import com.google.common.eventbus.Subscribe;
+import com.sun.rowset.CachedRowSetImpl;
 import cruft.wtf.gimlet.conf.Alias;
 import cruft.wtf.gimlet.event.ConnectEvent;
 import cruft.wtf.gimlet.event.EventDispatcher;
@@ -19,6 +20,7 @@ import javafx.scene.layout.StackPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.rowset.CachedRowSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
@@ -101,8 +103,10 @@ public class ConnectionTab extends Tab {
         // an untrue situation so keep this tab name static.
         setText(String.format("%s as %s", alias.getName(), alias.getUser()));
 
+        // Create the timer, but don't start it yet,
+        connectionValidityTimer = new ConnectionValidityTimer(this, 10000);
+
         setOnCloseRequest(e -> {
-            // FIXME if not registered (cannot connect) this throws illegal arg exc.
             EventDispatcher.getInstance().unregister(this);
             connectionTimer.cancel();
             connectionValidityTimer.cancel();
@@ -166,19 +170,7 @@ public class ConnectionTab extends Tab {
 
         objectsTab.setConnection(connection);
 
-        startConnectionValidityChecker();
-    }
-
-    /**
-     * This method will start a timer task which checks the validity of the connection
-     * every 30 seconds. The design of the feedback to the user has to be finetuned I
-     * suppose, but I reckon this is better than nothing. Currently, only an error
-     * dialog is displayed, and the icon of the tab is set to something different.
-     * <p>
-     * TODO: get rid of the magic numbers, they're arbitrarily chosen.
-     */
-    private void startConnectionValidityChecker() {
-        connectionValidityTimer = new ConnectionValidityTimer(this, 10000);
+        // Start the validity timer at last.
         connectionValidityTimer.schedule();
     }
 

@@ -1,6 +1,9 @@
 package cruft.wtf.gimlet.ui;
 
 import cruft.wtf.gimlet.event.EventDispatcher;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
+import javafx.scene.control.Separator;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
@@ -25,5 +28,9 @@ public class LeftPane extends BorderPane {
         tabQueries.setClosable(false);
         TabPane tabPane = new TabPane(tabAliases, tabQueries);
         setCenter(tabPane);
+
+        Separator sep = new Separator(Orientation.VERTICAL);
+        sep.setPadding(new Insets(0, 0, 0, 5));
+        setRight(sep);
     }
 }

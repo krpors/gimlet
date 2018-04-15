@@ -9,6 +9,7 @@ import cruft.wtf.gimlet.ui.dialog.SettingsDialog;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Side;
 import javafx.scene.Node;
