@@ -7,13 +7,15 @@ import cruft.wtf.gimlet.event.FileSavedEvent;
 import cruft.wtf.gimlet.ui.ConnectionTabPane;
 import cruft.wtf.gimlet.ui.Images;
 import cruft.wtf.gimlet.ui.LogTable;
+import cruft.wtf.gimlet.ui.MainMenuBar;
 import cruft.wtf.gimlet.ui.NavigationPane;
 import cruft.wtf.gimlet.ui.ProjectPropertiesPane;
 import cruft.wtf.gimlet.ui.StatusBar;
-import cruft.wtf.gimlet.ui.dialog.SettingsDialog;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
+import javafx.beans.property.ObjectProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.geometry.Orientation;
 import javafx.geometry.Side;
 import javafx.scene.Node;
@@ -21,14 +23,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
@@ -55,6 +52,13 @@ public class GimletApp extends Application {
     private static Logger logger = LoggerFactory.getLogger(GimletApp.class);
 
     /**
+     * This JavaFX property contains the {@link GimletProject} property. Based on the
+     * value (whether it is null or not, etc.) certain UI elements are rendered disabled
+     * or not. See also the {@link MainMenuBar}.
+     */
+    private ObjectProperty<GimletProject> gimletProjectObjectProperty = new SimpleObjectProperty<>();
+
+    /**
      * Reference to the primary stage.
      */
     private Stage primaryStage;
@@ -65,13 +69,6 @@ public class GimletApp extends Application {
     public static ConnectionTabPane connectionTabPane;
 
     public static Window window;
-
-    /**
-     * The global reference to the opened GimletProject. Can be null if none is opened... Is there a better way?
-     */
-    private GimletProject gimletProject;
-
-    private StackPane parentContentStackPane;
 
     private Parent mainContentPane;
 
@@ -128,10 +125,14 @@ public class GimletApp extends Application {
         }
     }
 
+    public ObjectProperty<GimletProject> getGimletProjectProperty() {
+        return gimletProjectObjectProperty;
+    }
+
     /**
      * Creates a new project file, by showing a dialog first.
      */
-    private void newProjectFile() {
+    public void newProjectFile() {
         FileChooser chooser = new FileChooser();
         chooser.setTitle("Select location for the new Gimlet project");
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Gimlet project files", "*.gml"));
@@ -156,21 +157,21 @@ public class GimletApp extends Application {
      *
      * @param file The file to (attempt) to open. When it fails, the user is notified.
      */
-    private void loadProjectFile(final File file) {
+    public void loadProjectFile(final File file) {
         try {
-            this.gimletProject = GimletProject.read(file);
+            this.gimletProjectObjectProperty.setValue(GimletProject.read(file));
+            GimletProject gimletProject = gimletProjectObjectProperty.get();
+            logger.info("Successfully read '{}'", file);
 
             Configuration.getInstance().setProperty(Configuration.Key.LAST_PROJECT_FILE, file.getAbsolutePath());
 
-            logger.info("Successfully read '{}'", file);
+            this.primaryStage.titleProperty().bind(Bindings.concat("Gimlet - ", gimletProject.nameProperty()));
 
-            this.primaryStage.titleProperty().bind(Bindings.concat("Gimlet - ", this.gimletProject.nameProperty()));
+            EventDispatcher.getInstance().post(new FileOpenedEvent(file, gimletProject));
 
-            EventDispatcher.getInstance().post(new FileOpenedEvent(file, this.gimletProject));
-
+            // Hide the informative label to open a new project etc, and show the main content pane instead.
             lblOpenOrNewProject.setVisible(false);
             mainContentPane.setVisible(true);
-
         } catch (JAXBException e) {
             logger.error("Unable to unmarshal " + file, e);
             Utils.showError("Invalid Gimlet project file", "The specified file could not be read properly.");
@@ -182,9 +183,33 @@ public class GimletApp extends Application {
     }
 
     /**
+     * Saves the project in-place.
+     */
+    public void saveProject() {
+        GimletProject gimletProject = gimletProjectObjectProperty.get();
+
+        // Sanity checks to prevent null pointers.
+        if (gimletProject != null && gimletProject.getFile() != null) {
+            logger.info("Writing project file to '{}'", gimletProject.getFile());
+            try {
+                gimletProject.writeToFile();
+                EventDispatcher.getInstance().post(new FileSavedEvent(gimletProject.getFile()));
+            } catch (JAXBException e) {
+                logger.error("Failed to write to file '{}'", gimletProject.getFile());
+                Utils.showExceptionDialog("Failed to write to file", "Could not write to file.", e);
+            }
+        } else {
+            logger.warn("gimletProject is null or file property is null?");
+            Utils.showExceptionDialog("Project property is null", "Cannot save project property!?", new Exception("Fix me!"));
+        }
+    }
+
+    /**
      * Shows a save-as dialog.
      */
-    private void showSaveAsDialog() {
+    public void showSaveAsDialog() {
+        GimletProject gimletProject = gimletProjectObjectProperty.get();
+
         FileChooser chooser = new FileChooser();
         chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Gimlet project files", "*.gml"));
         chooser.setTitle("Save Gimlet project as");
@@ -206,91 +231,6 @@ public class GimletApp extends Application {
         } catch (JAXBException e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Creates the menubar at the top of the application.
-     *
-     * @return The {@link MenuBar}.
-     */
-    private MenuBar createMenuBar() {
-        MenuBar menuBar = new MenuBar();
-
-        Menu menuFile = new Menu("File");
-
-        MenuItem fileItemNew = new MenuItem("New");
-        fileItemNew.setAccelerator(KeyCombination.keyCombination("Ctrl+N"));
-        fileItemNew.setOnAction(event -> newProjectFile());
-
-        MenuItem fileItemOpen = new MenuItem("Open...");
-        fileItemOpen.setAccelerator(KeyCombination.keyCombination("Ctrl+O"));
-        fileItemOpen.setOnAction(event -> {
-            FileChooser chooser = new FileChooser();
-            chooser.setTitle("Select Gimlet project file");
-            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Gimlet project files", "*.gml"));
-            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
-            File file = chooser.showOpenDialog(window);
-            if (file == null) {
-                // user pressed cancel.
-                return;
-            }
-
-            loadProjectFile(file);
-        });
-
-        MenuItem fileItemSave = new MenuItem("Save", Images.SAVE.imageView());
-        fileItemSave.setAccelerator(KeyCombination.keyCombination("Ctrl+S"));
-        fileItemSave.setOnAction(event -> {
-            if (gimletProject != null && gimletProject.getFile() != null) {
-                logger.info("Writing project file to '{}'", gimletProject.getFile());
-                try {
-                    gimletProject.writeToFile();
-                    EventDispatcher.getInstance().post(new FileSavedEvent(gimletProject.getFile()));
-                } catch (JAXBException e) {
-                    logger.error("Failed to write to file '{}'", gimletProject.getFile());
-                    Utils.showExceptionDialog("Failed to write to file", "Could not write to file.", e);
-                }
-            } else {
-                // no file to overwrite, so save project as ...
-                showSaveAsDialog();
-            }
-        });
-
-        MenuItem fileItemSaveAs = new MenuItem("Save as...");
-        fileItemSaveAs.setOnAction(event -> showSaveAsDialog());
-
-        MenuItem fileItemSettings = new MenuItem("Settings...");
-        fileItemSettings.setGraphic(Images.COG.imageView());
-        fileItemSettings.setOnAction(event -> {
-            SettingsDialog dlg = new SettingsDialog();
-            dlg.showAndWait();
-        });
-
-        MenuItem fileItemExit = new MenuItem("Exit");
-        fileItemExit.setAccelerator(KeyCombination.keyCombination("Ctrl+Q"));
-        fileItemExit.setOnAction(event -> {
-            askForClosing().ifPresent(buttonType -> {
-                if (buttonType == ButtonType.OK) {
-                    exit();
-                }
-            });
-        });
-        fileItemExit.setGraphic(Images.ACCOUNT_LOGOUT.imageView());
-
-        menuFile.getItems().add(fileItemNew);
-        menuFile.getItems().add(fileItemOpen);
-        menuFile.getItems().add(fileItemSave);
-        menuFile.getItems().add(fileItemSaveAs);
-        menuFile.getItems().add(new SeparatorMenuItem());
-        menuFile.getItems().add(fileItemSettings);
-        menuFile.getItems().add(new SeparatorMenuItem());
-        menuFile.getItems().add(fileItemExit);
-
-        Menu menuHelp = new Menu("Help");
-
-        menuBar.getMenus().add(menuFile);
-        menuBar.getMenus().add(menuHelp);
-        return menuBar;
     }
 
     /**
@@ -336,21 +276,25 @@ public class GimletApp extends Application {
      *
      * @return The result of the confirmation dialog.
      */
-    private Optional<ButtonType> askForClosing() {
+    public Optional<ButtonType> askForClosing() {
         return Utils.showConfirm(
                 "Are you sure you want to exit?",
                 "Close Gimlet",
                 "This will discard any unsaved changes.");
     }
 
-    private void exit() {
+    /**
+     * Exits the application properly.
+     */
+    public void exit() {
         // TODO: also!! The configuration API is ugly as hell!
         Configuration c = Configuration.getInstance();
         c.getBooleanProperty(Configuration.Key.SAVE_ON_EXIT).ifPresent(aBoolean -> {
-            if (aBoolean && this.gimletProject != null && this.gimletProject.getFile() != null) {
+            GimletProject gimletProject = gimletProjectObjectProperty.get();
+            if (aBoolean && gimletProject != null && gimletProject.getFile() != null) {
                 try {
-                    this.gimletProject.writeToFile();
-                    logger.info("Written to file {} at exit", this.gimletProject.getFile());
+                    gimletProject.writeToFile();
+                    logger.info("Written to file {} at exit", gimletProject.getFile());
                 } catch (JAXBException e) {
                     logger.error("Unable to save file", e);
                     Utils.showExceptionDialog("Unable to save", "Argh", e);
@@ -387,28 +331,26 @@ public class GimletApp extends Application {
      * @return The BorderPane containing the menu bar and the actual program contents.
      */
     private Parent createMainContent() {
-        parentContentStackPane = new StackPane();
-
         mainContentPane = createNavigationCenterBottom();
 
         // The pane containing menu bar, and the splitpanes.
         BorderPane pane = new BorderPane();
 
-        pane.setTop(createMenuBar());
+        pane.setTop(new MainMenuBar(this));
         pane.setCenter(mainContentPane);
 
         lblOpenOrNewProject = new Label("Create a new project or open an existing one.");
         lblOpenOrNewProject.setStyle("-fx-font-size: 25px");
         lblOpenOrNewProject.setVisible(false);
 
-        parentContentStackPane.getChildren().add(pane);
-        parentContentStackPane.getChildren().add(lblOpenOrNewProject);
-
         // Main content pane invisible, label visible. This will change depending on whether
-        // we can open up a recent project etc.
+        // we have opened a project or not.
         mainContentPane.setVisible(false);
         lblOpenOrNewProject.setVisible(true);
 
+        StackPane parentContentStackPane = new StackPane();
+        parentContentStackPane.getChildren().add(pane);
+        parentContentStackPane.getChildren().add(lblOpenOrNewProject);
         return parentContentStackPane;
     }
 
@@ -459,5 +401,4 @@ public class GimletApp extends Application {
 
         logger.info("Gimlet started and ready");
     }
-
 }
