@@ -4,20 +4,33 @@ import cruft.wtf.gimlet.conf.GimletProject;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.FileOpenedEvent;
 import cruft.wtf.gimlet.event.FileSavedEvent;
-import cruft.wtf.gimlet.ui.*;
+import cruft.wtf.gimlet.ui.ConnectionTabPane;
+import cruft.wtf.gimlet.ui.Images;
+import cruft.wtf.gimlet.ui.LogTable;
+import cruft.wtf.gimlet.ui.NavigationPane;
+import cruft.wtf.gimlet.ui.ProjectPropertiesPane;
+import cruft.wtf.gimlet.ui.StatusBar;
 import cruft.wtf.gimlet.ui.dialog.SettingsDialog;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
-import javafx.geometry.Insets;
 import javafx.geometry.Orientation;
 import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -29,6 +42,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Optional;
+
+// TODO: this class is getting too big I suppose. Needs refactoring?
 
 /**
  * This is the main class how Gimlet can be run. It also contains some global references to certain user interface
@@ -56,6 +71,11 @@ public class GimletApp extends Application {
      */
     private GimletProject gimletProject;
 
+    private StackPane parentContentStackPane;
+
+    private Parent mainContentPane;
+
+    private Label lblOpenOrNewProject;
 
     /**
      * Entry point.
@@ -99,9 +119,6 @@ public class GimletApp extends Application {
             if (lastProject.isPresent()) {
                 logger.info("Loading up most recent project file '{}'", lastProject.get());
                 loadProjectFile(new File(lastProject.get()));
-            } else {
-                // TODO: instead of setting an empty project, display a screen saying CLICK NEW!!!
-                this.gimletProject = new GimletProject();
             }
         } catch (IOException e) {
             Utils.showExceptionDialog(
@@ -150,6 +167,10 @@ public class GimletApp extends Application {
             this.primaryStage.titleProperty().bind(Bindings.concat("Gimlet - ", this.gimletProject.nameProperty()));
 
             EventDispatcher.getInstance().post(new FileOpenedEvent(file, this.gimletProject));
+
+            lblOpenOrNewProject.setVisible(false);
+            mainContentPane.setVisible(true);
+
         } catch (JAXBException e) {
             logger.error("Unable to unmarshal " + file, e);
             Utils.showError("Invalid Gimlet project file", "The specified file could not be read properly.");
@@ -278,7 +299,7 @@ public class GimletApp extends Application {
      * @return The {@link Node} containing the left portion of the application.
      */
     private Node createLeft() {
-        LeftPane left = new LeftPane();
+        NavigationPane left = new NavigationPane();
         left.setPrefWidth(320);
         return left;
     }
@@ -340,33 +361,55 @@ public class GimletApp extends Application {
         Platform.exit();
     }
 
-    /**
-     * This method creates the main content: the splitpanes.
-     *
-     * @return The BorderPane containing the menu bar and the actual program contents.
-     */
-    private Parent createMainContent() {
+    private Parent createNavigationCenterBottom() {
         connectionTabPane = new ConnectionTabPane();
-
-        Node left = createLeft();
 
         Node bottom = createBottom();
         SplitPane.setResizableWithParent(bottom, false);
 
-        // The pane containing menu bar, and the splitpanes.
-        BorderPane pane = new BorderPane();
-        pane.setTop(createMenuBar());
-        pane.setLeft(left);
-        pane.setCenter(connectionTabPane);
-
+        BorderPane paneNavigationConnections = new BorderPane();
+        Node left = createLeft();
+        paneNavigationConnections.setLeft(left);
+        paneNavigationConnections.setCenter(connectionTabPane);
 
         // The splitpane, containing the upper borderpane (alias/query + connections)
         // and the bottom part, containing logging and project properties.
-        SplitPane mainContentPane = new SplitPane(pane, bottom);
-        mainContentPane.setOrientation(Orientation.VERTICAL);
-        mainContentPane.setDividerPosition(0, 0.6);
+        SplitPane splitPane = new SplitPane(paneNavigationConnections, bottom);
+        splitPane.setOrientation(Orientation.VERTICAL);
+        splitPane.setDividerPosition(0, 0.6);
 
-        return mainContentPane;
+        return splitPane;
+    }
+
+    /**
+     * This method creates the main content: the menu bar itself and the rest of the application.
+     *
+     * @return The BorderPane containing the menu bar and the actual program contents.
+     */
+    private Parent createMainContent() {
+        parentContentStackPane = new StackPane();
+
+        mainContentPane = createNavigationCenterBottom();
+
+        // The pane containing menu bar, and the splitpanes.
+        BorderPane pane = new BorderPane();
+
+        pane.setTop(createMenuBar());
+        pane.setCenter(mainContentPane);
+
+        lblOpenOrNewProject = new Label("Create a new project or open an existing one.");
+        lblOpenOrNewProject.setStyle("-fx-font-size: 25px");
+        lblOpenOrNewProject.setVisible(false);
+
+        parentContentStackPane.getChildren().add(pane);
+        parentContentStackPane.getChildren().add(lblOpenOrNewProject);
+
+        // Main content pane invisible, label visible. This will change depending on whether
+        // we can open up a recent project etc.
+        mainContentPane.setVisible(false);
+        lblOpenOrNewProject.setVisible(true);
+
+        return parentContentStackPane;
     }
 
     /**

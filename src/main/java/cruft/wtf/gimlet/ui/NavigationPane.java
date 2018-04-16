@@ -8,12 +8,12 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 
-public class LeftPane extends BorderPane {
+public class NavigationPane extends BorderPane {
 
     private AliasPane aliasPane = new AliasPane();
     private QueryPane queryPane = new QueryPane();
 
-    public LeftPane() {
+    public NavigationPane() {
         createCenter();
 
         EventDispatcher.getInstance().register(this);
