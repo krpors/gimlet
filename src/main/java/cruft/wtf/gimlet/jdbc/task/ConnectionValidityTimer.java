@@ -1,16 +1,13 @@
 package cruft.wtf.gimlet.jdbc.task;
 
-import cruft.wtf.gimlet.Utils;
-import cruft.wtf.gimlet.conf.Alias;
-import cruft.wtf.gimlet.ui.ConnectionTab;
-import cruft.wtf.gimlet.ui.Images;
 import javafx.application.Platform;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -27,15 +24,18 @@ public class ConnectionValidityTimer {
 
     private boolean scheduled = false;
 
+    private Connection connection;
+
     private final int checkTimeout;
 
-    private final ConnectionTab tab;
+    private final String name;
 
-    public ConnectionValidityTimer(final ConnectionTab tab, int checkTimeout) {
-        this.tab = Objects.requireNonNull(tab);
+    private EventHandler<ActionEvent> eventHandler;
+
+    public ConnectionValidityTimer(final String name, int checkTimeout) {
+        this.name = name;
         this.checkTimeout = checkTimeout;
-
-        this.timer = new Timer(String.format("Connection validity timer for '%s'", tab.getAlias().getName()), true);
+        this.timer = new Timer(String.format("Connection validity timer for '%s'", name), true);
     }
 
     /**
@@ -43,10 +43,10 @@ public class ConnectionValidityTimer {
      */
     public void schedule() {
         if (!scheduled) {
-            timer.scheduleAtFixedRate(new CheckTask(), 0, 60000);
+            timer.scheduleAtFixedRate(new CheckTask(), 0, 30000);
             scheduled = true;
 
-            logger.debug("Scheduled connection validity task for '{}'", tab.getAlias().getName());
+            logger.debug("Scheduled connection validity task for '{}'", name);
         }
     }
 
@@ -57,6 +57,19 @@ public class ConnectionValidityTimer {
         timer.cancel();
     }
 
+    public void setConnection(Connection connection) {
+        this.connection = connection;
+    }
+
+    /**
+     * Sets the callback handler when a disconnect happens.
+     *
+     * @param evt The event.
+     */
+    public void setOnDisconnect(EventHandler<ActionEvent> evt) {
+        this.eventHandler = evt;
+    }
+
     /**
      * The actual scheduled task to periodically check the validity of the SQL connection.
      */
@@ -65,21 +78,10 @@ public class ConnectionValidityTimer {
         @Override
         public void run() {
             try {
-                Connection connection = tab.getConnection();
-                Alias alias = tab.getAlias();
-
                 if (!connection.isValid(checkTimeout)) {
+                    // Connection deemed invalid. Cancel the timer, close the connection.
                     cancel();
-
-                    // This task is run through a Timer, so use Platform.runLater.
-                    Platform.runLater(() -> {
-                        tab.getContent().setDisable(true);
-                        tab.setGraphic(Images.SKULL.imageView());
-                        Utils.showError(
-                                String.format("Connection to '%s' was closed (by peer?)", alias.getName()),
-                                "Please close the tab and reconnect.");
-                    });
-                    connection.close();
+                    Platform.runLater(() -> eventHandler.handle(new ActionEvent(this, null)));
                 }
             } catch (SQLException e) {
                 logger.error("The connection was closed", e);

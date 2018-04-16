@@ -1,7 +1,7 @@
 package cruft.wtf.gimlet.ui;
 
 import com.google.common.eventbus.Subscribe;
-import com.sun.rowset.CachedRowSetImpl;
+import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.conf.Alias;
 import cruft.wtf.gimlet.event.ConnectEvent;
 import cruft.wtf.gimlet.event.EventDispatcher;
@@ -20,7 +20,6 @@ import javafx.scene.layout.StackPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.sql.rowset.CachedRowSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
@@ -104,7 +103,14 @@ public class ConnectionTab extends Tab {
         setText(String.format("%s as %s", alias.getName(), alias.getUser()));
 
         // Create the timer, but don't start it yet,
-        connectionValidityTimer = new ConnectionValidityTimer(this, 10000);
+        connectionValidityTimer = new ConnectionValidityTimer(alias.getName(), 10000);
+        connectionValidityTimer.setOnDisconnect(event -> {
+            getContent().setDisable(true);
+            setGraphic(Images.SKULL.imageView());
+            Utils.showError(
+                    String.format("Connection to '%s' was closed (by peer?)", alias.getName()),
+                    "Please close the tab and reconnect.");
+        });
 
         setOnCloseRequest(e -> {
             EventDispatcher.getInstance().unregister(this);
@@ -112,14 +118,15 @@ public class ConnectionTab extends Tab {
             connectionValidityTimer.cancel();
             try {
                 // Close the connection when the tab is closed.
-                if (connection != null) {
+                if (connection != null && !connection.isClosed()) {
                     connection.close();
-                    EventDispatcher.getInstance().post(new ConnectEvent(ConnectEvent.Type.CLOSED, alias));
                     logger.info("Closed connection for '{}'", alias.getName());
-                    logger.debug("Unregistered {} from Event Dispatcher", this);
                 }
+
+                EventDispatcher.getInstance().post(new ConnectEvent(ConnectEvent.Type.CLOSED, alias));
+                logger.debug("Unregistered {} from Event Dispatcher", this);
             } catch (SQLException e1) {
-                logger.error("Could not close connection ourselves", e1);
+                logger.warn("Could not close connection ourselves (already closed?)", e1);
             }
         });
 
@@ -171,6 +178,7 @@ public class ConnectionTab extends Tab {
         objectsTab.setConnection(connection);
 
         // Start the validity timer at last.
+        connectionValidityTimer.setConnection(connection);
         connectionValidityTimer.schedule();
     }
 
