@@ -1,14 +1,10 @@
 package cruft.wtf.gimlet.ui;
 
+import cruft.wtf.gimlet.AboutWindow;
 import cruft.wtf.gimlet.GimletApp;
 import cruft.wtf.gimlet.ui.dialog.SettingsDialog;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.BooleanBinding;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCombination;
 import javafx.stage.FileChooser;
 
@@ -85,6 +81,12 @@ public class MainMenuBar extends MenuBar {
         menuFile.getItems().add(fileItemExit);
 
         Menu menuHelp = new Menu("Help");
+        MenuItem helpItemAbout = new MenuItem("About");
+        helpItemAbout.setOnAction(event -> {
+            AboutWindow window = new AboutWindow(gimletApp);
+            window.show();
+        });
+        menuHelp.getItems().add(helpItemAbout);
 
         getMenus().add(menuFile);
         getMenus().add(menuHelp);

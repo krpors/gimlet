@@ -4,13 +4,7 @@ import cruft.wtf.gimlet.conf.GimletProject;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.FileOpenedEvent;
 import cruft.wtf.gimlet.event.FileSavedEvent;
-import cruft.wtf.gimlet.ui.ConnectionTabPane;
-import cruft.wtf.gimlet.ui.Images;
-import cruft.wtf.gimlet.ui.LogTable;
-import cruft.wtf.gimlet.ui.MainMenuBar;
-import cruft.wtf.gimlet.ui.NavigationPane;
-import cruft.wtf.gimlet.ui.ProjectPropertiesPane;
-import cruft.wtf.gimlet.ui.StatusBar;
+import cruft.wtf.gimlet.ui.*;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -21,11 +15,7 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.FileChooser;
@@ -68,6 +58,9 @@ public class GimletApp extends Application {
      */
     public static ConnectionTabPane connectionTabPane;
 
+    /**
+     * This window is used to provide as a parent for multiple dialogs.
+     */
     public static Window window;
 
     private Parent mainContentPane;
