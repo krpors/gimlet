@@ -7,14 +7,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
-import java.util.TreeMap;
 
 /**
  * A JavaFX task to run a named parameter query.
  */
 public class NamedQueryTask extends QueryTask {
 
-    private Map<String, Object> namedProperties = new TreeMap<>();
+    private Map<String, Object> namedProperties;
 
     public NamedQueryTask(final Connection connection, final String query, int maxRows, Map<String, Object> props) {
         super(connection, query, maxRows);

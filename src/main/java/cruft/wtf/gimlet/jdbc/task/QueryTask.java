@@ -1,26 +1,23 @@
 package cruft.wtf.gimlet.jdbc.task;
 
-import cruft.wtf.gimlet.Column;
+import com.sun.rowset.CachedRowSetImpl;
 import cruft.wtf.gimlet.Utils;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.rowset.CachedRowSet;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Types;
 
 /**
  * A JavaFX task to run a simple query (i.e. a typed query, without named parameters).
  */
-public abstract class QueryTask extends Task<ObservableList<ObservableList>> {
+public abstract class QueryTask extends Task<CachedRowSet> {
 
     private Logger logger = LoggerFactory.getLogger(getClass());
 
@@ -28,7 +25,7 @@ public abstract class QueryTask extends Task<ObservableList<ObservableList>> {
 
     private SimpleLongProperty processingTime = new SimpleLongProperty(0);
 
-    private ObservableList<Column> columns = FXCollections.observableArrayList();
+    private CachedRowSet cachedRowSet;
 
     protected final Connection connection;
 
@@ -62,12 +59,12 @@ public abstract class QueryTask extends Task<ObservableList<ObservableList>> {
         return processingTime;
     }
 
-    public ObservableList<Column> columnProperty() {
-        return columns;
-    }
-
     public String getQuery() {
         return query;
+    }
+
+    public CachedRowSet getCachedRowSet() {
+        return cachedRowSet;
     }
 
     /**
@@ -86,7 +83,7 @@ public abstract class QueryTask extends Task<ObservableList<ObservableList>> {
      */
     @SuppressWarnings("unchecked")
     @Override
-    protected ObservableList<ObservableList> call() throws Exception {
+    protected CachedRowSet call() throws Exception {
         logger.debug("Running task");
         long before = System.currentTimeMillis();
 
@@ -100,32 +97,15 @@ public abstract class QueryTask extends Task<ObservableList<ObservableList>> {
             statement.setMaxRows(maxRows);
             rs = statement.executeQuery();
 
-            ResultSetMetaData rsmd = rs.getMetaData();
-            logger.debug("Found {} columns in ResultSet", rsmd.getColumnCount());
-            for (int col = 0; col < rsmd.getColumnCount(); col++) {
-                int z = col + 1;
-                Column column = new Column(rsmd.getColumnType(z), rsmd.getColumnName(z));
-                columns.add(column);
-            }
-
-            ObservableList<ObservableList> tempList = FXCollections.observableArrayList();
-            while (rs.next()) {
-                ObservableList<Object> list = FXCollections.observableArrayList();
-                for (int i = 1; i <= rsmd.getColumnCount(); i++) {
-                    // Just add it as an Object. This also retains nullable numeric values for instance.
-                    // If we do explicit gets, for ex. rs.getLong(), when the column is effectively NULL,
-                    // the list will add a '0' instead. This will not retain NULL.
-                    list.add(rs.getObject(i));
-                }
-
-                tempList.add(list);
-                rowCount.set(rowCount.get() + 1);
-            }
+            cachedRowSet = new CachedRowSetImpl();
+            cachedRowSet.populate(rs);
+            rowCount.set(cachedRowSet.size());
 
             // When all is finished, add it to the end list. This will notify listeners.
             processingTime.set(System.currentTimeMillis() - before);
-            logger.debug("Task finished in {} ms, resulting in {} rows", processingTime.get(), rowCount);
-            return tempList;
+            logger.debug("Task finished in {} ms, resulting in {} rows in {} columns",
+                    processingTime.get(), rowCount.get(), cachedRowSet.getMetaData().getColumnCount());
+            return cachedRowSet;
         } catch (SQLException ex) {
             logger.error("SQL Exception", ex);
             throw ex;

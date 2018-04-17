@@ -13,7 +13,12 @@ public class QueryExecutedEvent {
     private Long runtime;
 
     public QueryExecutedEvent() {
+    }
 
+    public QueryExecutedEvent(final String query, final int rowCount, final Long runtime) {
+        this.query = query;
+        this.rowCount = rowCount;
+        this.runtime = runtime;
     }
 
     public String getQuery() {

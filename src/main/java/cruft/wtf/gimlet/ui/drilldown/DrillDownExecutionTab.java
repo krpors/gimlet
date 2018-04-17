@@ -1,12 +1,15 @@
 package cruft.wtf.gimlet.ui.drilldown;
 
+import cruft.wtf.gimlet.Column;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecutedEvent;
+import cruft.wtf.gimlet.jdbc.CachedRowSetTransformer;
 import cruft.wtf.gimlet.jdbc.ParseResult;
 import cruft.wtf.gimlet.jdbc.task.NamedQueryTask;
 import cruft.wtf.gimlet.ui.Images;
 import cruft.wtf.gimlet.ui.dialog.ParamInputDialog;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
@@ -14,13 +17,12 @@ import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.rowset.CachedRowSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.sql.Connection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.sql.SQLException;
+import java.util.*;
 
 /**
  * This tab contains the logic for connecting and executing a named and parameterized query.
@@ -167,15 +169,23 @@ public class DrillDownExecutionTab extends Tab {
         namedQueryTask.setOnSucceeded(event -> {
             btnRerun.setDisable(false);
             setGraphic(Images.SPREADSHEET.imageView());
-            table.setItems(namedQueryTask.columnProperty(), namedQueryTask.getValue());
 
-            QueryExecutedEvent qee = new QueryExecutedEvent();
-            qee.setQuery(namedQueryTask.getQuery());
-            qee.setRuntime(namedQueryTask.getProcessingTime());
-            qee.setRowCount(namedQueryTask.getRowCount());
+            try (CachedRowSet rowset = namedQueryTask.getValue()) {
+                List<Column> columnList = CachedRowSetTransformer.getColumns(rowset);
+                ObservableList<ObservableList> data = CachedRowSetTransformer.getData(rowset);;
 
-            // Posting the event on the bus will result in a new tab
-            EventDispatcher.getInstance().post(qee);
+                table.setItems(columnList, data);
+
+                QueryExecutedEvent qee = new QueryExecutedEvent(
+                        namedQueryTask.getQuery(),
+                        namedQueryTask.getRowCount(),
+                        namedQueryTask.getProcessingTime());
+
+                // Posting the event on the bus will result in a new tab
+                EventDispatcher.getInstance().post(qee);
+            } catch (SQLException e) {
+                logger.error("Unhandled exception", e);
+            }
         });
 
         Thread t = new Thread(namedQueryTask, "Gimlet named query task");

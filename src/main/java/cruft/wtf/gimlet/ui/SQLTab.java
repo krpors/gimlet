@@ -3,24 +3,24 @@ package cruft.wtf.gimlet.ui;
 
 import com.sun.javafx.scene.control.behavior.TabPaneBehavior;
 import com.sun.javafx.scene.control.skin.TabPaneSkin;
+import cruft.wtf.gimlet.Column;
 import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecutedEvent;
+import cruft.wtf.gimlet.jdbc.CachedRowSetTransformer;
 import cruft.wtf.gimlet.jdbc.task.SimpleQueryTask;
-import javafx.geometry.Insets;
+import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.rowset.CachedRowSet;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.sql.SQLException;
+import java.util.List;
 
 /**
  * This class is a tab where simple, plain SQL statements can be entered.
@@ -91,11 +91,11 @@ public class SQLTab extends Tab {
             return;
         }
 
-        Derpington derpington = new Derpington(this.connectionTab);
+        ResultTabPane resultTabPane = new ResultTabPane(this.connectionTab);
 
         final Tab tab = new Tab(Utils.truncate(query, 36));
         tab.setGraphic(Images.CLOCK.imageView());
-        tab.setContent(derpington);
+        tab.setContent(resultTabPane);
 
         int maxRows = connectionTab.getLimitMaxRows();
         logger.debug("Limiting maximum amount of rows to {}", maxRows);
@@ -125,13 +125,20 @@ public class SQLTab extends Tab {
         task.setOnSucceeded(event -> {
             tab.setGraphic(Images.SPREADSHEET.imageView());
 
-            derpington.setItems(task.columnProperty(), task.getValue());
+            try (CachedRowSet rowset = task.getValue()) {
+                List<Column> columnList = CachedRowSetTransformer.getColumns(rowset);
+                ObservableList<ObservableList> data = CachedRowSetTransformer.getData(rowset);
 
-            QueryExecutedEvent e = new QueryExecutedEvent();
-            e.setQuery(task.getQuery());
-            e.setRowCount(task.getRowCount());
-            e.setRuntime(task.getProcessingTime());
-            EventDispatcher.getInstance().post(e);
+                resultTabPane.setItems(columnList, data);
+
+                QueryExecutedEvent e = new QueryExecutedEvent(
+                        task.getQuery(),
+                        task.getRowCount(),
+                        task.getProcessingTime());
+                EventDispatcher.getInstance().post(e);
+            } catch (SQLException e) {
+                logger.error("Unhandled exception", e);
+            }
         });
 
         Thread t = new Thread(task, "Gimlet SimpleQueryTask runner");

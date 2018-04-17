@@ -1,3 +1,6 @@
+drop table customer if exists;
+drop table invoice if exists;
+
 create table customer(
     id int,
     name varchar(32)

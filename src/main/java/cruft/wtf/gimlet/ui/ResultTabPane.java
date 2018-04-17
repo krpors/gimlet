@@ -11,7 +11,11 @@ import javafx.scene.text.Text;
 
 import java.util.List;
 
-public class Derpington extends TabPane {
+/**
+ * This TabPane contains tabs with a {@link ResultTable}, {@link RotatedTable}, and metadata
+ * about the resultset.
+ */
+public class ResultTabPane extends TabPane {
 
     private ResultTable resultTable;
 
@@ -21,7 +25,7 @@ public class Derpington extends TabPane {
 
     private final ConnectionTab connectionTab;
 
-    public Derpington(final ConnectionTab connectionTab) {
+    public ResultTabPane(final ConnectionTab connectionTab) {
         this.connectionTab = connectionTab;
         this.resultTable = new ResultTable();
         this.rotatedTable = new RotatedTable();
@@ -40,7 +44,7 @@ public class Derpington extends TabPane {
                     protected Void call() throws Exception {
                         // TODO: Rotating a table with for ex. 2500 items TAKES A SHITLOAD OF TIME.
                         // The rotation itself is rather quick, but adding so many columns.
-                        Platform.runLater(()-> rotatedTable.setItems(resultTable.getColumnList(), resultTable.getItems()));
+                        Platform.runLater(() -> rotatedTable.setItems(resultTable.getColumnList(), resultTable.getItems()));
                         return null;
                     }
                 };
