@@ -75,10 +75,11 @@ public abstract class QueryTask extends Task<CachedRowSet> {
     public abstract PreparedStatement prepareStatement() throws SQLException;
 
     /**
-     * Executes the task, and returns the rowdata which is returned by the query. This rowdata is given as
-     * a list of lists. The initial list contains the rows, whereas the contained list is a list with columns.
+     * Executes the task, and returns a {@link CachedRowSet}. This object is inherently not directly
+     * connected to the data source, so we can do offline iteration on the contained {@link ResultSet}
+     * and {@link java.sql.ResultSetMetaData}.
      *
-     * @return The row data with column data per row.
+     * @return The {@link CachedRowSet} containing the results of the query.
      * @throws Exception Whenever.
      */
     @SuppressWarnings("unchecked")

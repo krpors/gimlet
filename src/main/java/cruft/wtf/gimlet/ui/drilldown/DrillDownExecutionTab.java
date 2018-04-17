@@ -10,6 +10,7 @@ import cruft.wtf.gimlet.jdbc.task.NamedQueryTask;
 import cruft.wtf.gimlet.ui.Images;
 import cruft.wtf.gimlet.ui.dialog.ParamInputDialog;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Worker;
 import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
@@ -114,6 +115,44 @@ public class DrillDownExecutionTab extends Tab {
     }
 
     /**
+     * Creates a String with a summary of the exception when the task was in failed state.
+     *
+     * @param task The {@link NamedQueryTask} in error.
+     * @return The String.
+     */
+    private String createExceptionString(final NamedQueryTask task) {
+        if (task.getState() != Worker.State.FAILED) {
+            throw new IllegalStateException(String.format("The worker state was in state %s, but expected FAILED", task.getState()));
+        }
+
+        // When the query failed, we add a textarea to the tab instead of the table.
+        // This textarea contains the stacktrace information.
+        StringWriter sw = new StringWriter();
+        task.getException().printStackTrace(new PrintWriter(sw));
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder
+                .append(task.getException().getMessage()).append("\n\n")
+                .append("Source query:\n\n")
+                .append(task.getQuery())
+                .append("\n\n");
+
+        if (!task.getNamedProperties().isEmpty()) {
+            stringBuilder.append("Named parameters given:\n\n");
+            task.getNamedProperties().forEach((s, o) -> {
+                stringBuilder.append(String.format("\t%s = %s\n", s, o));
+            });
+        } else {
+            stringBuilder.append("The query does not contain named parameters.\n");
+        }
+
+        stringBuilder
+                .append("\nStacktrace:\n\n")
+                .append(sw.toString());
+
+        return stringBuilder.toString();
+    }
+
+    /**
      * Execute the query.
      */
     public void executeQuery(final Map<String, Object> columnMap) {
@@ -138,28 +177,8 @@ public class DrillDownExecutionTab extends Tab {
             setGraphic(Images.WARNING.imageView());
             // When the query failed, we add a textarea to the tab instead of the table.
             // This textarea contains the stacktrace information.
-            StringWriter sw = new StringWriter();
-            namedQueryTask.getException().printStackTrace(new PrintWriter(sw));
-            StringBuilder stringBuilder = new StringBuilder();
-            stringBuilder
-                    .append(namedQueryTask.getException().getMessage()).append("\n\n")
-                    .append("Source query:\n\n")
-                    .append(namedQueryTask.getQuery())
-                    .append("\n\n");
 
-            if (!namedQueryTask.getNamedProperties().isEmpty()) {
-                stringBuilder.append("Named parameters given:\n\n");
-                namedQueryTask.getNamedProperties().forEach((s, o) -> {
-                    stringBuilder.append(String.format("\t%s = %s\n", s, o));
-                });
-            } else {
-                stringBuilder.append("The query does not contain named parameters.\n");
-            }
-
-            stringBuilder
-                    .append("\nStacktrace:\n\n")
-                    .append(sw.toString());
-            TextArea area = new TextArea(stringBuilder.toString());
+            TextArea area = new TextArea(createExceptionString(namedQueryTask));
             area.getStyleClass().add("error-text");
             area.setEditable(false);
 
@@ -172,7 +191,7 @@ public class DrillDownExecutionTab extends Tab {
 
             try (CachedRowSet rowset = namedQueryTask.getValue()) {
                 List<Column> columnList = CachedRowSetTransformer.getColumns(rowset);
-                ObservableList<ObservableList> data = CachedRowSetTransformer.getData(rowset);;
+                ObservableList<ObservableList> data = CachedRowSetTransformer.getData(rowset);
 
                 table.setItems(columnList, data);
 
