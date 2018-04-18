@@ -1,12 +1,10 @@
 package cruft.wtf.gimlet.jdbc.task;
 
 import cruft.wtf.gimlet.ui.objects.DatabaseObject;
-import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Task;
 import javafx.scene.control.TreeItem;
-import javafx.scene.control.TreeView;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,14 +16,9 @@ import java.sql.SQLException;
 /**
  * This task is responsible for finding all database objects given a connection.
  */
-public class ObjectLoaderTask extends Task<Void> {
+public class ObjectLoaderTask extends Task<TreeItem<DatabaseObject>> {
 
     private static Logger logger = LoggerFactory.getLogger(ObjectLoaderTask.class);
-
-    /**
-     * The TreeView to add items to.
-     */
-    private TreeView<DatabaseObject> treeView;
 
     /**
      * The connection to use. Must be open, and non-null.
@@ -42,9 +35,8 @@ public class ObjectLoaderTask extends Task<Void> {
      */
     private StringProperty loadingTableProperty = new SimpleStringProperty("");
 
-    public ObjectLoaderTask(TreeView<DatabaseObject> tree, Connection connection) {
+    public ObjectLoaderTask(Connection connection) {
         this.connection = connection;
-        this.treeView = tree;
     }
 
     public String getLoadingSchemaProperty() {
@@ -66,19 +58,17 @@ public class ObjectLoaderTask extends Task<Void> {
     /**
      * Starts the task.
      *
-     * @return
-     * @throws Exception
+     * @return The root of a {@link javafx.scene.control.TreeView}.
+     * @throws Exception Whenever something failed.
      */
     @Override
-    protected Void call() throws Exception {
+    protected TreeItem<DatabaseObject> call() throws Exception {
         TreeItem<DatabaseObject> root = new TreeItem<>(new DatabaseObject(DatabaseObject.ROOT, "Schemas"));
         root.setExpanded(true);
 
         findSchemas(root);
 
-        Platform.runLater(() -> treeView.setRoot(root));
-
-        return null;
+        return root;
     }
 
     private void findSchemas(final TreeItem<DatabaseObject> root) throws SQLException {

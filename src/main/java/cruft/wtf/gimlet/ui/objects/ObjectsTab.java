@@ -215,7 +215,7 @@ public class ObjectsTab extends Tab {
      * spinner and labels are updates when things are loaded.
      */
     private void populateTree() {
-        this.taskLoadObjects = new ObjectLoaderTask(objectTree, connection);
+        this.taskLoadObjects = new ObjectLoaderTask(connection);
 
         taskLoadObjects.loadingSchemaPropertyProperty().addListener((observable, oldValue, newValue) -> {
             Platform.runLater(() -> {
@@ -233,6 +233,7 @@ public class ObjectsTab extends Tab {
             stackPane.getChildren().clear();
             stackPane.getChildren().add(paneObjects);
             paneObjects.toFront();
+            objectTree.setRoot(taskLoadObjects.getValue());
         });
 
         taskLoadObjects.setOnCancelled(event -> {

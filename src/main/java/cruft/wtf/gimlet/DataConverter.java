@@ -1,14 +1,17 @@
 package cruft.wtf.gimlet;
 
+import com.google.common.escape.Escaper;
+import com.google.common.html.HtmlEscapers;
 import javafx.collections.ObservableList;
 
 import java.util.Arrays;
+import java.util.List;
 
 /**
  * This class is responsible for exporting generic {@link javax.swing.text.TableView} data
  * (stored as an ObservableList of ObservableLists) to copy/paste format. Whatever, we'll see.
  */
-public class DataExporter {
+public class DataConverter {
 
     private static final String SEP = System.getProperty("line.separator");
 
@@ -20,12 +23,12 @@ public class DataExporter {
      * @param opts        The options.
      * @return The String.
      */
-    public static String exportToBasicString(
-            final String[] columnNames,
+    public static String convertToText(
+            final List<String> columnNames,
             final ObservableList<ObservableList> tableData,
             final Options opts) {
 
-        int[] colWidths = new int[columnNames.length];
+        int[] colWidths = new int[columnNames.size()];
         Arrays.fill(colWidths, 0);
 
         StringBuilder b = new StringBuilder();
@@ -36,8 +39,8 @@ public class DataExporter {
         // no padding will be done in the second pass.
         if (opts.fitWidth) {
             // Iterate over the column names. They may be longer than the actual content.
-            for (int colIdx = 0; colIdx < columnNames.length; colIdx++) {
-                colWidths[colIdx] = columnNames[colIdx].length();
+            for (int colIdx = 0; colIdx < columnNames.size(); colIdx++) {
+                colWidths[colIdx] = columnNames.get(colIdx).length();
             }
 
             // Iterate over each row first.
@@ -60,8 +63,8 @@ public class DataExporter {
         }
 
         if (opts.includeColNames) {
-            for (int col = 0; col < columnNames.length; col++) {
-                b.append(padString(columnNames[col], colWidths[col], ' '));
+            for (int col = 0; col < columnNames.size(); col++) {
+                b.append(padString(columnNames.get(col), colWidths[col], ' '));
                 b.append(opts.columnSeparator);
             }
             b.append(SEP);
@@ -107,6 +110,39 @@ public class DataExporter {
         }
 
         return b.toString();
+    }
+
+    /**
+     * Converts the columns and table data to a simplistic HTML table.
+     *
+     * @param columnNames The column names.
+     * @param tableData   The table data.
+     * @return The HTML string.
+     */
+    public static String convertToHtml(final List<String> columnNames, final ObservableList<ObservableList> tableData) {
+        StringBuilder s = new StringBuilder();
+        Escaper e = HtmlEscapers.htmlEscaper();
+
+        s.append("<table>");
+        s.append("<thead>");
+        s.append("<tr>");
+        for (String col : columnNames) {
+            s.append("<th>").append(e.escape(String.valueOf(col))).append("</th>");
+        }
+        s.append("</tr>");
+        s.append("</thead>");
+        s.append("<tbody>");
+        for (ObservableList cols : tableData) {
+            s.append("<tr>");
+            for (Object content : cols) {
+                s.append("<td>").append(e.escape(String.valueOf(content))).append("</td>");
+            }
+            s.append("</tr>");
+        }
+        s.append("</tbody>");
+        s.append("</table>");
+
+        return s.toString();
     }
 
     public static class Options {
