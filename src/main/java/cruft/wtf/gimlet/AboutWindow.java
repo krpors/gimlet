@@ -17,9 +17,12 @@ import javafx.stage.StageStyle;
 public class AboutWindow extends Stage {
 
     public AboutWindow(final Application application) {
+        initOwner(GimletApp.window);
         initStyle(StageStyle.UNDECORATED);
         setWidth(640);
         setHeight(400);
+        setTitle("About Gimlet");
+        setAlwaysOnTop(true);
         centerOnScreen();
 
         ImageView imageView = new ImageView("/splash.png");
@@ -52,5 +55,6 @@ public class AboutWindow extends Stage {
             }
         });
         setScene(scene);
+
     }
 }
