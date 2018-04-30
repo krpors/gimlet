@@ -154,9 +154,10 @@ public final class Configuration extends Properties {
      * This enumeration contains all possible configuration keys.
      */
     public enum Key {
+        CONFIRM_APPLICATION_EXIT,
         LAST_PROJECT_FILE,
-        TRUNCATE_SIZE,
         SAVE_ON_EXIT,
+        TRUNCATE_SIZE,
         WINDOW_MAXIMIZED,;
 
         public String getName() {

@@ -27,6 +27,8 @@ public class SettingsDialog extends Dialog<String> {
 
     private CheckBox chkSaveOnExit;
 
+    private CheckBox chkConfirmAppExit;
+
     public SettingsDialog() {
         initOwner(GimletApp.window);
         setTitle("Settings");
@@ -40,13 +42,16 @@ public class SettingsDialog extends Dialog<String> {
         txtTruncateSize = new TextField(c.getProperty(Configuration.Key.TRUNCATE_SIZE));
         txtTruncateSize.setTextFormatter(Utils.createFormatter());
         txtTruncateSize.setTooltip(new Tooltip("The amount of characters to display in columns until they are truncated."));
-
         pane.add("Column truncate length", txtTruncateSize);
 
         chkSaveOnExit = new CheckBox();
         chkSaveOnExit.setSelected(c.getBooleanProperty(Configuration.Key.SAVE_ON_EXIT).orElse(false));
-
         pane.add("Save project automatically on exit", chkSaveOnExit);
+
+        chkConfirmAppExit = new CheckBox();
+        chkConfirmAppExit.setSelected(c.getBooleanProperty(Configuration.Key.CONFIRM_APPLICATION_EXIT).orElse(true));
+        chkConfirmAppExit.setTooltip(new Tooltip("Check this box to confirm to exit the application"));
+        pane.add("Confirm application exit", chkConfirmAppExit);
 
         getDialogPane().setContent(pane);
         getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CLOSE);
@@ -65,6 +70,7 @@ public class SettingsDialog extends Dialog<String> {
         try {
             c.setProperty(Configuration.Key.TRUNCATE_SIZE, txtTruncateSize.getText());
             c.setProperty(Configuration.Key.SAVE_ON_EXIT, chkSaveOnExit.isSelected());
+            c.setProperty(Configuration.Key.CONFIRM_APPLICATION_EXIT, chkConfirmAppExit.isSelected());
             c.write();
         } catch (IOException e) {
             logger.error("Unable to write configuration file", e);

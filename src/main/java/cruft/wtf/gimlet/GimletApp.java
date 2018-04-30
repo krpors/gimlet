@@ -270,10 +270,18 @@ public class GimletApp extends Application {
      * @return The result of the confirmation dialog.
      */
     public Optional<ButtonType> askForClosing() {
-        return Utils.showConfirm(
-                "Are you sure you want to exit?",
-                "Close Gimlet",
-                "This will discard any unsaved changes.");
+        Configuration c = Configuration.getInstance();
+
+        // Check if we are supposed to ask the user to exit the application.
+        if (c.getBooleanProperty(Configuration.Key.CONFIRM_APPLICATION_EXIT).orElse(true)) {
+            return Utils.showConfirm(
+                    "Are you sure you want to exit?",
+                    "Close Gimlet",
+                    "This will discard any unsaved changes.");
+        }
+
+        // In this case, don't ask the user to exit, just assume OK.
+        return Optional.of(ButtonType.OK);
     }
 
     /**

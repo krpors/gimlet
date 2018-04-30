@@ -92,7 +92,6 @@ A list of things to be done, or some ideas. Not in any particular order.
 
 #### Milestones for 1.0 release
 
-1. Splash screen with some funky graphic (should be allowed to be disabled).
 1. Finish up the 'new project' functionality. Initial startup should show
    some kind of landing page.
 
