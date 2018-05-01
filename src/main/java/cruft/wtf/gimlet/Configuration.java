@@ -8,12 +8,16 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.Properties;
 
 /**
  * Application-wide configuration class. This class is responsible for reading and writing configuration properties
- * from and to the Gimlet config file, which resides in the user's {@code home directory/.gimlet/config}.
+ * from and to the Gimlet config file. The configuration file's location depends on the
+ * <a href="https://specifications.freedesktop.org/basedir-spec/basedir-spec-latest.html">XDG directory specification</a>,
+ * specifically the {@code XDG_CONFIG_HOME} environment variable. If no such environment variable is set, the default
+ * will be used of {@code $HOME/.confg/gimlet} containing the {@code config} file.
  */
 public final class Configuration extends Properties {
 
@@ -24,17 +28,32 @@ public final class Configuration extends Properties {
      */
     private static Configuration instance = new Configuration();
 
-    private static final File CONFIG_FILE = new File(System.getProperty("user.home") + "/.gimlet/", "config");
+    /**
+     * Will be initialized in the constructor, based on the {@code XDG_CONFIG_HOME}.
+     */
+    private static File configFile;
 
     private Configuration() {
+        // Used the XDG directory specification to check whether the env var is set. If so
+        // then use that one, and if not, the default is used of $HOME/.config.
+        String xdgHome = System.getenv("XDG_CONFIG_HOME");
+        if (xdgHome == null || "".equals(xdgHome.trim())) {
+            xdgHome = System.getProperty("user.home") + "/.config";
+        } else {
+            logger.debug("Using explicit XDG_CONFIG_HOME '{}'", xdgHome);
+        }
+
+        configFile = Paths.get(xdgHome, "gimlet", "config").toFile();
+        logger.debug("Gimlet configuration file is '{}'", configFile);
+
     }
 
     public static Configuration getInstance() {
         return instance;
     }
 
-    public File getConfigFile() {
-        return CONFIG_FILE;
+    File getConfigFile() {
+        return configFile;
     }
 
     /**
@@ -122,31 +141,31 @@ public final class Configuration extends Properties {
     }
 
     /**
-     * Loads the property file given by {@link Configuration#CONFIG_FILE}.
+     * Loads the property file given by {@link Configuration#configFile}.
      *
      * @throws IOException When the file cannot be read.
      */
     public void load() throws IOException {
-        if (!CONFIG_FILE.exists()) {
-            logger.info("Configuration file '{}' does not exist; setting default values", CONFIG_FILE);
+        if (!configFile.exists()) {
+            logger.info("Configuration file '{}' does not exist; setting default values", configFile);
             setDefaults();
             return;
         }
-        FileInputStream fis = new FileInputStream(CONFIG_FILE);
+        FileInputStream fis = new FileInputStream(configFile);
         load(fis);
         fis.close();
     }
 
     /**
-     * Writes the property file given by {@link Configuration#CONFIG_FILE}. Parent directory will be created.
+     * Writes the property file given by {@link Configuration#configFile}. Parent directory will be created.
      *
      * @throws IOException When the file could not be written.
      */
     public void write() throws IOException {
-        Files.createParentDirs(CONFIG_FILE);
-        FileOutputStream fos = new FileOutputStream(CONFIG_FILE);
+        Files.createParentDirs(configFile);
+        FileOutputStream fos = new FileOutputStream(configFile);
         store(fos, "Gimlet config");
-        logger.info("Written configuration file '{}'", CONFIG_FILE);
+        logger.info("Written configuration file '{}'", configFile);
         fos.close();
     }
 
