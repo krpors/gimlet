@@ -66,7 +66,7 @@ public class LogTable extends TableView<ILoggingEvent> {
     @Subscribe
     public void onLoggingEvent(final ILoggingEvent event) {
         getItems().add(event);
-        Platform.runLater(() -> scrollToEnd());
+        Platform.runLater(this::scrollToEnd);
     }
 
     public void scrollToEnd() {

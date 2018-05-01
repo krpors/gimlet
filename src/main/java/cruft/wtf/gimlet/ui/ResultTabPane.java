@@ -21,6 +21,7 @@ public class ResultTabPane extends TabPane {
 
     private RotatedTable rotatedTable;
 
+    // TODO: metadata about the resultset.
     private Node metaData;
 
     private final ConnectionTab connectionTab;
@@ -53,11 +54,9 @@ public class ResultTabPane extends TabPane {
                 t.start();
             }
         });
-        Tab tabMetaData = new Tab("Metadata", metaData);
 
-        getTabs().addAll(tabResult, tabRotated, tabMetaData);
+        getTabs().addAll(tabResult, tabRotated);
     }
-
 
     public void setItems(List<Column> columnList, ObservableList<ObservableList> rowData) {
         resultTable.setItems(columnList, rowData);

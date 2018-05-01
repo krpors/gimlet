@@ -34,8 +34,6 @@ public class SQLTab extends Tab {
      */
     private final ConnectionTab connectionTab;
 
-    private CheckBox checkMaxRows;
-
     private TextArea txtQuery = new TextArea();
 
     private TabPane tabPaneResultSets = new TabPane();
