@@ -35,6 +35,7 @@
                     <archive>
                         <manifestEntries>
                             <Gimlet-Version>${project.version}</Gimlet-Version>
+                            <Gimlet-Build-Timestamp>${maven.build.timestamp}</Gimlet-Build-Timestamp>
                         </manifestEntries>
                     </archive>
                 </configuration>

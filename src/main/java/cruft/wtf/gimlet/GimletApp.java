@@ -158,7 +158,7 @@ public class GimletApp extends Application {
 
             Configuration.getInstance().setProperty(Configuration.Key.LAST_PROJECT_FILE, file.getAbsolutePath());
 
-            this.primaryStage.titleProperty().bind(Bindings.concat("Gimlet - ", gimletProject.nameProperty()));
+            this.primaryStage.titleProperty().bind(Bindings.concat(VersionInfo.getVersionString() + " - ", gimletProject.nameProperty()));
 
             EventDispatcher.getInstance().post(new FileOpenedEvent(file, gimletProject));
 
@@ -372,7 +372,7 @@ public class GimletApp extends Application {
         Scene scene = new Scene(createMainContent());
         scene.getStylesheets().add("/css/style.css");
 
-        primaryStage.setTitle("Gimlet");
+        primaryStage.setTitle(VersionInfo.getVersionString());
         primaryStage.setScene(scene);
         primaryStage.setWidth(800);
         primaryStage.setHeight(600);
@@ -400,6 +400,6 @@ public class GimletApp extends Application {
             });
         });
 
-        logger.info("Gimlet started and ready");
+        logger.info(VersionInfo.getVersionString() + " started and ready");
     }
 }

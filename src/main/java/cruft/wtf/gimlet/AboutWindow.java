@@ -21,11 +21,19 @@ public class AboutWindow extends Stage {
         initStyle(StageStyle.UNDECORATED);
         setWidth(640);
         setHeight(400);
-        setTitle("About Gimlet");
+        setTitle("About Gimlet version " + VersionInfo.get().getVersion());
         setAlwaysOnTop(true);
         centerOnScreen();
 
+
         ImageView imageView = new ImageView("/splash.png");
+
+        String v = "Version: " + VersionInfo.get().getVersion() + "\n";
+        v += "Build time: " + VersionInfo.get().getBuildTimestamp();
+        Label version = new Label(v);
+        version.setStyle("-fx-text-fill: white");
+        version.setLayoutX(250);
+        version.setLayoutY(35);
 
         String s = "A simple JDBC based query evaluator.\n\n";
         s += "For more information, or for feedback, bugs, issues, feature requests\n";
@@ -45,7 +53,7 @@ public class AboutWindow extends Stage {
         link.setLayoutX(45);
         link.setLayoutY(360);
 
-        AnchorPane pane = new AnchorPane(imageView, lbl, link);
+        AnchorPane pane = new AnchorPane(imageView, lbl, link, version);
         pane.setOnMouseClicked(event -> close());
 
         Scene scene = new Scene(pane);
