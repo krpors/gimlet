@@ -90,12 +90,7 @@ In the Alias editor dialog, the combobox *should* then list all available driver
 
 A list of things to be done, or some ideas. Not in any particular order.
 
-#### Milestones for 1.0 release
-
-1. Finish up the 'new project' functionality. Initial startup should show
-   some kind of landing page.
-
-#### Next versions
+#### Milestones for 1.1 release
 
 1. Recent queries: save them in different file.
 1. Multiple select, and multiple sub-query execution. For instance, select 4 rows, right
@@ -120,9 +115,17 @@ to configure the next query, until finished, then a query tree is a result.
 1. Fix the way the `QueryTree` and the backed `Query` object tree work?
 1. Moar Javadoc.
 
-# Other things
+# Notes
 
-* Mimic network latency: https://wiki.linuxfoundation.org/networking/netem
-* Icons: https://materialdesignicons.com/
-* Mimic network cutoffs by using `socat` as a TCP proxy between Gimlet and
-  the target database host.
+[Mimic network latency](https://wiki.linuxfoundation.org/networking/netem) using NetEm (`man netem`),
+using the `tc` utility. This can be used to test connections such as longer roundtrips, connection
+timeouts, interruptions, etc.
+
+[Icons](https://materialdesignicons.com/) used can be found here.
+
+Mimic network cutoffs by using `socat` as a TCP proxy between Gimlet and
+the target database host, for example
+
+    socat -x -v tcp4-listen:1521,bind=127.0.0.1,reuseaddr,fork tcp4:targetmachine:1521 2> lol.txt
+
+Then establish a connection to `localhost:1521` and interrupt using `^C`.
