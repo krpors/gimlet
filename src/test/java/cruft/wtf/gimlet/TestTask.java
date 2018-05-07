@@ -1,10 +1,10 @@
 package cruft.wtf.gimlet;
 
-import com.sun.rowset.CachedRowSetImpl;
 import cruft.wtf.gimlet.jdbc.SqlUtil;
 import org.junit.Test;
 
 import javax.sql.rowset.CachedRowSet;
+import javax.sql.rowset.RowSetProvider;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -18,7 +18,7 @@ public class TestTask {
 
         Connection c = DriverManager.getConnection("jdbc:hsqldb:mem");
         SqlUtil.runSql("/create.sql", c);
-        rowSet = new CachedRowSetImpl();
+        rowSet = RowSetProvider.newFactory().createCachedRowSet();
         rowSet.setReadOnly(true);
         Statement stmt = c.createStatement();
         ResultSet rs = stmt.executeQuery("select * from customer");

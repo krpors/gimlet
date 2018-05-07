@@ -1,6 +1,5 @@
 package cruft.wtf.gimlet.jdbc.task;
 
-import com.sun.rowset.CachedRowSetImpl;
 import cruft.wtf.gimlet.Utils;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleLongProperty;
@@ -9,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.sql.rowset.CachedRowSet;
+import javax.sql.rowset.RowSetFactory;
+import javax.sql.rowset.RowSetProvider;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -27,11 +28,21 @@ public abstract class QueryTask extends Task<CachedRowSet> {
 
     private CachedRowSet cachedRowSet;
 
+    private static RowSetFactory rowSetProvider;
+
     protected final Connection connection;
 
     protected final String query;
 
     protected int maxRows;
+
+    static {
+        try {
+            rowSetProvider = RowSetProvider.newFactory();
+        } catch (SQLException e) {
+            throw new ExceptionInInitializerError("Unable to get RowSetFactory!");
+        }
+    }
 
     public QueryTask(final Connection connection, final String query) {
         this(connection, query, 0);
@@ -98,7 +109,7 @@ public abstract class QueryTask extends Task<CachedRowSet> {
             statement.setMaxRows(maxRows);
             rs = statement.executeQuery();
 
-            cachedRowSet = new CachedRowSetImpl();
+            cachedRowSet = rowSetProvider.createCachedRowSet();
             cachedRowSet.populate(rs);
             rowCount.set(cachedRowSet.size());
 
