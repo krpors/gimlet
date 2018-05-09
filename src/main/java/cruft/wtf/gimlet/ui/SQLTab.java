@@ -73,7 +73,7 @@ public class SQLTab extends Tab {
     /**
      * Executes the query in a JavaFX task.
      */
-    private void executeQuery() {
+    public void executeQuery() {
         if (txtQuery.getText() == null) {
             return;
         }

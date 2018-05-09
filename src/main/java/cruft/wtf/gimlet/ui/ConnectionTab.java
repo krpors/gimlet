@@ -227,9 +227,15 @@ public class ConnectionTab extends Tab {
         chkLimitRows = new CheckBox("Limit rows");
         chkLimitRows.setSelected(true);
         numMaxRowCount = new NumberTextField(100);
-        ToolBar topPaneWithLabels = new ToolBar(chkLimitRows, numMaxRowCount);
-        topPaneWithLabels.setPadding(new Insets(5));
         numMaxRowCount.disableProperty().bind(chkLimitRows.selectedProperty().not());
+
+        Button btnRunQuery = new Button("Run", Images.RUN.imageView());
+        btnRunQuery.setTooltip(new Tooltip("Run the (highlighted) query (Ctrl+Enter)"));
+        btnRunQuery.setOnAction(event -> sqlTab.executeQuery());
+
+        ToolBar topPaneWithLabels = new ToolBar(chkLimitRows, numMaxRowCount, btnRunQuery);
+        topPaneWithLabels.setPadding(new Insets(5));
+
 
         contentPane.setTop(topPaneWithLabels);
 
