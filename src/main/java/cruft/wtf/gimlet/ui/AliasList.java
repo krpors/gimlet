@@ -1,12 +1,19 @@
 package cruft.wtf.gimlet.ui;
 
+import com.google.common.eventbus.Subscribe;
 import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.conf.Alias;
 import cruft.wtf.gimlet.event.ConnectEvent;
 import cruft.wtf.gimlet.event.EventDispatcher;
+import cruft.wtf.gimlet.event.FileOpenedEvent;
 import cruft.wtf.gimlet.ui.dialog.AliasDialog;
-import javafx.collections.ObservableList;
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 
 import java.util.Collections;
@@ -29,6 +36,8 @@ public class AliasList extends ListView<Alias> {
         menuItemNew.setOnAction(e -> openNewDialog());
         contextMenu.getItems().add(menuItemNew);
         setContextMenu(contextMenu);
+
+        EventDispatcher.getInstance().register(this);
     }
 
     /**
@@ -95,15 +104,6 @@ public class AliasList extends ListView<Alias> {
     }
 
     /**
-     * Sets the Aliases content for this list.
-     *
-     * @param list
-     */
-    public void setAliases(final ObservableList<Alias> list) {
-        setItems(list);
-    }
-
-    /**
      * Custom renderer for every {@link Alias} in the ListView.
      */
     private class AliasListCell extends ListCell<Alias> {
@@ -157,6 +157,12 @@ public class AliasList extends ListView<Alias> {
             setText(item.getName());
             setTooltip(new Tooltip(item.getDescription()));
         }
+    }
+
+    @SuppressWarnings("unused")
+    @Subscribe
+    public void onFileOpened(final FileOpenedEvent foe) {
+        setItems(foe.getGimletProject().aliasesProperty());
     }
 }
 

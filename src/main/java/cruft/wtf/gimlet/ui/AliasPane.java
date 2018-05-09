@@ -1,8 +1,5 @@
 package cruft.wtf.gimlet.ui;
 
-import com.google.common.eventbus.Subscribe;
-import cruft.wtf.gimlet.event.EventDispatcher;
-import cruft.wtf.gimlet.event.FileOpenedEvent;
 import javafx.scene.control.Button;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
@@ -31,13 +28,5 @@ public class AliasPane extends BorderPane {
 
         setTop(bar);
         setCenter(this.aliasList);
-
-        EventDispatcher.getInstance().register(this);
-    }
-
-    @SuppressWarnings("unused")
-    @Subscribe
-    public void onFileOpened(final FileOpenedEvent foe) {
-        aliasList.setAliases(foe.getGimletProject().aliasesProperty());
     }
 }
