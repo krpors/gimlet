@@ -148,7 +148,7 @@ public class Tester extends Application {
         primaryStage.setWidth(800);
         primaryStage.setHeight(600);
 
-        withCrap(pane);
+        withParamInputDialog(pane);
 
         // Show the stage after possibly reading and setting window properties.
         primaryStage.show();

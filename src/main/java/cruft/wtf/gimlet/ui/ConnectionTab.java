@@ -12,6 +12,7 @@ import cruft.wtf.gimlet.ui.controls.NumberTextField;
 import cruft.wtf.gimlet.ui.drilldown.DrillDownTab;
 import cruft.wtf.gimlet.ui.objects.ObjectsTab;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -229,13 +230,8 @@ public class ConnectionTab extends Tab {
         numMaxRowCount = new NumberTextField(100);
         numMaxRowCount.disableProperty().bind(chkLimitRows.selectedProperty().not());
 
-        Button btnRunQuery = new Button("Run", Images.RUN.imageView());
-        btnRunQuery.setTooltip(new Tooltip("Run the (highlighted) query (Ctrl+Enter)"));
-        btnRunQuery.setOnAction(event -> sqlTab.executeQuery());
-
-        ToolBar topPaneWithLabels = new ToolBar(chkLimitRows, numMaxRowCount, btnRunQuery);
+        ToolBar topPaneWithLabels = new ToolBar(chkLimitRows, numMaxRowCount);
         topPaneWithLabels.setPadding(new Insets(5));
-
 
         contentPane.setTop(topPaneWithLabels);
 

@@ -11,8 +11,16 @@ import cruft.wtf.gimlet.jdbc.CachedRowSetTransformer;
 import cruft.wtf.gimlet.jdbc.task.SimpleQueryTask;
 import javafx.collections.ObservableList;
 import javafx.geometry.Orientation;
-import javafx.scene.control.*;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.ToolBar;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
+import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,8 +58,31 @@ public class SQLTab extends Tab {
         setText("SQL");
         setClosable(false);
         setGraphic(Images.CODE.imageView());
-        txtQuery.textProperty().bindBidirectional(connectionTab.getAlias().queryProperty());
 
+        SplitPane pane = new SplitPane();
+        pane.setOrientation(Orientation.VERTICAL);
+        pane.setDividerPosition(0, 0.30);
+        pane.getItems().add(createTopPart());
+        pane.getItems().add(tabPaneResultSets);
+
+        setContent(pane);
+    }
+
+    /**
+     * Creates the top part of the SQL tab containing the toolbar and the text area.
+     *
+     * @return The node for the top.
+     */
+    private Node createTopPart() {
+        BorderPane pane = new BorderPane();
+
+        Button btnRunQuery = new Button("Run", Images.RUN.imageView());
+        btnRunQuery.setTooltip(new Tooltip("Run the (highlighted) query (Ctrl+Enter)"));
+        btnRunQuery.setOnAction(event -> executeQuery());
+
+        ToolBar bar = new ToolBar(btnRunQuery);
+
+        txtQuery.textProperty().bindBidirectional(connectionTab.getAlias().queryProperty());
         txtQuery.setWrapText(false);
         txtQuery.getStyleClass().add("query-editor");
         txtQuery.setPromptText("Enter any SQL query here");
@@ -61,13 +92,10 @@ public class SQLTab extends Tab {
             }
         });
 
-        SplitPane pane = new SplitPane();
-        pane.setOrientation(Orientation.VERTICAL);
-        pane.setDividerPosition(0, 0.30);
-        pane.getItems().add(txtQuery);
-        pane.getItems().add(tabPaneResultSets);
+        pane.setTop(bar);
+        pane.setCenter(txtQuery);
 
-        setContent(pane);
+        return pane;
     }
 
     /**
