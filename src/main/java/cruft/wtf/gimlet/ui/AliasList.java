@@ -95,12 +95,25 @@ public class AliasList extends ListView<Alias> {
         if (selected == null) {
             return;
         }
-        Optional<ButtonType> bt = Utils.showConfirm(String.format("Delete '%s'?", selected.getName()), "Confirm deletion", "Ble");
+        Optional<ButtonType> bt = Utils.showConfirm(String.format("Delete '%s'?", selected.getName()), "Confirm deletion", "Are you sure?");
         bt.ifPresent(buttonType -> {
             if (buttonType == ButtonType.OK) {
                 getItems().remove(selected);
             }
         });
+    }
+
+    /**
+     * Makes a copy of the selected alias and appends it at the end of the list.
+     */
+    private void duplicateSelectedAlias() {
+        Alias selected = getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            return;
+        }
+
+        Alias dupe = new Alias(selected);
+        getItems().add(dupe);
     }
 
     /**
@@ -114,12 +127,13 @@ public class AliasList extends ListView<Alias> {
             // We require separate items for the two different context menu's.
             MenuItem itemConnect = new MenuItem("Connect", Images.ACCOUNT_LOGIN.imageView());
             MenuItem newItem = new MenuItem("New", Images.PLUS.imageView());
-            MenuItem duplicateItem = new MenuItem("Duplicate");
+            MenuItem duplicateItem = new MenuItem("Duplicate", Images.DUPLICATE.imageView());
             MenuItem deleteItem = new MenuItem("Delete", Images.TRASH.imageView());
             MenuItem editItem = new MenuItem("Properties...", Images.PENCIL.imageView());
 
             itemConnect.setOnAction(e -> EventDispatcher.getInstance().post(new ConnectEvent(ConnectEvent.Type.INITATED, getItem())));
             newItem.setOnAction(e -> openNewDialog());
+            duplicateItem.setOnAction(e -> duplicateSelectedAlias());
             editItem.setOnAction(e -> openEditDialog());
             deleteItem.setOnAction(e -> deleteSelectedAlias());
 

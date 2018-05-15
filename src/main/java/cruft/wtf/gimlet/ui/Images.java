@@ -25,6 +25,7 @@ public enum Images {
     COG("/icons/settings-24px.png", true),
     COPY("/icons/content-copy-24px.png", true),
     CUT("/icons/content-cut-24px.png", true),
+    DUPLICATE("/icons/content-duplicate-24px.png", true),
     DOCUMENT("/icons/database-24px.png", true),
     FOLDER("/icons/clock-24px.png", true),
     MAGNIFYING_GLASS("/icons/database-search-24px.png", true),

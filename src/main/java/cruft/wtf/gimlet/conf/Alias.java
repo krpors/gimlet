@@ -42,6 +42,19 @@ public class Alias {
 
     private StringProperty query = new SimpleStringProperty();
 
+    public Alias() {
+    }
+
+    /**
+     * Copy constructor. Copies everything, except that it renames the Alias' name.
+     *
+     * @param other The content to copy from.
+     */
+    public Alias(final Alias other) {
+        copyFrom(other);
+        setName(getName() + " (copy)");
+    }
+
     @XmlElement(name = "name")
     public String getName() {
         return name.get();
