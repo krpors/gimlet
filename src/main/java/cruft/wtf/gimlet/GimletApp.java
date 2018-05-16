@@ -35,6 +35,7 @@ import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.security.krb5.Config;
 
 import javax.xml.bind.JAXBException;
 import java.io.File;
@@ -148,12 +149,14 @@ public class GimletApp extends Application {
      * @param file The file to (attempt) to open. When it fails, the user is notified.
      */
     public void loadProjectFile(final File file) {
+        Configuration config = Configuration.getInstance();
+
         try {
             this.gimletProjectObjectProperty.setValue(GimletProject.read(file));
             GimletProject gimletProject = gimletProjectObjectProperty.get();
             logger.info("Successfully read '{}'", file);
 
-            Configuration.getInstance().setProperty(Configuration.Key.LAST_PROJECT_FILE, file.getAbsolutePath());
+            config.setProperty(Configuration.Key.LAST_PROJECT_FILE, file.getAbsolutePath());
 
             this.primaryStage.titleProperty().bind(Bindings.concat(VersionInfo.getVersionString() + " - ", gimletProject.nameProperty()));
 
@@ -168,7 +171,7 @@ public class GimletApp extends Application {
         } catch (FileNotFoundException e) {
             logger.error("Could not load Gimlet project file", e);
             Utils.showExceptionDialog("File could not be found", "The file could not be found.", e);
-            // TODO: fix that the application won't read aliases (which are null) at this point.
+            config.remove(Configuration.Key.LAST_PROJECT_FILE);
         }
     }
 

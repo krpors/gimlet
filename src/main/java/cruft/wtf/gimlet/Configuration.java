@@ -170,6 +170,15 @@ public final class Configuration extends Properties {
     }
 
     /**
+     * Removes a key by enum.
+     *
+     * @param key The key to remove.
+     */
+    public void remove(Key key) {
+        remove(key.getName());
+    }
+
+    /**
      * This enumeration contains all possible configuration keys.
      */
     public enum Key {
