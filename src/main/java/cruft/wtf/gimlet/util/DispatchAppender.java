@@ -1,4 +1,4 @@
-package cruft.wtf.gimlet;
+package cruft.wtf.gimlet.util;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.AppenderBase;

@@ -1,5 +1,7 @@
-package cruft.wtf.gimlet;
+package cruft.wtf.gimlet.ui.dialog;
 
+import cruft.wtf.gimlet.GimletApp;
+import cruft.wtf.gimlet.util.VersionInfo;
 import javafx.application.Application;
 import javafx.application.HostServices;
 import javafx.scene.Scene;

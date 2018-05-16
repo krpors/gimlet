@@ -1,6 +1,6 @@
 package cruft.wtf.gimlet.ui.drilldown;
 
-import cruft.wtf.gimlet.Column;
+import cruft.wtf.gimlet.jdbc.Column;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecutedEvent;

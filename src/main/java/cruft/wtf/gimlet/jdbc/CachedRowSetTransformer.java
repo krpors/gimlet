@@ -1,6 +1,5 @@
 package cruft.wtf.gimlet.jdbc;
 
-import cruft.wtf.gimlet.Column;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.slf4j.Logger;

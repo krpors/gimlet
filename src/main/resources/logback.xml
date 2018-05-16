@@ -5,7 +5,7 @@
         </encoder>
     </appender>
 
-    <appender name="EVENTBUS" class="cruft.wtf.gimlet.DispatchAppender"/>
+    <appender name="EVENTBUS" class="cruft.wtf.gimlet.util.DispatchAppender"/>
 
     <root level="debug">
         <appender-ref ref="STDOUT"/>

@@ -50,11 +50,9 @@ public class ResultSetCell extends TextFieldTableCell<ObservableList, Object> {
         }
 
         String s = item.toString().replace("\n", "\\n").replace("\r", "\\r").trim();
-        int truncateSize = 32;
+
         Optional<Integer> tsize = Configuration.getInstance().getIntegerProperty(Configuration.Key.TRUNCATE_SIZE);
-        if (tsize.isPresent()) {
-            truncateSize = tsize.get();
-        }
+        int truncateSize = tsize.orElse(32);
 
         setText(s);
 

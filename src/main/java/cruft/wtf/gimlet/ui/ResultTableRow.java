@@ -1,6 +1,6 @@
 package cruft.wtf.gimlet.ui;
 
-import cruft.wtf.gimlet.DataConverter;
+import cruft.wtf.gimlet.util.DataConverter;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;

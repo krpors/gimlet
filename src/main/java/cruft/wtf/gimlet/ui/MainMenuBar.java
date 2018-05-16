@@ -1,14 +1,16 @@
 package cruft.wtf.gimlet.ui;
 
-import cruft.wtf.gimlet.AboutWindow;
 import cruft.wtf.gimlet.GimletApp;
+import cruft.wtf.gimlet.ui.dialog.AboutWindow;
+import cruft.wtf.gimlet.ui.dialog.FileDialogs;
 import cruft.wtf.gimlet.ui.dialog.SettingsDialog;
 import javafx.beans.binding.Bindings;
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCombination;
-import javafx.stage.FileChooser;
-
-import java.io.File;
 
 // TODO: perhaps externalize ActionEvents to their own classes?
 
@@ -26,23 +28,11 @@ public class MainMenuBar extends MenuBar {
 
         MenuItem fileItemNew = new MenuItem("New");
         fileItemNew.setAccelerator(KeyCombination.keyCombination("Ctrl+N"));
-        fileItemNew.setOnAction(event -> gimletApp.newProjectFile());
+        fileItemNew.setOnAction(event -> FileDialogs.showNewProjectDialog());
 
         MenuItem fileItemOpen = new MenuItem("Open...");
         fileItemOpen.setAccelerator(KeyCombination.keyCombination("Ctrl+O"));
-        fileItemOpen.setOnAction(event -> {
-            FileChooser chooser = new FileChooser();
-            chooser.setTitle("Select Gimlet project file");
-            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Gimlet project files", "*.gml"));
-            chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
-            File file = chooser.showOpenDialog(GimletApp.window);
-            if (file == null) {
-                // user pressed cancel.
-                return;
-            }
-
-            gimletApp.loadProjectFile(file);
-        });
+        fileItemOpen.setOnAction(event -> FileDialogs.showOpenProjectDialog());
 
         MenuItem fileItemSave = new MenuItem("Save", Images.SAVE.imageView());
         fileItemSave.setAccelerator(KeyCombination.keyCombination("Ctrl+S"));
@@ -50,7 +40,7 @@ public class MainMenuBar extends MenuBar {
         fileItemSave.disableProperty().bind(Bindings.isNull(gimletApp.getGimletProjectProperty()));
 
         MenuItem fileItemSaveAs = new MenuItem("Save as...");
-        fileItemSaveAs.setOnAction(event -> gimletApp.showSaveAsDialog());
+        fileItemSaveAs.setOnAction(event -> FileDialogs.showSaveAsDialog(gimletApp.getGimletProjectProperty().get()));
         fileItemSaveAs.disableProperty().bind(Bindings.isNull(gimletApp.getGimletProjectProperty()));
 
         MenuItem fileItemSettings = new MenuItem("Settings...");

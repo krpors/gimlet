@@ -1,7 +1,7 @@
 package cruft.wtf.gimlet.ui;
 
 
-import cruft.wtf.gimlet.Column;
+import cruft.wtf.gimlet.jdbc.Column;
 import cruft.wtf.gimlet.jdbc.task.SimpleQueryTask;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;

@@ -1,4 +1,4 @@
-package cruft.wtf.gimlet;
+package cruft.wtf.gimlet.jdbc;
 
 public class Column {
 

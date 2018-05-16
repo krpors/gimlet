@@ -1,5 +1,6 @@
 package cruft.wtf.gimlet;
 
+import cruft.wtf.gimlet.util.DataConverter;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.junit.Assert;
@@ -7,7 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.LinkedList;
 import java.util.List;
 
 public class DataConverterTest {

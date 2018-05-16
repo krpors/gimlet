@@ -1,5 +1,6 @@
-package cruft.wtf.gimlet;
+package cruft.wtf.gimlet.util;
 
+import cruft.wtf.gimlet.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

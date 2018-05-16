@@ -1,6 +1,7 @@
 package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.conf.Alias;
+import cruft.wtf.gimlet.jdbc.Column;
 import cruft.wtf.gimlet.jdbc.ParseResult;
 import cruft.wtf.gimlet.ui.ConnectionTab;
 import cruft.wtf.gimlet.ui.ConnectionTabPane;
@@ -16,7 +17,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;

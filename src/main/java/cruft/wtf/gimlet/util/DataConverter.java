@@ -1,4 +1,4 @@
-package cruft.wtf.gimlet;
+package cruft.wtf.gimlet.util;
 
 import com.google.common.escape.Escaper;
 import com.google.common.html.HtmlEscapers;

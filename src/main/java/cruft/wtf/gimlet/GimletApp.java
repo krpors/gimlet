@@ -1,10 +1,19 @@
 package cruft.wtf.gimlet;
 
+import com.google.common.eventbus.Subscribe;
 import cruft.wtf.gimlet.conf.GimletProject;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.FileOpenedEvent;
 import cruft.wtf.gimlet.event.FileSavedEvent;
-import cruft.wtf.gimlet.ui.*;
+import cruft.wtf.gimlet.event.LoadProjectEvent;
+import cruft.wtf.gimlet.ui.ConnectionTabPane;
+import cruft.wtf.gimlet.ui.Images;
+import cruft.wtf.gimlet.ui.LogTable;
+import cruft.wtf.gimlet.ui.MainMenuBar;
+import cruft.wtf.gimlet.ui.NavigationPane;
+import cruft.wtf.gimlet.ui.ProjectPropertiesPane;
+import cruft.wtf.gimlet.ui.StatusBar;
+import cruft.wtf.gimlet.util.VersionInfo;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -15,10 +24,13 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
-import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import org.slf4j.Logger;
@@ -77,6 +89,14 @@ public class GimletApp extends Application {
     }
 
     /**
+     * Constructor.
+     */
+    public GimletApp() {
+        // Register this class with the event dispatcher.
+        EventDispatcher.getInstance().register(this);
+    }
+
+    /**
      * Adds a shutdown hook so when the application is shutdown, some actions will run.
      */
     private void addShutdownHook() {
@@ -120,29 +140,6 @@ public class GimletApp extends Application {
 
     public ObjectProperty<GimletProject> getGimletProjectProperty() {
         return gimletProjectObjectProperty;
-    }
-
-    /**
-     * Creates a new project file, by showing a dialog first.
-     */
-    public void newProjectFile() {
-        FileChooser chooser = new FileChooser();
-        chooser.setTitle("Select location for the new Gimlet project");
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Gimlet project files", "*.gml"));
-        File file = chooser.showSaveDialog(window);
-        if (file == null) {
-            // user pressed cancel.
-            return;
-        }
-        // TODO: add .gml to file if not explicitly given.
-        GimletProject temp = new GimletProject();
-        temp.setFile(file);
-        try {
-            temp.writeToFile();
-            loadProjectFile(file);
-        } catch (JAXBException e) {
-            logger.error("Unable to write project to file", e);
-        }
     }
 
     /**
@@ -194,35 +191,6 @@ public class GimletApp extends Application {
         } else {
             logger.warn("gimletProject is null or file property is null?");
             Utils.showExceptionDialog("Project property is null", "Cannot save project property!?", new Exception("Fix me!"));
-        }
-    }
-
-    /**
-     * Shows a save-as dialog.
-     */
-    public void showSaveAsDialog() {
-        GimletProject gimletProject = gimletProjectObjectProperty.get();
-
-        FileChooser chooser = new FileChooser();
-        chooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Gimlet project files", "*.gml"));
-        chooser.setTitle("Save Gimlet project as");
-        chooser.setInitialFileName(gimletProject.getName() + ".gml");
-        File file = chooser.showSaveDialog(null);
-        if (file == null) {
-            return;
-        }
-
-        try {
-            gimletProject.setFile(file); // update the file reference so the editor is now opened in that one.
-            gimletProject.writeToFile();
-
-            FileSavedEvent event = new FileSavedEvent(file);
-            EventDispatcher.getInstance().post(event);
-
-            // Initiate the loading sequence.
-            loadProjectFile(file);
-        } catch (JAXBException e) {
-            e.printStackTrace();
         }
     }
 
@@ -356,6 +324,17 @@ public class GimletApp extends Application {
     }
 
     /**
+     * Subscribes ourselves to the {@link LoadProjectEvent}, which can be emitted from menu's etc.
+     *
+     * @param event The event, emitted when a file has been selected for opening.
+     */
+    @Subscribe
+    private void onLoadProject(final LoadProjectEvent event) {
+        logger.debug("onLoad...");
+        loadProjectFile(event.getFile());
+    }
+
+    /**
      * Creates the {@link Stage} and all other cruft of the main window.
      *
      * @param primaryStage
@@ -400,6 +379,6 @@ public class GimletApp extends Application {
             });
         });
 
-        logger.info(VersionInfo.getVersionString() + " started and ready");
+        logger.info("{} started and ready", VersionInfo.getVersionString());
     }
 }
