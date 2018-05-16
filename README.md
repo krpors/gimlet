@@ -53,18 +53,20 @@ Just compile:
 
     mvn clean install
 
-Create .tar.gz distribution:
+Create `.tar.gz` and `.zip` distribution:
 
     mvn clean package assembly:single
 
-In the `target` directory a file will be created, called `gimlet-1.0-SNAPSHOT.tar.gz`.
+In the `target` directory a file will be created, called `gimlet-$VERSION.tar.gz`.
 The contents are as follows:
 
-    gimlet-1.0-SNAPSHOT
+    gimlet-$VERSION
 		README.md       <-- this file you're reading
+		LICENSE         <-- license file
 		/bin/
 			gimlet.sh   <-- shell script for Linux
 			gimlet.bat  <-- batch file for Windows
+			gimletw.bat <-- batch file for Windows, without console
 		/lib/
 			error_prone_annotations-2.0.18.jar
 			hsqldb-2.4.0.jar
@@ -77,6 +79,12 @@ The contents are as follows:
 			guava-22.0.jar
 			logback-classic-1.2.3.jar
 			... drop any JDBC driver JARs here ...
+
+# Running from Maven
+
+To directly run from within Maven, just run:
+
+    mvn exec:java
 
 # JDBC driver installation
 

@@ -356,8 +356,8 @@ public class GimletApp extends Application {
 
         primaryStage.setTitle(VersionInfo.getVersionString());
         primaryStage.setScene(scene);
-        primaryStage.setWidth(800);
-        primaryStage.setHeight(600);
+        primaryStage.setWidth(1024);
+        primaryStage.setHeight(768);
 
         // After all controls are created, read the configuration file (if any).
         initConfigs();
