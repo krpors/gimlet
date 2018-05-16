@@ -50,8 +50,14 @@ public final class FileDialogs {
             // user pressed cancel.
             return;
         }
-        // TODO: add .gml to file if not explicitly given.
+
+        if (!file.getName().endsWith(".gml")) {
+            logger.debug("Missing extension, forcibly adding .gml to original filename '{}'", file.getName());
+            file = new File(file.getAbsolutePath() + ".gml");
+        }
+
         GimletProject temp = new GimletProject();
+        temp.setName(file.getName());
         temp.setFile(file);
         try {
             temp.writeToFile();
@@ -70,6 +76,7 @@ public final class FileDialogs {
         chooser.getExtensionFilters().add(filterGml);
         chooser.setTitle("Save Gimlet project as");
         chooser.setInitialFileName(gimletProject.getName() + ".gml");
+        chooser.setInitialDirectory(gimletProject.getFile().getParentFile());
         File file = chooser.showSaveDialog(null);
         if (file == null) {
             return;
