@@ -10,7 +10,7 @@ import java.util.Optional;
  * A simple extension to the {@link TextField}, which contains some logic to parse a number.
  * When parsing fails, the user gets visual notification that it cannot be parsed correctly.
  */
-public class NumberTextField extends TextField {
+public class NumberTextField extends TextField implements ParamInput<Number> {
     private DecimalFormat decimalFormat = new DecimalFormat("#");
 
     private Number number = 0;
@@ -57,5 +57,20 @@ public class NumberTextField extends TextField {
      */
     public Optional<Number> getNumber() {
         return Optional.ofNullable(number);
+    }
+
+    @Override
+    public String getParameterName() {
+        return getId();
+    }
+
+    @Override
+    public Number getParameterValue() {
+        return number;
+    }
+
+    @Override
+    public void setParameterValue(Number o) {
+        this.number = o;
     }
 }
