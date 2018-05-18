@@ -7,6 +7,27 @@
     <name>Gimlet</name>
     <description>Simple query drilldown application</description>
 
+    <licenses>
+        <license>
+            <name>MIT</name>
+            <url>https://opensource.org/licenses/MIT</url>
+        </license>
+    </licenses>
+    <inceptionYear>2017</inceptionYear>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/krpors/gimlet/issues</url>
+    </issueManagement>
+
+    <developers>
+        <developer>
+            <id>krpors</id>
+            <name>Kevin Pors</name>
+            <timezone>Europe/Amsterdam</timezone>
+        </developer>
+    </developers>
+
     <groupId>cruft.wtf.gimlet</groupId>
     <artifactId>gimlet</artifactId>
     <version>1.1-SNAPSHOT</version>
@@ -83,11 +104,6 @@
             <version>22.0</version>
         </dependency>
         <dependency>
-            <groupId>org.hsqldb</groupId>
-            <artifactId>hsqldb</artifactId>
-            <version>2.4.0</version>
-        </dependency>
-        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.2.3</version>
@@ -97,13 +113,38 @@
             <artifactId>slf4j-api</artifactId>
             <version>1.7.25</version>
         </dependency>
+
+        <!-- test dependencies -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.12</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>2.4.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
+    <profiles>
+        <!-- This profile can be forcefully activated to include
+        the HSQL database (+ driver) on the classpath, as well with
+        with packaging. By default, we don't need (or want) to
+        ship the driver so let's use a profile to fix that. -->
+        <profile>
+            <id>with-hsql</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.hsqldb</groupId>
+                    <artifactId>hsqldb</artifactId>
+                    <version>2.4.0</version>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 
 </project>
 
