@@ -166,11 +166,11 @@ public class ObjectsTab extends Tab {
             objectTree.getRoot().getChildren().removeAll(collect);
             btnRemoveEmptySchemas.setDisable(true);
         });
-        HBox lolbox = new HBox(btnRemoveEmptySchemas);
-        lolbox.setPadding(new Insets(10));
+
+        ToolBar bar = new ToolBar(btnRemoveEmptySchemas);
 
         paneObjects = new BorderPane();
-        paneObjects.setTop(lolbox);
+        paneObjects.setTop(bar);
         paneObjects.setCenter(splitPaneObjects);
 
     }
