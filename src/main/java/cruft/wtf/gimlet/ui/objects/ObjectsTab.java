@@ -136,6 +136,7 @@ public class ObjectsTab extends Tab {
                         data.setTypeName(rs.getString("TYPE_NAME"));
                         data.setColumnSize(rs.getInt("COLUMN_SIZE"));
                         data.setNullable(rs.getInt("NULLABLE") != 0);
+                        data.setRemarks(rs.getString("REMARKS"));
                         data.setPrimaryKey(setColumnPks.contains(rs.getString("COLUMN_NAME")));
                         derp.add(data);
                     }

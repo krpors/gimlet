@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Properties;
 
 /**
  * The {@link ConnectTask} will try to initiate a (read only) SQL {@link Connection} using the given {@link Alias}
@@ -26,6 +27,11 @@ public class ConnectTask extends Task<Connection> {
         setPassword(aliasToConnectTo.getPassword());
     }
 
+    /**
+     * This method can be used when the user should be asked for a password, instead of having it saved.
+     *
+     * @param password The password to use for connecting.
+     */
     public void setPassword(String password) {
         this.password = password;
     }
@@ -40,7 +46,11 @@ public class ConnectTask extends Task<Connection> {
         }
 
         try {
-            Connection c = DriverManager.getConnection(alias.getUrl(), alias.getUser(), password);
+            Properties connProperties = new Properties();
+            connProperties.setProperty("user", alias.getUser());
+            connProperties.setProperty("password", password);
+            connProperties.putAll(alias.getJdbcProperties());
+            Connection c = DriverManager.getConnection(alias.getUrl(), connProperties);
             c.setReadOnly(true);
             logger.info("Connection successfully established to {}", alias.getUrl());
             return c;

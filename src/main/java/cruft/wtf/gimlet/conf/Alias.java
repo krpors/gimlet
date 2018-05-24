@@ -1,13 +1,21 @@
 package cruft.wtf.gimlet.conf;
 
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ListProperty;
+import javafx.beans.property.MapProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleMapProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableMap;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import java.util.TreeMap;
 
+@XmlRootElement(name = "alias") // only use for tests
 @XmlType(propOrder = {
         "name",
         "description",
@@ -18,6 +26,7 @@ import javax.xml.bind.annotation.XmlType;
         "askForPassword",
         "color",
         "colorDisabled",
+        "jdbcProperties",
         "query"
 })
 public class Alias {
@@ -41,6 +50,8 @@ public class Alias {
     private BooleanProperty askForPassword = new SimpleBooleanProperty(false);
 
     private StringProperty query = new SimpleStringProperty();
+
+    private MapProperty<String, String> jdbcProperties = new SimpleMapProperty<>(FXCollections.observableMap(new TreeMap<>()));
 
     public Alias() {
     }
@@ -177,6 +188,18 @@ public class Alias {
         this.query.set(query);
     }
 
+    public ObservableMap<String, String> getJdbcProperties() {
+        return jdbcProperties.get();
+    }
+
+    public MapProperty<String, String> jdbcPropertiesProperty() {
+        return jdbcProperties;
+    }
+
+    public void setJdbcProperties(ObservableMap<String, String> jdbcProperties) {
+        this.jdbcProperties.set(jdbcProperties);
+    }
+
     /**
      * Copies values over from another {@link Alias}. This is to keep the reference intact.
      *
@@ -194,6 +217,8 @@ public class Alias {
         setQuery(other.getQuery());
         setUrl(other.getUrl());
         setUser(other.getUser());
+        setJdbcProperties(other.getJdbcProperties());
+        other.getJdbcProperties().forEach((s, s2) -> System.out.printf("%s -> %s!!\n", s, s2));
     }
 
     @Override

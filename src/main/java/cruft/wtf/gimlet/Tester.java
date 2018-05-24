@@ -5,6 +5,8 @@ import cruft.wtf.gimlet.jdbc.Column;
 import cruft.wtf.gimlet.jdbc.ParseResult;
 import cruft.wtf.gimlet.ui.ConnectionTab;
 import cruft.wtf.gimlet.ui.ConnectionTabPane;
+import cruft.wtf.gimlet.ui.JdbcPropertiesTab;
+import cruft.wtf.gimlet.ui.JdbcPropertiesTable;
 import cruft.wtf.gimlet.ui.ResultTable;
 import cruft.wtf.gimlet.ui.RotatedTable;
 import cruft.wtf.gimlet.ui.controls.DateTimePicker;
@@ -166,11 +168,17 @@ public class Tester extends Application {
         return new Tab("Connection tab", ctp);
     }
 
+    private Tab createWithJdbcProps() throws SQLException {
+        JdbcPropertiesTab tab = new JdbcPropertiesTab();
+        return tab;
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         TabPane pane = new TabPane();
         pane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
         pane.getTabs().addAll(
+                createWithJdbcProps(),
                 createWithConnectionTabPane(),
                 createWithObjectsTable(),
                 createRotatedTable(),

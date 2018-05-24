@@ -16,6 +16,8 @@ public class ObjectsTableData {
 
     private boolean isPrimaryKey;
 
+    private String remarks;
+
     public int getOrdinalPosition() {
         return ordinalPosition;
     }
@@ -70,5 +72,13 @@ public class ObjectsTableData {
 
     public void setPrimaryKey(boolean primaryKey) {
         isPrimaryKey = primaryKey;
+    }
+
+    public String getRemarks() {
+        return remarks;
+    }
+
+    public void setRemarks(String remarks) {
+        this.remarks = remarks;
     }
 }

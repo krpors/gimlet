@@ -46,6 +46,9 @@ public class ObjectsTable extends TableView<ObjectsTableData> {
         columnColOrdinalPos.setCellValueFactory(param -> new SimpleIntegerProperty(param.getValue().getOrdinalPosition()));
         getColumns().add(columnColOrdinalPos);
 
+        TableColumn<ObjectsTableData, String> columnRemarks = new TableColumn<>("Remarks");
+        columnRemarks.setCellValueFactory(param -> new SimpleStringProperty(param.getValue().getRemarks()));
+        getColumns().add(columnRemarks);
     }
 
     /**

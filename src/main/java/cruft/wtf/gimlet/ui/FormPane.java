@@ -10,7 +10,7 @@ import javafx.scene.layout.Priority;
 
 public class FormPane extends GridPane {
 
-    public int rowCounter = 0;
+    private int rowCounter = 0;
 
     public FormPane() {
         setHgap(10);
@@ -20,7 +20,6 @@ public class FormPane extends GridPane {
         ColumnConstraints col1 = new ColumnConstraints();
         ColumnConstraints col2 = new ColumnConstraints();
         col1.setMinWidth(90);
-
         col2.setHgrow(Priority.ALWAYS);
 
         getColumnConstraints().addAll(col1, col2);
@@ -29,6 +28,8 @@ public class FormPane extends GridPane {
     public void add(String label, Node node) {
         Label lbl = new Label(label);
         GridPane.setValignment(lbl, VPos.CENTER);
+        lbl.setMnemonicParsing(true);
+        lbl.setLabelFor(node);
         super.add(lbl, 0, rowCounter);
         super.add(node, 1, rowCounter);
         rowCounter++;

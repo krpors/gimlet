@@ -161,7 +161,7 @@ public class DrillDownExecutionTab extends Tab {
         // Get the max rows from the ConnectionTab (parent, parent). 0 will mean no row limit.
         // TODO: is there an easier way to get this, instead of going up the chain of parents?
         int maxRows = drillDownTab.getConnectionTab().getLimitMaxRows();
-        logger.debug("Limiting  maximum amount of  rows to {} for query '{}'", maxRows, query.getName());
+        logger.debug("Limiting maximum amount of rows to {} for query '{}'", maxRows, query.getName());
 
         NamedQueryTask namedQueryTask = new NamedQueryTask(connection, query.getContent(), maxRows, columnMap);
 

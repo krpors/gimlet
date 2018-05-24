@@ -4,11 +4,22 @@ import cruft.wtf.gimlet.GimletApp;
 import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.conf.Alias;
 import cruft.wtf.gimlet.ui.FormPane;
+import cruft.wtf.gimlet.ui.JdbcPropertiesTab;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
 import javafx.scene.Parent;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.ColorPicker;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Dialog;
+import javafx.scene.control.PasswordField;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
+import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
@@ -46,6 +57,8 @@ public class AliasDialog extends Dialog<Alias> {
     private ColorPicker colorPicker;
 
     private CheckBox chkDisableColor;
+
+    private JdbcPropertiesTab jdbcPropertiesTab;
 
     public AliasDialog() {
         initOwner(GimletApp.window);
@@ -90,6 +103,9 @@ public class AliasDialog extends Dialog<Alias> {
         alias.setColor(Utils.toRgbCode(colorPicker.getValue()));
         alias.setColorDisabled(chkDisableColor.isSelected());
         alias.setAskForPassword(chkAskForPassword.isSelected());
+        alias.setJdbcProperties(jdbcPropertiesTab.getItemsAsMap());
+        System.out.println("jdbc props: ");
+        jdbcPropertiesTab.getItemsAsMap().forEach((s, s2) -> System.out.printf("%s -> %s\n", s, s2));
         return alias;
     }
 
@@ -99,6 +115,23 @@ public class AliasDialog extends Dialog<Alias> {
      * @return The scene's content.
      */
     private Parent createContent() {
+        jdbcPropertiesTab = new JdbcPropertiesTab();
+
+        TabPane tabPane = new TabPane(
+                createFirstTab(),
+                jdbcPropertiesTab);
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+        return tabPane;
+    }
+
+    /**
+     * Main jdbcPropertiesTab for the alias.
+     *
+     * @return The first jdbcPropertiesTab.
+     */
+    private Tab createFirstTab() {
+        Tab tab = new Tab("Default settings");
+
         FormPane pane = new FormPane();
 
         txtName = new TextField();
@@ -155,8 +188,10 @@ public class AliasDialog extends Dialog<Alias> {
         box.setAlignment(Pos.CENTER_LEFT);
         pane.add("Tab coloring:", box);
 
-        return pane;
+        tab.setContent(pane);
+        return tab;
     }
+
 
     /**
      * Tests a connection using the filled in values in the form.
@@ -216,6 +251,7 @@ public class AliasDialog extends Dialog<Alias> {
         colorPicker.setValue(Color.valueOf(alias.getColor()));
         chkDisableColor.setSelected(alias.isColorDisabled());
         chkAskForPassword.setSelected(alias.isAskForPassword());
+        jdbcPropertiesTab.setItemsFromMap(alias.getJdbcProperties());
         return showAndWait();
     }
 
