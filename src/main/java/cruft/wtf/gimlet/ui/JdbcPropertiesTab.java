@@ -8,10 +8,12 @@ import javafx.scene.layout.BorderPane;
 
 import java.util.Map;
 
+/**
+ * This class contains a toolbar and the actual table for adding custom JDBC property.
+ */
 public class JdbcPropertiesTab extends Tab {
 
     private JdbcPropertiesTable table;
-
 
     public JdbcPropertiesTab() {
         super("JDBC properties");

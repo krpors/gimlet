@@ -12,6 +12,9 @@ import javafx.util.converter.DefaultStringConverter;
 import java.util.Map;
 import java.util.TreeMap;
 
+/**
+ * This table contains functionality for custom JDBC driver properties.
+ */
 public class JdbcPropertiesTable extends TableView<JdbcPropertiesTable.JdbcProperty> {
 
     public JdbcPropertiesTable() {
@@ -44,6 +47,9 @@ public class JdbcPropertiesTable extends TableView<JdbcPropertiesTable.JdbcPrope
         setItems(props);
     }
 
+    /**
+     * Denotes a name/value for the table.
+     */
     public static class JdbcProperty {
         private String name;
         private String value;
