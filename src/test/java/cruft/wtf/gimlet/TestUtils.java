@@ -7,7 +7,7 @@ public final class TestUtils {
 
     public static String readFromClasspath(String name) {
         StringBuilder b = new StringBuilder();
-        try (InputStream is = DataConverterTest.class.getResourceAsStream(name)) {
+        try (InputStream is = TestUtils.class.getResourceAsStream(name)) {
             int c;
             while ((c = is.read()) != -1) {
                 b.append((char)c);
