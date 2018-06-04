@@ -1,9 +1,12 @@
 package cruft.wtf.gimlet.ui;
 
 import cruft.wtf.gimlet.GimletApp;
+import cruft.wtf.gimlet.Script;
+import cruft.wtf.gimlet.ScriptLoader;
 import cruft.wtf.gimlet.ui.dialog.AboutWindow;
 import cruft.wtf.gimlet.ui.dialog.FileDialogs;
 import cruft.wtf.gimlet.ui.dialog.SettingsDialog;
+import cruft.wtf.gimlet.util.Xdg;
 import javafx.beans.binding.Bindings;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Menu;
@@ -11,6 +14,12 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCombination;
+
+import javax.script.ScriptException;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 
 // TODO: perhaps externalize ActionEvents to their own classes?
 
@@ -20,6 +29,8 @@ import javafx.scene.input.KeyCombination;
 public class MainMenuBar extends MenuBar {
 
     private final GimletApp gimletApp;
+
+    private Menu menuScripts;
 
     public MainMenuBar(final GimletApp gimletApp) {
         this.gimletApp = gimletApp;
@@ -70,6 +81,9 @@ public class MainMenuBar extends MenuBar {
         menuFile.getItems().add(new SeparatorMenuItem());
         menuFile.getItems().add(fileItemExit);
 
+        menuScripts = new Menu("Scripts");
+        loadScripts();
+
         Menu menuHelp = new Menu("Help");
         MenuItem helpItemAbout = new MenuItem("About");
         helpItemAbout.setOnAction(event -> {
@@ -79,6 +93,42 @@ public class MainMenuBar extends MenuBar {
         menuHelp.getItems().add(helpItemAbout);
 
         getMenus().add(menuFile);
+        getMenus().add(menuScripts);
         getMenus().add(menuHelp);
+    }
+
+    /**
+     * Load the scripts from the filesystem
+     */
+    private void loadScripts() {
+        menuScripts.getItems().clear();
+
+        try {
+            Path p = Xdg.getConfigHome().resolve("scripts");
+            List<Script> s = ScriptLoader.load(p.toString());
+            s
+                    .stream()
+                    .filter(Script::isValid)
+                    .forEach(script -> {
+                        MenuItem item = new MenuItem(script.getName());
+                        item.setOnAction(e -> executeScript(script));
+                        menuScripts.getItems().add(item);
+                    });
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        menuScripts.getItems().add(new SeparatorMenuItem());
+        MenuItem itemReload = new MenuItem("Reload scripts");
+        itemReload.setOnAction(event -> loadScripts());
+        menuScripts.getItems().add(itemReload);
+    }
+
+    private void executeScript(final Script script) {
+        try {
+            script.execute();
+        } catch (ScriptException e) {
+            // TODO: logging?
+            e.printStackTrace();
+        }
     }
 }

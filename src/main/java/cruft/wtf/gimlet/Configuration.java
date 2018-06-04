@@ -1,6 +1,7 @@
 package cruft.wtf.gimlet;
 
 import com.google.common.io.Files;
+import cruft.wtf.gimlet.util.Xdg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,16 +35,7 @@ public final class Configuration extends Properties {
     private static File configFile;
 
     private Configuration() {
-        // Used the XDG directory specification to check whether the env var is set. If so
-        // then use that one, and if not, the default is used of $HOME/.config.
-        String xdgHome = System.getenv("XDG_CONFIG_HOME");
-        if (xdgHome == null || "".equals(xdgHome.trim())) {
-            xdgHome = System.getProperty("user.home") + "/.config";
-        } else {
-            logger.debug("Using explicit XDG_CONFIG_HOME '{}'", xdgHome);
-        }
-
-        configFile = Paths.get(xdgHome, "gimlet", "config").toFile();
+        configFile = Xdg.getConfigHome().resolve("config").toFile();
         logger.debug("Gimlet configuration file is '{}'", configFile);
 
     }

@@ -104,8 +104,6 @@ public class AliasDialog extends Dialog<Alias> {
         alias.setColorDisabled(chkDisableColor.isSelected());
         alias.setAskForPassword(chkAskForPassword.isSelected());
         alias.setJdbcProperties(jdbcPropertiesTab.getItemsAsMap());
-        System.out.println("jdbc props: ");
-        jdbcPropertiesTab.getItemsAsMap().forEach((s, s2) -> System.out.printf("%s -> %s\n", s, s2));
         return alias;
     }
 

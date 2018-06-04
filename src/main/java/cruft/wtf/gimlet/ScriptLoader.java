@@ -35,10 +35,10 @@ public final class ScriptLoader {
                     try {
                         s = fromFile(file);
                     } catch (ScriptException e) {
-                        log.error("Unable to read script", e);
+                        log.warn("Unable to read script", e);
                         s.setError(e.getMessage());
                     } catch (IOException e) {
-                        log.error("Unable open file", e);
+                        log.warn("Unable open file", e);
                         s.setError(e.getMessage());
                     } finally {
                         list.add(s);
