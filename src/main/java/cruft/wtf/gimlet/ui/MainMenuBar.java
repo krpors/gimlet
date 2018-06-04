@@ -3,6 +3,8 @@ package cruft.wtf.gimlet.ui;
 import cruft.wtf.gimlet.GimletApp;
 import cruft.wtf.gimlet.Script;
 import cruft.wtf.gimlet.ScriptLoader;
+import cruft.wtf.gimlet.event.EventDispatcher;
+import cruft.wtf.gimlet.event.ScriptExecutedEvent;
 import cruft.wtf.gimlet.ui.dialog.AboutWindow;
 import cruft.wtf.gimlet.ui.dialog.FileDialogs;
 import cruft.wtf.gimlet.ui.dialog.SettingsDialog;
@@ -110,6 +112,10 @@ public class MainMenuBar extends MenuBar {
                     .stream()
                     .filter(Script::isValid)
                     .forEach(script -> {
+                        // Bind objects in the namespace of the script.
+                        script.put("gimletapp", gimletApp);
+                        script.put("ctp", GimletApp.connectionTabPane);
+
                         MenuItem item = new MenuItem(script.getName());
                         item.setOnAction(e -> executeScript(script));
                         menuScripts.getItems().add(item);
@@ -125,7 +131,8 @@ public class MainMenuBar extends MenuBar {
 
     private void executeScript(final Script script) {
         try {
-            script.execute();
+            Object o = script.execute();
+            EventDispatcher.getInstance().post(new ScriptExecutedEvent(o));
         } catch (ScriptException e) {
             // TODO: logging?
             e.printStackTrace();

@@ -58,6 +58,9 @@ public final class ScriptLoader {
                     } catch (IOException e) {
                         log.warn("Unable open file", e);
                         s.setError(e.getMessage());
+                    } catch (Exception e) {
+                        log.warn("Other error", e);
+                        s.setError(e.getMessage());
                     } finally {
                         list.add(s);
                     }

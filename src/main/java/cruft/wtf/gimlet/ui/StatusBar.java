@@ -1,11 +1,7 @@
 package cruft.wtf.gimlet.ui;
 
 import com.google.common.eventbus.Subscribe;
-import cruft.wtf.gimlet.event.ConnectEvent;
-import cruft.wtf.gimlet.event.EventDispatcher;
-import cruft.wtf.gimlet.event.FileOpenedEvent;
-import cruft.wtf.gimlet.event.FileSavedEvent;
-import cruft.wtf.gimlet.event.QueryExecutedEvent;
+import cruft.wtf.gimlet.event.*;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -69,5 +65,10 @@ public class StatusBar extends HBox {
     @Subscribe
     public void onQueryExecuted(final QueryExecutedEvent event) {
         setStatus("Query executed in %d ms, containing %d rows ", event.getRuntime(), event.getRowCount());
+    }
+
+    @Subscribe
+    public void onScriptExecutedEvent(final ScriptExecutedEvent event) {
+        setStatus("Script executed with result: %s", event.getMessage());
     }
 }
