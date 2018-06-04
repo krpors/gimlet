@@ -1,6 +1,6 @@
 function script_register() {
     return {
-        name: "Example script",
+        name: "Example script for bindings",
         description: "Example script description",
         author: "Herp A. Derp"
     };

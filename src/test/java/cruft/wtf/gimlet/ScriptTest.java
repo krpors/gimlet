@@ -17,7 +17,7 @@ public class ScriptTest {
     public void okScript() throws IOException, ScriptException {
         URL url = ScriptTest.class.getResource("/scripts/ok.js");
         File file = new File(url.getFile());
-        Script s = Script.fromFile(file);
+        Script s = ScriptLoader.fromFile(file);
         assertEquals("Example script", s.getName());
         assertEquals("Example script description", s.getDescription());
         assertEquals("Herp A. Derp", s.getAuthor());
@@ -30,7 +30,7 @@ public class ScriptTest {
         URL url = ScriptTest.class.getResource("/scripts/bad_register.js");
         File file = new File(url.getFile());
         try {
-            Script.fromFile(file);
+            ScriptLoader.fromFile(file);
             fail("Expected exception at this point");
         } catch (ScriptException e) {
             // OK
@@ -41,7 +41,7 @@ public class ScriptTest {
     public void okBindings() throws IOException, ScriptException {
         URL url = ScriptTest.class.getResource("/scripts/ok_bindings.js");
         File file = new File(url.getFile());
-        Script s = Script.fromFile(file);
+        Script s = ScriptLoader.fromFile(file);
 
         s.put("someVar", 123);
 
