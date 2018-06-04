@@ -101,16 +101,30 @@ public final class Script implements Comparable<Script> {
                 '}';
     }
 
+    /**
+     * Compares this Script object to another Script. Comparison is mainly done
+     * based on the name.
+     * <p>
+     * <h1>Documentation from {@link Comparable}:</h1>
+     * {@inheritDoc}
+     *
+     * @param o The other script.
+     * @return -1 if this is lesser than the other, 1 if this is greater than the other,
+     * or 0 if equal.
+     */
     @Override
     public int compareTo(Script o) {
         if (o == null) {
             return 1;
         }
 
-        if (o.getName() == null || this.getName() == null) {
-            return -1;
+        if (o.getName() == null) {
+            return 1;
         }
 
+        if (this.getName() == null) {
+            return -1;
+        }
         return this.getName().compareTo(o.getName());
     }
 }

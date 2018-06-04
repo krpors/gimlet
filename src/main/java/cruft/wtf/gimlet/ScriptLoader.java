@@ -17,13 +17,31 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * This class is responsible for loading Nashorn scripts from the filesystem.
+ */
 public final class ScriptLoader {
 
     private static final Logger log = LoggerFactory.getLogger(ScriptLoader.class);
 
-    public static List<Script> load(String baseDir) throws IOException {
+    /**
+     * Attempts to load scripts from the filesystem located in the given {@code baseDir}.
+     * If some files fail to be parsed by the script engine, the Script is returned in the
+     * list as well, except the {@link Script#valid} flag is set to false and the
+     * {@link Script#error} attribute contains the actual error.
+     *
+     * @param baseDir   The base directory to search Nashorn compatible Javascript files..
+     * @param createDir true if the given directory should be created.
+     * @return The list of scripts.
+     * @throws IOException When an exception occurs while reading files from disk.
+     */
+    public static List<Script> load(String baseDir, boolean createDir) throws IOException {
         log.info("Loading scripts from {}", baseDir);
         Path p = Paths.get(baseDir);
+
+        if (createDir) {
+            Files.createDirectories(p);
+        }
 
         List<Script> list = new ArrayList<>();
 

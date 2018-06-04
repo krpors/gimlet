@@ -105,7 +105,7 @@ public class MainMenuBar extends MenuBar {
 
         try {
             Path p = Xdg.getConfigHome().resolve("scripts");
-            List<Script> s = ScriptLoader.load(p.toString());
+            List<Script> s = ScriptLoader.load(p.toString(), true);
             s
                     .stream()
                     .filter(Script::isValid)
