@@ -15,7 +15,7 @@ public class ScriptTest {
 
     @Test
     public void okScript() throws IOException, ScriptException {
-        URL url = ScriptTest.class.getResource("/scripts/ok.js");
+        URL url = ScriptTest.class.getResource("/scripts/ok.bsh");
         File file = new File(url.getFile());
         Script s = ScriptLoader.fromFile(file);
         assertEquals("Example script", s.getName());
@@ -27,7 +27,7 @@ public class ScriptTest {
 
     @Test
     public void badRegisterFunction() throws IOException {
-        URL url = ScriptTest.class.getResource("/scripts/bad_register.js");
+        URL url = ScriptTest.class.getResource("/scripts/bad_register.bsh");
         File file = new File(url.getFile());
         try {
             ScriptLoader.fromFile(file);
@@ -39,13 +39,13 @@ public class ScriptTest {
 
     @Test
     public void okBindings() throws IOException, ScriptException {
-        URL url = ScriptTest.class.getResource("/scripts/ok_bindings.js");
+        URL url = ScriptTest.class.getResource("/scripts/ok_bindings.bsh");
         File file = new File(url.getFile());
         Script s = ScriptLoader.fromFile(file);
 
         s.put("someVar", 123);
 
         Object o = s.execute(); // will execute 123 * 8
-        assertEquals(984.0, o);
+        assertEquals(984, o);
     }
 }

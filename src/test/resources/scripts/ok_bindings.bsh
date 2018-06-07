@@ -1,0 +1,11 @@
+script_register() {
+    return new String[] {
+        "Example script for bindings",
+        "Example script description",
+        "Herp A. Derp"
+    };
+}
+
+script_execute() {
+    return someVar * 8;
+}

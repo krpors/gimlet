@@ -53,13 +53,13 @@ public final class ScriptLoader {
                     try {
                         s = fromFile(file);
                     } catch (ScriptException e) {
-                        log.warn("Unable to read script", e);
+                        log.warn(String.format("Unable to parse script '%s'", file), e);
                         s.setError(e.getMessage());
                     } catch (IOException e) {
-                        log.warn("Unable open file", e);
+                        log.warn(String.format("Unable to open script file '%s'", file), e);
                         s.setError(e.getMessage());
                     } catch (Exception e) {
-                        log.warn("Other error", e);
+                        log.warn(String.format("Unexpected error while parsing script '%s'", file), e);
                         s.setError(e.getMessage());
                     } finally {
                         list.add(s);
@@ -84,7 +84,7 @@ public final class ScriptLoader {
         s.setFile(file);
 
         ScriptEngineManager mgr = new ScriptEngineManager();
-        ScriptEngine engine = mgr.getEngineByName("nashorn");
+        ScriptEngine engine = mgr.getEngineByName("beanshell");
 
         // Auto-closeable. If anything fails, exception propagates up the stack.
         try (FileReader fr = new FileReader(file)) {
@@ -92,21 +92,27 @@ public final class ScriptLoader {
         }
 
         Object o = engine.eval(Script.SCRIPT_REGISTER_FUNCTION);
-        if (o instanceof JSObject) {
-            JSObject json = (JSObject) o;
+        if (o instanceof String[]) {
+            String[] strings = (String[]) o;
+            if (strings.length != 3) {
+                throw new ScriptException("The "
+                        + Script.SCRIPT_REGISTER_FUNCTION
+                        + " function should return a string array with 3 elements");
+            }
 
-            Object name = json.getMember("name");
-            Object desc = json.getMember("description");
-            Object auth = json.getMember("author");
+            String name = strings[0];
+            String desc = strings[1];
+            String auth = strings[2];
 
             if (name == null || desc == null || auth == null) {
                 // TODO: something more descriptive.
-                throw new ScriptException("The " + Script.SCRIPT_REGISTER_FUNCTION + " function did not return the necessary JSON object.");
+                throw new ScriptException("The " + Script.SCRIPT_REGISTER_FUNCTION + " function did return null values");
             }
 
-            s.setName(String.valueOf(json.getMember("name")));
-            s.setDescription(String.valueOf(json.getMember("description")));
-            s.setAuthor(String.valueOf(json.getMember("author")));
+            s.setName(name);
+            s.setDescription(desc);
+            s.setAuthor(auth);
+
         } else {
             throw new ScriptException("The " + Script.SCRIPT_REGISTER_FUNCTION + " function must return something useful");
         }

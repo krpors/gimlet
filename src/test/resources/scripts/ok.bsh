@@ -1,0 +1,23 @@
+/**
+ * The script_register function will be invoked by Gimlet to register the plugin.
+ * It must return (for now) an array of three elements.
+ */
+script_register() {
+    name   = "Example script";
+    desc   = "Example script description";
+    author = "Herp A. Derp";
+
+    return new String[] {
+        name,
+        desc,
+        author
+    };
+}
+
+/**
+ * This function will be executed by Gimlet if the script is selected for running.
+ */
+script_execute() {
+    print("This is the execution of an example script");
+    return "OK";
+}

@@ -3,6 +3,7 @@ package cruft.wtf.gimlet.ui;
 import cruft.wtf.gimlet.GimletApp;
 import cruft.wtf.gimlet.Script;
 import cruft.wtf.gimlet.ScriptLoader;
+import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.ScriptExecutedEvent;
 import cruft.wtf.gimlet.ui.dialog.AboutWindow;
@@ -10,17 +11,14 @@ import cruft.wtf.gimlet.ui.dialog.FileDialogs;
 import cruft.wtf.gimlet.ui.dialog.SettingsDialog;
 import cruft.wtf.gimlet.util.Xdg;
 import javafx.beans.binding.Bindings;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Menu;
-import javafx.scene.control.MenuBar;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCombination;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.script.ScriptException;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 // TODO: perhaps externalize ActionEvents to their own classes?
@@ -29,6 +27,8 @@ import java.util.List;
  * The main menu bar, displayed at the top of the application.
  */
 public class MainMenuBar extends MenuBar {
+
+    private static Logger logger = LoggerFactory.getLogger(MainMenuBar.class);
 
     private final GimletApp gimletApp;
 
@@ -108,8 +108,7 @@ public class MainMenuBar extends MenuBar {
         try {
             Path p = Xdg.getConfigHome().resolve("scripts");
             List<Script> s = ScriptLoader.load(p.toString(), true);
-            s
-                    .stream()
+            s.stream()
                     .filter(Script::isValid)
                     .forEach(script -> {
                         // Bind objects in the namespace of the script.
@@ -134,8 +133,8 @@ public class MainMenuBar extends MenuBar {
             Object o = script.execute();
             EventDispatcher.getInstance().post(new ScriptExecutedEvent(o));
         } catch (ScriptException e) {
-            // TODO: logging?
-            e.printStackTrace();
+            logger.error("Error while executing script", e);
+            Utils.showExceptionDialog("Error in script.", "There was an error while executing the script.", e);
         }
     }
 }

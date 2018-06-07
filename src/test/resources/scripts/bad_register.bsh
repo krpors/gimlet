@@ -1,0 +1,9 @@
+script_register() {
+    return new String[] {
+        "Example script, only one array element (FAULTY!)"
+    };
+}
+
+script_execute() {
+    return "fail!";
+}
