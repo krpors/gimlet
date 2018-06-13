@@ -80,6 +80,9 @@ public class DrillDownExecutionTab extends Tab {
         pane.setCenter(table);
 
         textProperty().bind(query.nameProperty());
+        if (!query.isColorDisabled()) {
+            setStyle("-fx-base: " + query.getColor());
+        }
         setGraphic(Images.CLOCK.imageView());
         setContent(pane);
     }

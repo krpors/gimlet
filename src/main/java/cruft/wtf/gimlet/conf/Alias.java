@@ -12,28 +12,22 @@ import javafx.collections.ObservableMap;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlType;
 import java.util.TreeMap;
 
 @XmlRootElement(name = "alias") // only use for tests
 @XmlType(propOrder = {
-        "name",
-        "description",
         "url",
         "driverClass",
         "user",
         "password",
         "askForPassword",
-        "color",
-        "colorDisabled",
         "jdbcProperties",
         "query"
 })
-public class Alias {
-
-    private StringProperty name = new SimpleStringProperty();
-
-    private StringProperty description = new SimpleStringProperty();
+@XmlSeeAlso({Item.class})
+public class Alias extends Item {
 
     private StringProperty url = new SimpleStringProperty();
 
@@ -42,10 +36,6 @@ public class Alias {
     private StringProperty user = new SimpleStringProperty();
 
     private StringProperty password = new SimpleStringProperty(); // TODO: byte array
-
-    private StringProperty color = new SimpleStringProperty("#c0c0c0");
-
-    private BooleanProperty colorDisabled = new SimpleBooleanProperty(true);
 
     private BooleanProperty askForPassword = new SimpleBooleanProperty(false);
 
@@ -64,31 +54,6 @@ public class Alias {
     public Alias(final Alias other) {
         copyFrom(other);
         setName(getName() + " (copy)");
-    }
-
-    @XmlElement(name = "name")
-    public String getName() {
-        return name.get();
-    }
-
-    public StringProperty nameProperty() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name.set(name);
-    }
-
-    public String getDescription() {
-        return description.get();
-    }
-
-    public StringProperty descriptionProperty() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description.set(description);
     }
 
     public String getUrl() {
@@ -138,30 +103,6 @@ public class Alias {
 
     public void setPassword(String password) {
         this.password.set(password);
-    }
-
-    public String getColor() {
-        return color.get();
-    }
-
-    public StringProperty colorProperty() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color.set(color);
-    }
-
-    public boolean isColorDisabled() {
-        return colorDisabled.get();
-    }
-
-    public BooleanProperty colorDisabledProperty() {
-        return colorDisabled;
-    }
-
-    public void setColorDisabled(boolean colorDisabled) {
-        this.colorDisabled.set(colorDisabled);
     }
 
     public boolean isAskForPassword() {
@@ -224,8 +165,8 @@ public class Alias {
     @Override
     public String toString() {
         return "Alias{" +
-                "name=" + name +
-                ", description=" + description +
+                "name=" + nameProperty().get() +
+                ", description=" + descriptionProperty().get() +
                 ", url=" + url +
                 ", user=" + user +
                 ", password=" + password +

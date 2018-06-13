@@ -8,6 +8,7 @@ import javafx.collections.FXCollections;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlSeeAlso;
 import javax.xml.bind.annotation.XmlTransient;
 import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayDeque;
@@ -15,16 +16,11 @@ import java.util.Deque;
 import java.util.List;
 
 @XmlType(propOrder = {
-        "name",
-        "description",
         "content",
         "subQueries"
 })
-public class Query {
-
-    private StringProperty name = new SimpleStringProperty();
-
-    private StringProperty description = new SimpleStringProperty();
+@XmlSeeAlso({Item.class})
+public class Query extends Item {
 
     private StringProperty content = new SimpleStringProperty();
 
@@ -38,28 +34,18 @@ public class Query {
     /**
      * Copy constructor to make a deep copy of the given query. The parent query is not copied and is set to null.
      *
-     * @param query The query to make a copy of.
+     * @param other The query to make a copy of.
      */
-    public Query(final Query query) {
-        this.nameProperty().set(query.getName());
-        this.descriptionProperty().set(query.getDescription());
-        this.contentProperty().set(query.getContent());
-        for (Query q : query.getSubQueries()) {
+    public Query(final Query other) {
+        this.nameProperty().set(other.getName());
+        this.descriptionProperty().set(other.getDescription());
+        this.contentProperty().set(other.getContent());
+        this.colorProperty().set(other.getColor());
+        this.colorDisabledProperty().setValue(other.isColorDisabled());
+        for (Query q : other.getSubQueries()) {
             Query copy = new Query(q);
             this.addSubQuery(copy);
         }
-    }
-
-    public String getName() {
-        return name.get();
-    }
-
-    public StringProperty nameProperty() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name.set(name);
     }
 
     public String getContent() {
@@ -72,18 +58,6 @@ public class Query {
 
     public void setContent(String content) {
         this.content.set(content);
-    }
-
-    public String getDescription() {
-        return description.get();
-    }
-
-    public StringProperty descriptionProperty() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description.set(description);
     }
 
     /**
@@ -142,6 +116,8 @@ public class Query {
         setName(other.getName());
         setContent(other.getContent());
         setDescription(other.getDescription());
+        setColor(other.getColor());
+        setColorDisabled(other.isColorDisabled());
     }
 
     protected void afterUnmarshal(Unmarshaller um, Object parent) {
@@ -153,6 +129,6 @@ public class Query {
 
     @Override
     public String toString() {
-        return "Query{name='" + name.get() + "}";
+        return "Query{name='" + nameProperty().get() + "}";
     }
 }
