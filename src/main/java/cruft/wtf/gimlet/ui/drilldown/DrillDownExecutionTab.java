@@ -79,7 +79,7 @@ public class DrillDownExecutionTab extends Tab {
         pane.setTop(box);
         pane.setCenter(table);
 
-        setText(query.getName());
+        textProperty().bind(query.nameProperty());
         setGraphic(Images.CLOCK.imageView());
         setContent(pane);
     }

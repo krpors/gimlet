@@ -6,6 +6,7 @@ import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecuteEvent;
 import cruft.wtf.gimlet.ui.ResultTable;
 import cruft.wtf.gimlet.ui.ResultTableRow;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.SeparatorMenuItem;
@@ -43,6 +44,27 @@ public class DrillResultTable extends ResultTable {
                 contextMenu.getItems().add(new SeparatorMenuItem());
             }
 
+            createMenuItems(query);
+
+            // Note: the listener will be added per visible table row.
+            query.subQueriesProperty().addListener((ListChangeListener<Query>) c -> {
+                while (c.next()) {
+                    if (c.wasAdded() || c.wasReplaced() || c.wasRemoved()) {
+                        createMenuItems(query);
+                    }
+                }
+            });
+        }
+
+        /**
+         * Adds subquery menu items for this table row.
+         *
+         * @param queryParent The parent query. All subqueries are added as a selectable menu item.
+         */
+        private void createMenuItems(final Query queryParent) {
+            // First remove all items. They can be added again when the list of subqueries change.
+            contextMenu.getItems().clear();
+
             // Create a context menu, containing the direct sub queries for the original query.
             for (Query subQuery : query.getSubQueries()) {
                 MenuItem item = new MenuItem(subQuery.getName());
@@ -54,7 +76,7 @@ public class DrillResultTable extends ResultTable {
             }
         }
 
-        public void executeDrillDown(final Query subquery) {
+        private void executeDrillDown(final Query subquery) {
             logger.debug("Executing subquery '{}'", subquery.getName());
 
             ObservableList selectedItem = getSelectionModel().getSelectedItem();
