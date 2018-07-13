@@ -1,6 +1,7 @@
 package cruft.wtf.gimlet.ui;
 
 import cruft.wtf.gimlet.GimletApp;
+import cruft.wtf.gimlet.conf.GimletProject;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecuteEvent;
@@ -9,6 +10,7 @@ import cruft.wtf.gimlet.ui.dialog.ParamInputDialog;
 import cruft.wtf.gimlet.ui.dialog.QueryDialog;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.input.ClipboardContent;
@@ -33,6 +35,15 @@ public class QueryTree extends TreeView<Query> {
 
     private TreeItem<Query> sourceDraggedItem;
 
+    private GimletProject project;
+
+    private ChangeListener<String> listener = (observable, oldValue, newValue) -> {
+        System.out.println("Changed to " + newValue);
+        project.updateQueryReference(oldValue, newValue);
+
+
+    };
+
     public QueryTree() {
         EventDispatcher.getInstance().register(this);
         setOnKeyPressed(event -> {
@@ -40,6 +51,10 @@ public class QueryTree extends TreeView<Query> {
                 openEditSelectedQueryDialog();
             }
         });
+    }
+
+    public void setProject(GimletProject project) {
+        this.project = project;
     }
 
     /**
@@ -80,6 +95,10 @@ public class QueryTree extends TreeView<Query> {
         for (Query q : queryList) {
             TreeItem<Query> qitem = new TreeItem<>(q);
             root.getChildren().add(qitem);
+            // Add a listener on the name. The name can be used as a reference in other
+            // queries, so if the name changes, we must update the references as well!
+            q.nameProperty().addListener(listener);
+            // Iterate over the references and add them as an item too.
             for (Query q2 : q.findReferencesQueries()) {
                 Query copy = new Query(q2);
                 copy.nameProperty().bindBidirectional(q2.nameProperty());
@@ -157,7 +176,8 @@ public class QueryTree extends TreeView<Query> {
      */
     private void openEditSelectedQueryDialog() {
         TreeItem<Query> selectedItem = getSelectionModel().getSelectedItem();
-        if (selectedItem == null) {
+        // Do NOT act on null items, and do not edit reference queries.
+        if (selectedItem == null || selectedItem.getValue().isReference()) {
             return;
         }
 
@@ -316,6 +336,8 @@ public class QueryTree extends TreeView<Query> {
 
         private ContextMenu menu = new ContextMenu();
 
+        private ContextMenu menuRefs = new ContextMenu();
+
         public QueryConfigurationTreeCell() {
             MenuItem menuItemExecute = new MenuItem("Run", Images.RUN.imageView());
             MenuItem menuItemNewRoot = new MenuItem("New root query...", Images.PLUS.imageView());
@@ -378,6 +400,11 @@ public class QueryTree extends TreeView<Query> {
             menuItemMoveDown.setOnAction(e -> moveSelectedNode(Direction.DOWN));
             // menuItemMoveDown.setAccelerator(new KeyCodeCombination(KeyCode.J, KeyCombination.CONTROL_DOWN));
             menuItemProperties.setOnAction(e -> openEditSelectedQueryDialog());
+
+            menuRefs = new ContextMenu();
+            MenuItem itemTest = new MenuItem("Hello!");
+            itemTest.setOnAction(e -> System.out.println(":D"));
+            menuRefs.getItems().add(itemTest);
         }
 
         @Override
@@ -401,7 +428,7 @@ public class QueryTree extends TreeView<Query> {
             // return, since we are not allowed to do drag-and-drop actions etc. on that.
             if (item.isReference()) {
                 setGraphic(Images.LINK.imageView());
-                getStyleClass().add("query-reference");
+                setContextMenu(menuRefs);
                 setTooltip(new Tooltip(item.getDescription() + "\n\nNote: this query is a reference."));
                 return;
             }

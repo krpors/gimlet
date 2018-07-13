@@ -35,5 +35,6 @@ public class QueryPane extends BorderPane {
     @Subscribe
     public void onFileOpened(final FileOpenedEvent foe) {
         queryTree.setQueryList(foe.getGimletProject().queriesProperty());
+        queryTree.setProject(foe.getGimletProject());
     }
 }

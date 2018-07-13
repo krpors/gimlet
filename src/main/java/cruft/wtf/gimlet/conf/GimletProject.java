@@ -10,11 +10,7 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlElementWrapper;
-import javax.xml.bind.annotation.XmlRootElement;
-import javax.xml.bind.annotation.XmlTransient;
-import javax.xml.bind.annotation.XmlType;
+import javax.xml.bind.annotation.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -110,7 +106,29 @@ public class GimletProject {
     }
 
     /**
+     * When a query's name changes, all references must be updated as well. This method finds
+     * all references named {@code oldname} and renames them to {@code newname}.
+     *
+     * @param oldname The old query name which has become ...
+     * @param newname ... the new name of the query.
+     */
+    public void updateQueryReference(final String oldname, final String newname) {
+        Deque<Query> queue = new ArrayDeque<>(getQueries());
+        while (!queue.isEmpty()) {
+            Query next = queue.pop();
+            // If the query has a reference to oldname, change it to newname.
+            if (next.referencedQueriesProperty().contains(oldname)) {
+                next.referencedQueriesProperty().remove(oldname);
+                next.referencedQueriesProperty().add(newname);
+            }
+
+            queue.addAll(next.getSubQueries());
+        }
+    }
+
+    /**
      * Traverses all queries defined in the project, in search for the one which has the specified name.
+     *
      * @param name
      * @return
      */
