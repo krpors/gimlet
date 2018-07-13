@@ -28,6 +28,7 @@ public enum Images {
     DUPLICATE("/icons/content-duplicate-24px.png", true),
     DOCUMENT("/icons/database-24px.png", true),
     FOLDER("/icons/clock-24px.png", true),
+    LINK("/icons/link-24px.png", true),
     MAGNIFYING_GLASS("/icons/database-search-24px.png", true),
     PASTE("/icons/content-paste-24px.png", true),
     PENCIL("/icons/pencil-24px.png", true),

@@ -4,7 +4,6 @@ import cruft.wtf.gimlet.GimletApp;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecuteEvent;
-import cruft.wtf.gimlet.jdbc.NamedParameterPreparedStatement;
 import cruft.wtf.gimlet.jdbc.ParseResult;
 import cruft.wtf.gimlet.ui.dialog.ParamInputDialog;
 import cruft.wtf.gimlet.ui.dialog.QueryDialog;
@@ -81,6 +80,14 @@ public class QueryTree extends TreeView<Query> {
         for (Query q : queryList) {
             TreeItem<Query> qitem = new TreeItem<>(q);
             root.getChildren().add(qitem);
+            for (Query q2 : q.findReferencesQueries()) {
+                Query copy = new Query(q2);
+                copy.nameProperty().bindBidirectional(q2.nameProperty());
+                copy.descriptionProperty().bindBidirectional(q2.descriptionProperty());
+                copy.setReference(true);
+                TreeItem<Query> alskdj = new TreeItem<>(copy);
+                qitem.getChildren().add(alskdj);
+            }
             addQuery(qitem, q.getSubQueries());
         }
 
@@ -379,6 +386,7 @@ public class QueryTree extends TreeView<Query> {
             super.updateItem(item, empty);
 
             if (empty || item == null) {
+                getStyleClass().remove("query-reference");
                 setText(null);
                 setGraphic(null);
                 setTooltip(null);
@@ -386,12 +394,24 @@ public class QueryTree extends TreeView<Query> {
                 return;
             }
 
-            if (!isEditing()) {
+            setText(item.getName());
+
+            // If the given query item is marked as a reference, we are not allowed to do anything
+            // on it. So disable the normal context menu, but mark it as a reference. Prematurely
+            // return, since we are not allowed to do drag-and-drop actions etc. on that.
+            if (item.isReference()) {
+                setGraphic(Images.LINK.imageView());
+                getStyleClass().add("query-reference");
+                setTooltip(new Tooltip(item.getDescription() + "\n\nNote: this query is a reference."));
+                return;
+            }
+
+            setGraphic(Images.MAGNIFYING_GLASS.imageView());
+            setTooltip(new Tooltip(item.getDescription()));
+            if (!isEditing() && !item.isReference()) {
                 this.setContextMenu(menu);
             }
 
-            setText(item.getName());
-            setTooltip(new Tooltip(item.getDescription()));
 
             // DRAG AND DROP CODE
 

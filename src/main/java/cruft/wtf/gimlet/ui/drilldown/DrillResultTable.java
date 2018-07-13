@@ -14,6 +14,7 @@ import javafx.scene.control.TableColumn;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -44,13 +45,21 @@ public class DrillResultTable extends ResultTable {
                 contextMenu.getItems().add(new SeparatorMenuItem());
             }
 
-            createMenuItems(query);
+            createMenuItems();
 
             // Note: the listener will be added per visible table row.
             query.subQueriesProperty().addListener((ListChangeListener<Query>) c -> {
                 while (c.next()) {
                     if (c.wasAdded() || c.wasReplaced() || c.wasRemoved()) {
-                        createMenuItems(query);
+                        createMenuItems();
+                    }
+                }
+            });
+
+            query.referencedQueriesProperty().addListener((ListChangeListener<String>) c -> {
+                while (c.next()) {
+                    if (c.wasAdded() || c.wasReplaced() || c.wasRemoved()) {
+                        createMenuItems();
                     }
                 }
             });
@@ -58,10 +67,8 @@ public class DrillResultTable extends ResultTable {
 
         /**
          * Adds subquery menu items for this table row.
-         *
-         * @param queryParent The parent query. All subqueries are added as a selectable menu item.
          */
-        private void createMenuItems(final Query queryParent) {
+        private void createMenuItems() {
             // First remove all items. They can be added again when the list of subqueries change.
             contextMenu.getItems().clear();
 
@@ -72,6 +79,21 @@ public class DrillResultTable extends ResultTable {
                 contextMenu.getItems().add(item);
                 item.setOnAction(event -> {
                     executeDrillDown(subQuery);
+                });
+            }
+
+            // Check if the query has configured referenced queries (reusing of other, existing queries).
+            // If so, add them as well.
+            List<Query> refQueries = query.findReferencesQueries();
+            if (!refQueries.isEmpty()) {
+                contextMenu.getItems().add(new SeparatorMenuItem());
+            }
+
+            for (Query ref : refQueries) {
+                MenuItem item = new MenuItem(ref.getName());
+                contextMenu.getItems().add(item);
+                item.setOnAction(event -> {
+                    executeDrillDown(ref);
                 });
             }
         }

@@ -10,6 +10,7 @@ import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.*;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.LinkedList;
 import java.util.List;
 
 @XmlType(propOrder = {
@@ -29,6 +30,9 @@ public class Query extends Item {
     private Query parentQuery;
 
     private GimletProject parentProject;
+
+    @XmlTransient
+    private boolean reference;
 
     public Query() {
     }
@@ -106,7 +110,14 @@ public class Query extends Item {
 
     public List<Query> findReferencesQueries() {
         GimletProject parent = findGimletProject();
-        return null;
+        List<Query> ql = new LinkedList<>();
+        for (String refs : referencedQueries) {
+            Query qref = parent.findQueryByName(refs);
+            if (qref != null) {
+                ql.add(qref);
+            }
+        }
+        return ql;
     }
 
     @XmlElementWrapper(name = "referencedQueries")
@@ -140,6 +151,20 @@ public class Query extends Item {
     @XmlTransient
     public Query getParentQuery() {
         return parentQuery;
+    }
+
+    @XmlTransient
+    public boolean isReference() {
+        return reference;
+    }
+
+    /**
+     * Marks this query as a reference to another query.
+     *
+     * @param reference Whether the query is a reference.
+     */
+    public void setReference(boolean reference) {
+        this.reference = reference;
     }
 
     /**
