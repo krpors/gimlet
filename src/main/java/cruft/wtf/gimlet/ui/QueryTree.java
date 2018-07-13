@@ -8,6 +8,7 @@ import cruft.wtf.gimlet.event.QueryExecuteEvent;
 import cruft.wtf.gimlet.jdbc.ParseResult;
 import cruft.wtf.gimlet.ui.dialog.ParamInputDialog;
 import cruft.wtf.gimlet.ui.dialog.QueryDialog;
+import cruft.wtf.gimlet.ui.dialog.QueryReferenceDialog;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
@@ -172,6 +173,37 @@ public class QueryTree extends TreeView<Query> {
     }
 
     /**
+     * Opens up a dialog to select a reference query.
+     *
+     * @param item The item to add the reference query to.
+     */
+    private void openNewQueryRefDialog(final Query item) {
+        TreeItem<Query> selectedItem = getSelectionModel().getSelectedItem();
+
+        QueryReferenceDialog dlg = new QueryReferenceDialog(queryList);
+        Optional<Query> q = dlg.showAndWait();
+        q.ifPresent(query -> {
+            item.getReferencedQueries().add(query.getName());
+
+            // Find the last referenced query, and add it after that one. If we don't
+            // do this, the tree item will be added after the very last, which may as well
+            // be a non-referenced query. If we do it like this, we make sure the references
+            // are visible first, and then the custom sub-queries.
+            int lastIndexOfRefQuery = 0;
+            for (TreeItem<Query> zi : selectedItem.getChildren()) {
+                if (zi.getValue().isReference()) {
+                    lastIndexOfRefQuery++;
+                }
+            }
+
+            Query refQuery = new Query(query);
+            refQuery.setReference(true);
+            selectedItem.getChildren().add(lastIndexOfRefQuery, new TreeItem<>(refQuery));
+            refresh();
+        });
+    }
+
+    /**
      * Opens the {@link QueryDialog} based on the current selected {@link Query} in the tree.
      */
     private void openEditSelectedQueryDialog() {
@@ -287,6 +319,21 @@ public class QueryTree extends TreeView<Query> {
         getSelectionModel().select(selectedItem);
     }
 
+    private void removeSelectedRefQuery() {
+        TreeItem<Query> selectedTreeItem = getSelectionModel().getSelectedItem();
+        if (selectedTreeItem == null) {
+            return;
+        }
+
+        TreeItem<Query> parentTreeItem = selectedTreeItem.getParent();
+        Query parentQuery = parentTreeItem.getValue();
+
+        parentTreeItem.getChildren().remove(selectedTreeItem);
+        parentQuery.getReferencedQueries().remove(selectedTreeItem.getValue().getName());
+
+        refresh();
+    }
+
 
     /**
      * Removes the selected query (and its children, ancestors and the whole shebang). This is done by updating the
@@ -342,6 +389,7 @@ public class QueryTree extends TreeView<Query> {
             MenuItem menuItemExecute = new MenuItem("Run", Images.RUN.imageView());
             MenuItem menuItemNewRoot = new MenuItem("New root query...", Images.PLUS.imageView());
             MenuItem menuItemNew = new MenuItem("New...", Images.PLUS.imageView());
+            MenuItem menuItemNewRef = new MenuItem("New reference...", Images.LINK.imageView());
             MenuItem menuItemCut = new MenuItem("Cut", Images.CUT.imageView());
             MenuItem menuItemCopy = new MenuItem("Copy", Images.COPY.imageView());
             MenuItem menuItemPaste = new MenuItem("Paste", Images.PASTE.imageView());
@@ -356,6 +404,7 @@ public class QueryTree extends TreeView<Query> {
                     menuItemNewRoot,
                     new SeparatorMenuItem(),
                     menuItemNew,
+                    menuItemNewRef,
                     new SeparatorMenuItem(),
                     menuItemCut,
                     menuItemCopy,
@@ -375,6 +424,7 @@ public class QueryTree extends TreeView<Query> {
             menuItemExecute.setOnAction(e -> executeSelectedQuery(getItem()));
             menuItemNewRoot.setOnAction(event -> openNewRootQueryDialog());
             menuItemNew.setOnAction(event -> openNewQueryDialog(getItem()));
+            menuItemNewRef.setOnAction(event -> openNewQueryRefDialog(getItem()));
             menuItemCut.setOnAction(event -> {
                 // todo;
             });
@@ -402,8 +452,8 @@ public class QueryTree extends TreeView<Query> {
             menuItemProperties.setOnAction(e -> openEditSelectedQueryDialog());
 
             menuRefs = new ContextMenu();
-            MenuItem itemTest = new MenuItem("Hello!");
-            itemTest.setOnAction(e -> System.out.println(":D"));
+            MenuItem itemTest = new MenuItem("Delete", Images.TRASH.imageView());
+            itemTest.setOnAction(e -> removeSelectedRefQuery());
             menuRefs.getItems().add(itemTest);
         }
 

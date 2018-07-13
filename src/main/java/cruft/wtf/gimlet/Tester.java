@@ -1,17 +1,14 @@
 package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.conf.Alias;
+import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.jdbc.Column;
 import cruft.wtf.gimlet.jdbc.ParseResult;
-import cruft.wtf.gimlet.ui.ConnectionTab;
-import cruft.wtf.gimlet.ui.ConnectionTabPane;
-import cruft.wtf.gimlet.ui.JdbcPropertiesTab;
-import cruft.wtf.gimlet.ui.JdbcPropertiesTable;
-import cruft.wtf.gimlet.ui.ResultTable;
-import cruft.wtf.gimlet.ui.RotatedTable;
+import cruft.wtf.gimlet.ui.*;
 import cruft.wtf.gimlet.ui.controls.DateTimePicker;
 import cruft.wtf.gimlet.ui.dialog.ParamInputDialog;
 import cruft.wtf.gimlet.ui.dialog.QueryDialog;
+import cruft.wtf.gimlet.ui.dialog.QueryReferenceDialog;
 import cruft.wtf.gimlet.ui.dialog.SettingsDialog;
 import cruft.wtf.gimlet.ui.objects.ObjectsTable;
 import cruft.wtf.gimlet.ui.objects.ObjectsTableData;
@@ -26,22 +23,49 @@ import javafx.scene.control.TabPane;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
 
+import java.sql.Date;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.sql.Date;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 /**
  * Simple tester main to quickly test UI elements. Also: http://fxexperience.com/scenic-view/
  */
 public class Tester extends Application {
+
+    private void openQueryRefDialog() {
+        List<Query> ql = new ArrayList<>();
+        {
+            Query q = new Query();
+            q.setName("One");
+            q.setDescription("Desc 1");
+            ql.add(q);
+            {
+                Query q2 = new Query();
+                q2.setName("One-One");
+                q2.setName("Desc 1-1");
+                q.getSubQueries().add(q2);
+            }
+        }
+        {
+            Query q = new Query();
+            q.setName("Two");
+            q.setDescription("Desc 2");
+            ql.add(q);
+            {
+                Query q2 = new Query();
+                q2.setName("Two-One");
+                q2.setName("Desc 1-2");
+                q.getSubQueries().add(q2);
+            }
+        }
+
+
+        QueryReferenceDialog dlg = new QueryReferenceDialog(ql);
+        Optional<Query> q = dlg.showAndWait();
+        System.out.println(q);
+    }
 
     private void openSettingsDialog() {
         SettingsDialog settingsDialog = new SettingsDialog();
@@ -82,17 +106,20 @@ public class Tester extends Application {
         Button btnOpenSettings = new Button("Settings");
         Button btnQueryEditDialog = new Button("Query editor");
         Button btnParamInputDialog = new Button("Param input");
+        Button btnQueryRefDialog = new Button("Query ref");
         DateTimePicker dateTimePicker = new DateTimePicker();
 
         btnOpenSettings.setOnAction(event -> openSettingsDialog());
         btnQueryEditDialog.setOnAction(event -> openQueryEditDialog());
         btnParamInputDialog.setOnAction(event -> openParamInputDialog());
+        btnQueryRefDialog.setOnAction(event -> openQueryRefDialog());
 
         FlowPane pane = new FlowPane(
                 btnOpenSettings,
                 btnQueryEditDialog,
                 btnParamInputDialog,
-                dateTimePicker
+                dateTimePicker,
+                btnQueryRefDialog
         );
         pane.setHgap(5.0);
         pane.setPadding(new Insets(10));

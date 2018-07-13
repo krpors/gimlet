@@ -212,6 +212,12 @@ public class Query extends Item {
         setColorDisabled(other.isColorDisabled());
     }
 
+    /**
+     * Automatically called when JAXB is finished unmarshalling a Query.
+     * @param um
+     * @param parent
+     */
+    @SuppressWarnings("unused")
     protected void afterUnmarshal(Unmarshaller um, Object parent) {
         if (parent instanceof Query) {
             Query query = (Query) parent;
@@ -221,7 +227,6 @@ public class Query extends Item {
         if (parent instanceof GimletProject) {
             GimletProject gimletProject = (GimletProject) parent;
             this.parentProject = gimletProject;
-            System.out.println("parent project is " + gimletProject);
         }
     }
 
