@@ -159,7 +159,6 @@ public class Alias extends Item {
         setUrl(other.getUrl());
         setUser(other.getUser());
         setJdbcProperties(other.getJdbcProperties());
-        other.getJdbcProperties().forEach((s, s2) -> System.out.printf("%s -> %s!!\n", s, s2));
     }
 
     @Override

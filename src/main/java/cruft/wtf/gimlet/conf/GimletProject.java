@@ -18,6 +18,8 @@ import javax.xml.bind.annotation.XmlType;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.List;
 
 @XmlRootElement(name = "gimlet-project")
@@ -108,6 +110,24 @@ public class GimletProject {
     }
 
     /**
+     * Traverses all queries defined in the project, in search for the one which has the specified name.
+     * @param name
+     * @return
+     */
+    public Query findQueryByName(final String name) {
+        Deque<Query> queue = new ArrayDeque<>(getQueries());
+        while (!queue.isEmpty()) {
+            Query next = queue.pop();
+            if (name.equals(next.getName())) {
+                return next;
+            }
+
+            queue.addAll(next.getSubQueries());
+        }
+        return null;
+    }
+
+    /**
      * Reads from an {@link InputStream} and returns an unmarshalled {@link GimletProject}.
      *
      * @param is The {@link InputStream}.
@@ -137,5 +157,13 @@ public class GimletProject {
         marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
         marshaller.setProperty(Marshaller.JAXB_ENCODING, "UTF-8");
         marshaller.marshal(this, getFile());
+    }
+
+    @Override
+    public String toString() {
+        return "GimletProject{" +
+                "name=" + name.get() +
+                ", filename=" + filename +
+                '}';
     }
 }

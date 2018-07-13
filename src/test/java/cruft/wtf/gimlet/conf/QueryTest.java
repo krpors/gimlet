@@ -7,9 +7,12 @@ import static org.junit.Assert.assertNotEquals;
 
 public class QueryTest {
 
-    @Test
-    public void copyConstructor() {
+    private Query createQuery() {
+        GimletProject project = new GimletProject();
+        project.setName("Test Project");
+
         Query query = new Query();
+        query.setParentProject(project);
         query.setName("Parent query");
         query.setDescription("Parent description");
         query.setContent("Parent content");
@@ -24,6 +27,8 @@ public class QueryTest {
                 grandchild.setName("Grandchild query");
                 grandchild.setDescription("Grandchild description");
                 grandchild.setContent("Grandchild content");
+                // This query references the topmost parent query.
+                grandchild.getReferencedQueries().add("Parent query");
                 child.addSubQuery(grandchild);
             }
         }
@@ -34,6 +39,32 @@ public class QueryTest {
             child.setContent("Child 2 content");
             query.addSubQuery(child);
         }
+
+        project.queriesProperty().add(query);
+
+        return query;
+    }
+
+    @Test
+    public void referencedQuery() {
+        Query q = createQuery();
+        Query gc = q.getSubQueries().get(0).getSubQueries().get(0);
+        GimletProject parent = gc.findGimletProject();
+        Query zz = parent.findQueryByName(gc.getReferencedQueries().get(0));
+        assertEquals("Parent query", zz.getName());
+        assertEquals(q, zz);
+    }
+
+    @Test
+    public void parentProject() {
+        Query q = createQuery();
+        Query gc = q.getSubQueries().get(0).getSubQueries().get(0);
+        assertEquals(q.getParentProject(), gc.findGimletProject());
+    }
+
+    @Test
+    public void copyConstructor() {
+        Query query = createQuery();
 
         assertValues(query);
 
