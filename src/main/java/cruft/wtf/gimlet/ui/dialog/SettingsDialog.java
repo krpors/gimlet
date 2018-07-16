@@ -74,7 +74,7 @@ public class SettingsDialog extends Dialog<String> {
             c.write();
         } catch (IOException e) {
             logger.error("Unable to write configuration file", e);
-            Utils.showExceptionDialog("Unable to write properties", "CAN'T!", e);
+            Utils.showExceptionDialog(e, "Unable to write properties", "CAN'T!");
         }
     }
 }

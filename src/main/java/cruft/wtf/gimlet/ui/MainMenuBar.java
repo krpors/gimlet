@@ -134,7 +134,7 @@ public class MainMenuBar extends MenuBar {
             EventDispatcher.getInstance().post(new ScriptExecutedEvent(o));
         } catch (ScriptException e) {
             logger.error("Error while executing script", e);
-            Utils.showExceptionDialog("Error in script.", "There was an error while executing the script.", e);
+            Utils.showExceptionDialog(e, "Error in script.", "There was an error while executing the script.");
         }
     }
 }

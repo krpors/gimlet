@@ -229,15 +229,13 @@ public class AliasDialog extends Dialog<Alias> {
         } catch (SQLException ex) {
             logger.error("Can't connect", ex);
             Utils.showExceptionDialog(
-                    "Connection test failed.",
-                    String.format("Failed to connect to '%s'", txtJdbcUrl.getText()),
-                    ex);
+                    ex, "Connection test failed.",
+                    "Failed to connect to '%s'", txtJdbcUrl.getText());
         } catch (ClassNotFoundException ex) {
             logger.error("Class not found", ex);
             Utils.showExceptionDialog(
-                    "Could not instantiate driver.",
-                    String.format("Driver class not found: '%s'", comboDriverClass.getValue()),
-                    ex);
+                    ex, "Could not instantiate driver.",
+                    "Driver class not found: '%s'", comboDriverClass.getValue());
         }
     }
 

@@ -49,18 +49,19 @@ public final class Utils {
     /**
      * Creates and displays a dialog with {@link Exception} details.
      *
+     * @param exception The exception to display as expandable content.
      * @param header    The header text.
      * @param content   The content text.
-     * @param exception The exception to display as expandable content.
+     * @param va
      */
-    public static void showExceptionDialog(String header, String content, Throwable exception) {
+    public static void showExceptionDialog(Throwable exception, String header, String content, Object... va) {
         Dialog dialog = new Dialog();
         dialog.initOwner(GimletApp.window);
         dialog.getDialogPane().getStylesheets().add("/css/style.css");
         dialog.setGraphic(Images.DIALOG_ERROR.imageView());
         dialog.setTitle("Error!");
         dialog.setHeaderText(header);
-        dialog.setContentText(content);
+        dialog.setContentText(String.format(content, va));
         dialog.getDialogPane().getButtonTypes().add(ButtonType.OK);
 
         StringWriter sw = new StringWriter();

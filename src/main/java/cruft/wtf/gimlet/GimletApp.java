@@ -132,9 +132,8 @@ public class GimletApp extends Application {
             }
         } catch (IOException e) {
             Utils.showExceptionDialog(
-                    "Error!",
-                    "Could not load properties file " + Configuration.getInstance().getConfigFile(),
-                    e);
+                    e, "Error!",
+                    "Could not load properties file '%s'", Configuration.getInstance().getConfigFile());
         }
     }
 
@@ -169,7 +168,7 @@ public class GimletApp extends Application {
             Utils.showError("Invalid Gimlet project file", "The specified file could not be read properly.");
         } catch (FileNotFoundException e) {
             logger.error("Could not load Gimlet project file", e);
-            Utils.showExceptionDialog("File could not be found", "The file could not be found.", e);
+            Utils.showExceptionDialog(e, "File could not be found", "The file could not be found.");
             config.remove(Configuration.Key.LAST_PROJECT_FILE);
         }
     }
@@ -188,11 +187,11 @@ public class GimletApp extends Application {
                 EventDispatcher.getInstance().post(new FileSavedEvent(gimletProject.getFile()));
             } catch (JAXBException e) {
                 logger.error("Failed to write to file '{}'", gimletProject.getFile());
-                Utils.showExceptionDialog("Failed to write to file", "Could not write to file.", e);
+                Utils.showExceptionDialog(e, "Failed to write to file", "Could not write to file.");
             }
         } else {
             logger.warn("gimletProject is null or file property is null?");
-            Utils.showExceptionDialog("Project property is null", "Cannot save project property!?", new Exception("Fix me!"));
+            Utils.showExceptionDialog(new Exception("Fix me!"), "Project property is null", "Cannot save project property!?");
         }
     }
 
@@ -268,7 +267,7 @@ public class GimletApp extends Application {
                     logger.info("Written to file {} at exit", gimletProject.getFile());
                 } catch (JAXBException e) {
                     logger.error("Unable to save file", e);
-                    Utils.showExceptionDialog("Unable to save", "Argh", e);
+                    Utils.showExceptionDialog(e, "Unable to save", "Argh");
                 }
             }
         });
