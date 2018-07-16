@@ -162,9 +162,6 @@ A list of things to be done, or some ideas. Not in any particular order.
 
 1. Add some kind of list of known JDBC drivers + connection strings. This eases up the
    initial setup of a JDBC connection.
-1. Re-use (make a reference to) a query structure so you can make sort of
-duplicates, where you make a reference to another query structure for the
-subqueries.
 1. Help file/screen.
 
 1. Query wizard or something: start by a root query, execute sample query, then hit next

@@ -58,6 +58,8 @@ public class AliasDialog extends Dialog<Alias> {
 
     private CheckBox chkDisableColor;
 
+    private CheckBox chkReadOnly;
+
     private JdbcPropertiesTab jdbcPropertiesTab;
 
     public AliasDialog() {
@@ -104,6 +106,7 @@ public class AliasDialog extends Dialog<Alias> {
         alias.setColorDisabled(chkDisableColor.isSelected());
         alias.setAskForPassword(chkAskForPassword.isSelected());
         alias.setJdbcProperties(jdbcPropertiesTab.getItemsAsMap());
+        alias.setReadOnly(chkReadOnly.isSelected());
         return alias;
     }
 
@@ -178,6 +181,11 @@ public class AliasDialog extends Dialog<Alias> {
             }
         });
 
+        chkReadOnly = new CheckBox();
+        chkReadOnly.setTooltip(new Tooltip("Check this box if you want to " +
+                "force the connection to be read-only. This is the default."));
+        pane.add("Read-only connection:", chkReadOnly);
+
         colorPicker = new ColorPicker();
         chkDisableColor = new CheckBox("Disable color");
 
@@ -250,6 +258,7 @@ public class AliasDialog extends Dialog<Alias> {
         chkDisableColor.setSelected(alias.isColorDisabled());
         chkAskForPassword.setSelected(alias.isAskForPassword());
         jdbcPropertiesTab.setItemsFromMap(alias.getJdbcProperties());
+        chkReadOnly.setSelected(alias.isReadOnly());
         return showAndWait();
     }
 

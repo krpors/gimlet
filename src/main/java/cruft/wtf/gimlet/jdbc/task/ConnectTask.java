@@ -51,7 +51,7 @@ public class ConnectTask extends Task<Connection> {
             connProperties.setProperty("password", password);
             connProperties.putAll(alias.getJdbcProperties());
             Connection c = DriverManager.getConnection(alias.getUrl(), connProperties);
-            c.setReadOnly(true);
+            c.setReadOnly(alias.isReadOnly());
             logger.info("Connection successfully established to {}", alias.getUrl());
             return c;
         } catch (SQLException ex) {

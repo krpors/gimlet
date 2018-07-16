@@ -23,6 +23,7 @@ import java.util.TreeMap;
         "user",
         "password",
         "askForPassword",
+        "readOnly",
         "jdbcProperties",
         "query"
 })
@@ -40,6 +41,8 @@ public class Alias extends Item {
     private BooleanProperty askForPassword = new SimpleBooleanProperty(false);
 
     private StringProperty query = new SimpleStringProperty();
+
+    private BooleanProperty readOnly = new SimpleBooleanProperty(true);
 
     private MapProperty<String, String> jdbcProperties = new SimpleMapProperty<>(FXCollections.observableMap(new TreeMap<>()));
 
@@ -141,6 +144,18 @@ public class Alias extends Item {
         this.jdbcProperties.set(jdbcProperties);
     }
 
+    public boolean isReadOnly() {
+        return readOnly.get();
+    }
+
+    public BooleanProperty readOnlyProperty() {
+        return readOnly;
+    }
+
+    public void setReadOnly(boolean readOnly) {
+        this.readOnly.set(readOnly);
+    }
+
     /**
      * Copies values over from another {@link Alias}. This is to keep the reference intact.
      *
@@ -159,6 +174,7 @@ public class Alias extends Item {
         setUrl(other.getUrl());
         setUser(other.getUser());
         setJdbcProperties(other.getJdbcProperties());
+        setReadOnly(other.isReadOnly());
     }
 
     @Override
