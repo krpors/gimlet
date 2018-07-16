@@ -1,5 +1,7 @@
 package cruft.wtf.gimlet.ui;
 
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import org.slf4j.Logger;
@@ -27,7 +29,7 @@ public enum Images {
     CUT("/icons/content-cut-24px.png", true),
     DUPLICATE("/icons/content-duplicate-24px.png", true),
     DOCUMENT("/icons/database-24px.png", true),
-    FOLDER("/icons/clock-24px.png", true),
+    FOLDER("/icons/folder-open-24px.png", true),
     LINK("/icons/link-24px.png", true),
     MAGNIFYING_GLASS("/icons/database-search-24px.png", true),
     PASTE("/icons/content-paste-24px.png", true),

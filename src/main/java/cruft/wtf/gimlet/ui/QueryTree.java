@@ -1,5 +1,6 @@
 package cruft.wtf.gimlet.ui;
 
+import com.google.common.base.Strings;
 import cruft.wtf.gimlet.GimletApp;
 import cruft.wtf.gimlet.conf.GimletProject;
 import cruft.wtf.gimlet.conf.Query;
@@ -12,7 +13,15 @@ import cruft.wtf.gimlet.ui.dialog.QueryReferenceDialog;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
+import javafx.scene.control.Tooltip;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.Dragboard;
@@ -21,7 +30,13 @@ import javafx.scene.input.TransferMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class QueryTree extends TreeView<Query> {
 
@@ -472,6 +487,7 @@ public class QueryTree extends TreeView<Query> {
             }
 
             setText(item.getName());
+            setStyle("");
 
             // If the given query item is marked as a reference, we are not allowed to do anything
             // on it. So disable the normal context menu, but mark it as a reference. Prematurely
@@ -483,7 +499,10 @@ public class QueryTree extends TreeView<Query> {
                 return;
             }
 
-            setGraphic(Images.MAGNIFYING_GLASS.imageView());
+            if (item.getParentQuery() == null) {
+                setStyle("-fx-base: #c0c0c0");
+                setGraphic(Images.MAGNIFYING_GLASS.imageView());
+            }
             setTooltip(new Tooltip(item.getDescription()));
             if (!isEditing() && !item.isReference()) {
                 this.setContextMenu(menu);

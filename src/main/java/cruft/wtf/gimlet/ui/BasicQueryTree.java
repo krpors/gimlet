@@ -103,7 +103,10 @@ public class BasicQueryTree extends TreeView<Query> {
                 return;
             }
 
-            setGraphic(Images.MAGNIFYING_GLASS.imageView());
+            if (item.getParentQuery() == null) {
+                setStyle("-fx-base: #c0c0c0");
+                setGraphic(Images.MAGNIFYING_GLASS.imageView());
+            }
             setTooltip(new Tooltip(item.getDescription()));
         }
     }
