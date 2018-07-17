@@ -180,6 +180,7 @@ public class QueryTree extends TreeView<Query> {
         Optional<Query> q = qed.showAndWait();
         q.ifPresent(query -> {
             root.getSubQueries().add(query);
+            query.setParentQuery(root);
             TreeItem<Query> selected = getSelectionModel().getSelectedItem();
             selected.getChildren().add(new TreeItem<>(query));
             selected.setExpanded(true);
@@ -477,6 +478,8 @@ public class QueryTree extends TreeView<Query> {
             // super call is required, see documentation.
             super.updateItem(item, empty);
 
+            setStyle(""); // reset style, always
+
             if (empty || item == null) {
                 getStyleClass().remove("query-reference");
                 setText(null);
@@ -487,7 +490,7 @@ public class QueryTree extends TreeView<Query> {
             }
 
             setText(item.getName());
-            setStyle("");
+
 
             // If the given query item is marked as a reference, we are not allowed to do anything
             // on it. So disable the normal context menu, but mark it as a reference. Prematurely

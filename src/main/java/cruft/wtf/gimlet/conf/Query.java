@@ -7,7 +7,11 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.*;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
+import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.bind.annotation.XmlTransient;
+import javax.xml.bind.annotation.XmlType;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -151,6 +155,16 @@ public class Query extends Item {
     @XmlTransient
     public Query getParentQuery() {
         return parentQuery;
+    }
+
+    /**
+     * Used to set the parent query if any. This has effects on the rendering in they
+     * query tree.
+     *
+     * @param parentQuery The parent query.
+     */
+    public void setParentQuery(final Query parentQuery) {
+        this.parentQuery = parentQuery;
     }
 
     @XmlTransient

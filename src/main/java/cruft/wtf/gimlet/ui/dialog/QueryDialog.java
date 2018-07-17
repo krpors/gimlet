@@ -94,6 +94,7 @@ public class QueryDialog extends Dialog<Query> {
 
         colorPicker = new ColorPicker();
         chkDisableColor = new CheckBox("Disable color");
+        chkDisableColor.setSelected(true); // by default, color is disabled.
 
         HBox box = new HBox(colorPicker, chkDisableColor);
         box.setSpacing(5);

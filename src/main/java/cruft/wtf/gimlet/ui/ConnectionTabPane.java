@@ -41,6 +41,10 @@ public class ConnectionTabPane extends TabPane {
         });
     }
 
+    public ConnectionTab getSelected() {
+        return (ConnectionTab) getSelectionModel().getSelectedItem();
+    }
+
     /**
      * This property returns whether a tab is currently selected (i.e. open) in the current view. It's used by the
      * {@link QueryTree} to determine whether the "Run Query" is enabled or not.
