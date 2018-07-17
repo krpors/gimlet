@@ -30,5 +30,10 @@ http://maven.apache.org/ASSEMBLY/2.0.0 ">
             <outputDirectory>./bin/</outputDirectory>
             <fileMode>0775</fileMode>
         </fileSet>
+        <fileSet>
+            <directory>src/assembly/etc</directory>
+            <outputDirectory>./etc/</outputDirectory>
+            <fileMode>0644</fileMode>
+        </fileSet>
     </fileSets>
 </assembly>

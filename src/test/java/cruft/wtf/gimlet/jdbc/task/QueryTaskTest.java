@@ -13,7 +13,7 @@ public class QueryTaskTest {
 
     @Test
     public void asdas() throws Exception {
-        Connection c = DriverManager.getConnection("jdbc:hsqldb:mem;shutdown=true");
+        Connection c = DriverManager.getConnection("jdbc:hsqldb:mem:querytasktest;shutdown=true");
         SqlUtil.runSql("/create.sql", c);
 
         QueryTask queryTask = new QueryTask(c, "select * from customer") {

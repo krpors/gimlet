@@ -14,7 +14,7 @@ public class SimpleQueryTaskTest {
 
     @BeforeClass
     public static void setup() throws SQLException {
-        connection = DriverManager.getConnection("jdbc:hsqldb:mem:sqt");
+        connection = DriverManager.getConnection("jdbc:hsqldb:mem:simplequerytasktest;shutdown=true");
         System.out.println("Created connection");
     }
 

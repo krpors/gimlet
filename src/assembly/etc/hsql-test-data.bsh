@@ -1,0 +1,128 @@
+import cruft.wtf.gimlet.GimletApp;
+import cruft.wtf.gimlet.ui.*;
+import cruft.wtf.gimlet.*;
+import java.sql.*;
+
+/*
+ * This script can be used to create test tables and test data into an HSQL database.
+ * Parts of the code is copied and altered from the HSQL database source (in particular
+ * the "DatabaseManagerCommon" class) and is therefore subject to the license and terms
+ * of "The HSQL Development Group".
+ *
+ * To use this script in Gimlet, drop it in ~/.config/gimlet/scripts and make sure to
+ * reload it via the Scripts menu (or restart Gimlet).
+ */
+
+Random rRandom = new Random(100);
+
+String random(String[] s) {
+    return s[random(s.length)];
+}
+
+int random(int i) {
+    i = rRandom.nextInt() % i;
+    return i < 0 ? -i : i;
+}
+
+createTestTables(stmt) {
+    String[] sql = {
+        "DROP TABLE Item IF EXISTS;",
+        "DROP TABLE Invoice IF EXISTS;",
+        "DROP TABLE Product IF EXISTS;",
+        "DROP TABLE Customer IF EXISTS;",
+        "CREATE TABLE Customer(ID INTEGER PRIMARY KEY,FirstName VARCHAR(20), LastName VARCHAR(20),Street VARCHAR(20),City VARCHAR(20));",
+        "CREATE TABLE Product(ID INTEGER PRIMARY KEY,Name VARCHAR(20), Price DECIMAL(10,2));",
+        "CREATE TABLE Invoice(ID INTEGER PRIMARY KEY,CustomerID INTEGER, Total DECIMAL(10,2), FOREIGN KEY (CustomerId) REFERENCES Customer(ID) ON DELETE CASCADE);",
+        "CREATE TABLE Item(InvoiceID INTEGER, Item INTEGER, ProductID INTEGER, Quantity INTEGER, Cost DECIMAL(10,2), PRIMARY KEY(InvoiceID,Item), FOREIGN KEY (InvoiceId) REFERENCES Invoice (ID) ON DELETE CASCADE, FOREIGN KEY (ProductId) REFERENCES Product(ID) ON DELETE CASCADE);"
+    };
+
+    for (String d : sql) {
+        stmt.execute(d);
+    }
+}
+
+createTestData(sStatement) {
+    String[] name = {
+        "White", "Karsen", "Smith", "Ringer", "May", "King", "Fuller",
+        "Miller", "Ott", "Sommer", "Schneider", "Steel", "Peterson",
+        "Heiniger", "Clancy"
+    };
+    String[] firstname = {
+        "Mary", "James", "Anne", "George", "Sylvia", "Robert", "Janet",
+        "Michael", "Andrew", "Bill", "Susanne", "Laura", "Bob", "Julia",
+        "John"
+    };
+    String[] street = {
+        "Upland Pl.", "College Av.", "- 20th Ave.", "Seventh Av."
+    };
+    String[] city   = {
+        "New York", "Dallas", "Boston", "Chicago", "Seattle",
+        "San Francisco", "Berne", "Oslo", "Paris", "Lyon", "Palo Alto",
+        "Olten"
+    };
+    String[] product = {
+        "Iron", "Ice Tea", "Clock", "Chair", "Telephone", "Shoe"
+    };
+    int      max     = 50;
+
+    for (int i = 0; i < max; i++) {
+        sStatement.execute("INSERT INTO Customer VALUES(" + i + ",'"
+                           + random(firstname) + "','" + random(name)
+                           + "','" + random(554) + " " + random(street)
+                           + "','" + random(city) + "')");
+        sStatement.execute("INSERT INTO Product VALUES(" + i + ",'"
+                           + random(product) + " " + random(product)
+                           + "'," + (20 + 2 * random(120)) + ")");
+    }
+
+    for (int i = 0; i < max; i++) {
+        sStatement.execute("INSERT INTO Invoice VALUES(" + i + ","
+                           + random(max) + ",0.0)");
+
+        for (int j = random(20) + 2; j >= 0; j--) {
+            sStatement.execute("INSERT INTO Item VALUES(" + i + "," + j
+                               + "," + random(max) + ","
+                               + (1 + random(24)) + ",1.5)");
+        }
+    }
+
+    sStatement.execute("UPDATE Product SET Price=ROUND(Price*.1,2)");
+    sStatement.execute(
+        "UPDATE Item SET Cost=Cost*"
+        + "(SELECT Price FROM Product prod WHERE ProductID=prod.ID)");
+    sStatement.execute(
+        "UPDATE Invoice SET Total=(SELECT SUM(Cost*"
+        + "Quantity) FROM Item WHERE InvoiceID=Invoice.ID)");
+}
+
+script_register() {
+    return new String[] {
+        "Create and insert HSQL tables and data",
+        "This script drops/creates tables and inserts dummy data.",
+        "Kevin Pors"
+    };
+}
+
+script_execute() {
+	tp = GimletApp.connectionTabPane;
+	tab = tp.getSelected();
+	if (tab == null) {
+		Utils.showError("No connection open", "No connection tab opened.");
+		return 0;
+	}
+	conn = tab.getConnection();
+
+	if (conn.isReadOnly()) {
+		Utils.showError("Connection is read-only", "The connection is read-only. Unable to create tables etc.");
+		return 0;
+	}
+
+	stmt = conn.createStatement();
+    createTestTables(stmt);
+    createTestData(stmt);
+    stmt.close();
+
+    Utils.showInfo("Success", "Test data has been created and inserted!");
+
+    return "OK";
+}
