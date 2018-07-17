@@ -40,6 +40,8 @@ public class ObjectsTab extends Tab {
 
     private Button btnLoadObjects;
 
+    private Button btnReloadObjects;
+
     private Label lblLoadingSchema = new Label();
 
     private Label lblLoadingTable = new Label();
@@ -168,7 +170,10 @@ public class ObjectsTab extends Tab {
             btnRemoveEmptySchemas.setDisable(true);
         });
 
-        ToolBar bar = new ToolBar(btnRemoveEmptySchemas);
+        btnReloadObjects = new Button("Reload schemas", Images.RUN.imageView());
+        btnReloadObjects.setOnAction(handlerLoad);
+
+        ToolBar bar = new ToolBar(btnRemoveEmptySchemas, btnReloadObjects);
 
         paneObjects = new BorderPane();
         paneObjects.setTop(bar);
