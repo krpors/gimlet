@@ -1,20 +1,26 @@
 package cruft.wtf.gimlet.ui.objects;
 
-import cruft.wtf.gimlet.jdbc.task.ObjectLoaderTask;
 import cruft.wtf.gimlet.jdbc.SqlType;
+import cruft.wtf.gimlet.jdbc.task.ObjectLoaderTask;
 import cruft.wtf.gimlet.ui.Images;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.*;
+import javafx.scene.Node;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.control.SplitPane;
+import javafx.scene.control.Tab;
+import javafx.scene.control.ToolBar;
+import javafx.scene.control.Tooltip;
+import javafx.scene.control.TreeItem;
+import javafx.scene.control.TreeView;
 import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,67 +45,90 @@ public class ObjectsTab extends Tab {
     private Connection connection;
 
     private Button btnLoadObjects;
+    private Button btnCancelLoading;
+    private Button btnRemoveEmptySchemas;
 
-    private Button btnReloadObjects;
-
+    private ProgressIndicator progressIndicator;
     private Label lblLoadingSchema = new Label();
-
     private Label lblLoadingTable = new Label();
-
-    private ProgressIndicator bar;
 
     private TreeView<DatabaseObject> objectTree = new TreeView<>();
 
-    private VBox boxButtons;
-
     private ObjectsTable table;
 
-    private BorderPane paneObjects;
+    private BorderPane borderPane;
 
-    private Button btnRemoveEmptySchemas;
-
-    private StackPane stackPane;
+    private Node nodeLoadingObjects;
+    private Node nodeObjects;
 
     private ObjectLoaderTask taskLoadObjects;
-
-    private EventHandler<ActionEvent> handlerCancel;
-
-    private EventHandler<ActionEvent> handlerLoad;
 
     public ObjectsTab() {
         setText("Database Objects");
         setGraphic(Images.DOCUMENT.imageView());
         setClosable(false);
 
-        initHandlers();
+        borderPane = new BorderPane();
 
-        createObjectPane();
-        createLoadPane();
+        btnLoadObjects = new Button("", Images.RUN.imageView());
+        btnLoadObjects.setTooltip(new Tooltip("(Re)load the database schemas"));
+        btnLoadObjects.setOnAction(event -> {
+            btnLoadObjects.setDisable(true);
+            borderPane.setCenter(nodeLoadingObjects);
+            populateTree();
+        });
 
-        stackPane = new StackPane(boxButtons);
-        setContent(stackPane);
+        btnRemoveEmptySchemas = new Button("", Images.TRASH.imageView());
+        btnRemoveEmptySchemas.setTooltip(new Tooltip("Remove empty schemas from the view"));
+        btnRemoveEmptySchemas.disableProperty().bind(btnLoadObjects.disableProperty());
+        btnRemoveEmptySchemas.setOnAction(event -> {
+            List<TreeItem<DatabaseObject>> collect = objectTree.getRoot().getChildren()
+                    .stream()
+                    .filter(databaseObjectTreeItem -> databaseObjectTreeItem.getChildren().isEmpty())
+                    .collect(Collectors.toList());
+            objectTree.getRoot().getChildren().removeAll(collect);
+        });
+
+        ToolBar toolBar = new ToolBar(btnLoadObjects, btnRemoveEmptySchemas);
+
+        nodeLoadingObjects = createLoadPane();
+        nodeObjects = createObjectPane();
+
+        borderPane.setTop(toolBar);
+        borderPane.setCenter(null);
+
+        setContent(borderPane);
     }
 
-    private void createLoadPane() {
-        bar = new ProgressIndicator();
-        bar.setVisible(false);
+    /**
+     * This creates the pane containing the progress indicator and the label which shows the ongoing
+     * found schemas and tables.
+     */
+    private Node createLoadPane() {
+        btnCancelLoading = new Button("Cancel");
+        btnCancelLoading.setOnAction(event -> {
+            taskLoadObjects.cancel();
+            borderPane.setCenter(nodeObjects);
+        });
 
-        btnLoadObjects = new Button("Load database objects", Images.RUN.imageView());
-        btnLoadObjects.setOnAction(handlerLoad);
+        progressIndicator = new ProgressIndicator();
+        progressIndicator.setVisible(false);
 
-        boxButtons = new VBox(
-                btnLoadObjects,
-                bar,
+        VBox boxButtons = new VBox(
+                btnCancelLoading,
+                progressIndicator,
                 lblLoadingSchema,
                 lblLoadingTable);
         boxButtons.setSpacing(10.0);
         boxButtons.setAlignment(Pos.CENTER);
+
+        return boxButtons;
     }
 
     /**
-     * Creates the object pane.
+     * Creates the object pane, containing the tree on the left side and the table on the right side.
      */
-    private void createObjectPane() {
+    private Node createObjectPane() {
         objectTree.setCellFactory(param -> new Cell());
 
         // When selecting a TABLE display something.
@@ -158,27 +187,7 @@ public class ObjectsTab extends Tab {
         SplitPane splitPaneObjects = new SplitPane(objectTree, table);
         SplitPane.setResizableWithParent(objectTree, false);
         splitPaneObjects.setDividerPosition(0, 0.4);
-
-        btnRemoveEmptySchemas = new Button("Remove empty schemas");
-        btnRemoveEmptySchemas.setGraphic(Images.TRASH.imageView());
-        btnRemoveEmptySchemas.setOnAction(event -> {
-            List<TreeItem<DatabaseObject>> collect = objectTree.getRoot().getChildren()
-                    .stream()
-                    .filter(databaseObjectTreeItem -> databaseObjectTreeItem.getChildren().isEmpty())
-                    .collect(Collectors.toList());
-            objectTree.getRoot().getChildren().removeAll(collect);
-            btnRemoveEmptySchemas.setDisable(true);
-        });
-
-        btnReloadObjects = new Button("Reload schemas", Images.RUN.imageView());
-        btnReloadObjects.setOnAction(handlerLoad);
-
-        ToolBar bar = new ToolBar(btnRemoveEmptySchemas, btnReloadObjects);
-
-        paneObjects = new BorderPane();
-        paneObjects.setTop(bar);
-        paneObjects.setCenter(splitPaneObjects);
-
+        return splitPaneObjects;
     }
 
     /**
@@ -188,32 +197,6 @@ public class ObjectsTab extends Tab {
      */
     public void setConnection(Connection connection) {
         this.connection = connection;
-    }
-
-    /**
-     * Initialize event handlers for the buttons.
-     */
-    private void initHandlers() {
-        // Initialize some actions for swapping loading/cancelling.
-        handlerCancel = event -> {
-            taskLoadObjects.cancel();
-            btnLoadObjects.setText("Load database objects");
-            btnLoadObjects.setGraphic(Images.RUN.imageView());
-            lblLoadingSchema.setText("");
-            lblLoadingTable.setText("");
-            bar.setVisible(false);
-
-            btnLoadObjects.setOnAction(handlerLoad);
-        };
-
-        handlerLoad = event -> {
-            populateTree();
-            btnLoadObjects.setText("Cancel loading");
-            btnLoadObjects.setGraphic(Images.CLOCK.imageView());
-            bar.setVisible(true);
-
-            btnLoadObjects.setOnAction(handlerCancel);
-        };
     }
 
     /**
@@ -234,17 +217,22 @@ public class ObjectsTab extends Tab {
             Platform.runLater(() -> lblLoadingTable.setText(newValue));
         });
 
+        taskLoadObjects.setOnScheduled(event -> {
+            logger.debug("Task started");
+            progressIndicator.setVisible(true);
+            borderPane.setCenter(nodeLoadingObjects);
+        });
+
         taskLoadObjects.setOnSucceeded(event -> {
             logger.debug("Task succeeded");
-            stackPane.getChildren().clear();
-            stackPane.getChildren().add(paneObjects);
-            paneObjects.toFront();
+            borderPane.setCenter(nodeObjects);
             objectTree.setRoot(taskLoadObjects.getValue());
+            btnLoadObjects.setDisable(false);
         });
 
         taskLoadObjects.setOnCancelled(event -> {
             logger.debug("Task cancelled");
-            btnLoadObjects.setOnAction(handlerLoad);
+            btnLoadObjects.setDisable(false);
         });
 
 
