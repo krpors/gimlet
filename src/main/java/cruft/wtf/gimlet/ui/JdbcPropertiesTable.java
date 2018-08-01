@@ -42,8 +42,8 @@ public class JdbcPropertiesTable extends TableView<JdbcPropertiesTable.JdbcPrope
     }
 
     public void setItemsFromMap(final Map<String, String> map) {
-        ObservableList<JdbcPropertiesTable.JdbcProperty> props = FXCollections.observableArrayList();
-        map.forEach((k, v) -> props.add(new JdbcPropertiesTable.JdbcProperty(k, v)));
+        ObservableList<JdbcProperty> props = FXCollections.observableArrayList();
+        map.forEach((k, v) -> props.add(new JdbcProperty(k, v)));
         setItems(props);
     }
 
@@ -53,9 +53,6 @@ public class JdbcPropertiesTable extends TableView<JdbcPropertiesTable.JdbcPrope
     public static class JdbcProperty {
         private String name;
         private String value;
-
-        public JdbcProperty() {
-        }
 
         public JdbcProperty(String name, String value) {
             setName(name);

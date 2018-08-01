@@ -27,19 +27,21 @@ public class ResultTableRow extends TableRow<ObservableList> {
 
     protected ContextMenu contextMenu = new ContextMenu();
 
+    protected Menu menuCopy;
+
     public ResultTableRow() {
-        Menu subMenu = new Menu("Copy");
+        menuCopy = new Menu("Copy");
 
         MenuItem itemCopy = new MenuItem("Copy as plain text", Images.COPY.imageView());
         MenuItem itemCopyAsPlainHtml = new MenuItem("Copy as plain HTML text", Images.CODE.imageView());
         MenuItem itemCopyAsHtml = new MenuItem("Copy as HTML", Images.SPREADSHEET.imageView());
 
-        subMenu.getItems().addAll(
+        menuCopy.getItems().addAll(
                 itemCopy,
                 itemCopyAsPlainHtml,
                 itemCopyAsHtml);
 
-        contextMenu.getItems().add(subMenu);
+        contextMenu.getItems().add(menuCopy);
 
         final ClipboardContent clipboardContent = new ClipboardContent();
 

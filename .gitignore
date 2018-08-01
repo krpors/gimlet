@@ -28,8 +28,11 @@ hs_err_pid*
 # Maven
 target
 dependency-reduced-pom.xml
+*.versionsBackup
 
 # hsql cruft
 hsql:mem.properties
 hsql:mem.script
+mem.properties
+mem.script
 
