@@ -182,6 +182,7 @@ public class AliasDialog extends Dialog<Alias> {
         });
 
         chkReadOnly = new CheckBox();
+        chkReadOnly.setSelected(true);
         chkReadOnly.setTooltip(new Tooltip("Check this box if you want to " +
                 "force the connection to be read-only. This is the default."));
         pane.add("Read-only connection:", chkReadOnly);
