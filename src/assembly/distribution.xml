@@ -26,6 +26,11 @@ http://maven.apache.org/ASSEMBLY/2.0.0 ">
     </files>
     <fileSets>
         <fileSet>
+            <directory>src/assembly/drivers</directory>
+            <outputDirectory>drivers</outputDirectory>
+            <fileMode>0644</fileMode>
+        </fileSet>
+        <fileSet>
             <directory>src/assembly/bin</directory>
             <outputDirectory>./bin/</outputDirectory>
             <fileMode>0775</fileMode>

@@ -1,1 +1,1 @@
-javaw -cp "..\lib\*" cruft.wtf.gimlet.GimletApp
+javaw -cp "..\lib\*;..\drivers\*" cruft.wtf.gimlet.GimletApp
