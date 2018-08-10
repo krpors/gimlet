@@ -9,6 +9,8 @@ public class QueryExecuteEvent {
 
     private Query query;
 
+    private String targetTab;
+
     private Map<String, Object> columnnMap = new TreeMap<>();
 
     public Query getQuery() {
@@ -25,5 +27,13 @@ public class QueryExecuteEvent {
 
     public void setColumnnMap(Map<String, Object> columnnMap) {
         this.columnnMap = columnnMap;
+    }
+
+    public String getTargetTab() {
+        return targetTab;
+    }
+
+    public void setTargetTab(String targetTab) {
+        this.targetTab = targetTab;
     }
 }

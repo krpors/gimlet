@@ -182,17 +182,15 @@ public class Tester extends Application {
     }
 
     private Tab createWithConnectionTabPane() throws SQLException {
-        ConnectionTabPane ctp = new ConnectionTabPane();
-
         Alias alias = new Alias();
         alias.setName("Test");
         alias.setUser("SA");
         alias.setUrl("jdbc:hsqldb:hsql:mem");
         alias.setColor("#8080ff");
         ConnectionTab tab = new ConnectionTab(alias);
-        ctp.getTabs().add(tab);
+        ConnectionTabPane.instance.getTabs().add(tab);
 
-        return new Tab("Connection tab", ctp);
+        return new Tab("Connection tab", ConnectionTabPane.instance);
     }
 
     private Tab createWithJdbcProps() throws SQLException {

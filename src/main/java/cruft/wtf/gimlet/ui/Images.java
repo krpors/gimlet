@@ -16,6 +16,7 @@ import java.util.Map;
  * same Node twice, so we have to create them on the fly as needed, via the {@link #imageView()} method.
  */
 public enum Images {
+    // TODO: rename image enums since they are not really identifable...
 
     ACCOUNT_LOGIN("/icons/lan-connect-24px.png", true),
     ACCOUNT_LOGOUT("/icons/logout-variant-24px.png", true),

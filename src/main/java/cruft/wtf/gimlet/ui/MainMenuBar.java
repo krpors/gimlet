@@ -113,7 +113,7 @@ public class MainMenuBar extends MenuBar {
                     .forEach(script -> {
                         // Bind objects in the namespace of the script.
                         script.put("gimletapp", gimletApp);
-                        script.put("ctp", GimletApp.connectionTabPane);
+                        script.put("ctp", ConnectionTabPane.instance);
 
                         MenuItem item = new MenuItem(script.getName());
                         item.setOnAction(e -> executeScript(script));

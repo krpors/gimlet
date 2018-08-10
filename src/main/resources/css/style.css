@@ -63,3 +63,13 @@
 .query-reference {
     -fx-base: gray;
 }
+
+/**
+ * This menu item is used for the custom menu item. TODO: docs
+ */
+ .labeledMenuItem, labeledMenuItem:hover {
+    -fx-font-weight: bolder;
+    -fx-font-size: smaller;
+    -fx-background-color: transparent;
+    -fx-text-fill: black;
+ }

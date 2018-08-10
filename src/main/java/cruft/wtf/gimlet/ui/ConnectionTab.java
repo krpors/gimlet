@@ -12,7 +12,6 @@ import cruft.wtf.gimlet.ui.controls.NumberTextField;
 import cruft.wtf.gimlet.ui.drilldown.DrillDownTab;
 import cruft.wtf.gimlet.ui.objects.ObjectsTab;
 import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -304,14 +303,29 @@ public class ConnectionTab extends Tab {
      */
     @Subscribe
     public void onQueryExecute(final QueryExecuteEvent event) {
-        // Make sure to apply the query to the current open/selected connection tab. Multiple ConnectionTabs can be
-        // opened at once, so we make sure the query execution applies to the open tab.
-        if (isSelected()) {
+        // Make sure to apply the query to the proper connection tab. Multiple ConnectionTabs can be
+        // opened at once, so we make sure the query execution applies to the open tab, or the one
+        // explicitly selected as an interconnection query.
+
+        if (event.getTargetTab() == null && isSelected()) {
             logger.debug("Query will be executed on tab '{}' ({})", getText(), hashCode());
             tabPane.getSelectionModel().select(drillDownTab);
             drillDownTab.executeQuery(event.getQuery(), event.getColumnnMap());
-        } else {
-            logger.debug("Ignoring QueryExecuteEvent for tab '{}' ({}): tab is not selected", getText(), hashCode());
+            return;
         }
+
+        if (event.getTargetTab().equals(getText())) {
+            logger.debug("Interconnection query will be executed on tab '{}' ({})", getText(), hashCode());
+            getTabPane().getSelectionModel().select(this);
+            tabPane.getSelectionModel().select(drillDownTab);
+            drillDownTab.executeQuery(event.getQuery(), event.getColumnnMap());
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "ConnectionTab{" +
+                "alias=" + alias.getName() +
+                '}';
     }
 }

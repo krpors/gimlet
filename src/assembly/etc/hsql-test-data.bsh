@@ -104,8 +104,7 @@ script_register() {
 }
 
 script_execute() {
-	tp = GimletApp.connectionTabPane;
-	tab = tp.getSelected();
+	tab = ctp.getSelected();
 	if (tab == null) {
 		Utils.showError("No connection open", "No connection tab opened.");
 		return 0;

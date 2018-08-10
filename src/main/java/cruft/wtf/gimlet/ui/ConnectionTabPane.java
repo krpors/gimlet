@@ -16,18 +16,36 @@ import javafx.scene.input.KeyCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
  * The {@link ConnectionTabPane} contains the tabs associated with {@link ConnectionTab}s.
+ * Throughout the whole user interface, there is only ONE {@link ConnectionTabPane}. Therefore,
+ * there is only one instance of this class, which can be retrieved using the {@code instance}
+ * field.
+ * <p>
+ * I tried introducing Google Guice as a IOC method to inject dependencies. The framework is
+ * great and lightweight, but the whole codebase became a mess with Providers and injection
+ * crap.
+ * <p>
+ * If the UI was pretty static (no dynamic added tabs, with dynamic amount of tabs within
+ * each of those tabs) it would be a viable solution, but I decided to abandon it in favor
+ * of a singleton solution. Whatever, shoot me! The code is more readable and prevents a lot
+ * of 'passing parents' down the chain.
  */
-public class ConnectionTabPane extends TabPane {
+public final class ConnectionTabPane extends TabPane {
+
+    public static final ConnectionTabPane instance = new ConnectionTabPane();
 
     private Logger logger = LoggerFactory.getLogger(ConnectionTabPane.class);
 
+    /**
+     * Property to indicate whether a tab is selected (or, open).
+     */
     private SimpleBooleanProperty tabSelectedProperty = new SimpleBooleanProperty(false);
 
-    public ConnectionTabPane() {
+    private ConnectionTabPane() {
         EventDispatcher.getInstance().register(this);
         getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             tabSelectedProperty.set(newValue != null);
@@ -123,6 +141,5 @@ public class ConnectionTabPane extends TabPane {
         Thread t = new Thread(connectTask, "Gimlet connection thread");
         t.setDaemon(true);
         t.start();
-
     }
 }

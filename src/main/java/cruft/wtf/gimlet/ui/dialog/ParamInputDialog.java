@@ -85,6 +85,7 @@ public class ParamInputDialog extends Dialog<Map<String, Object>> {
                     String id = paramInputNode.getParameterName();
                     Object value = values.get(id);
                     if (value != null) {
+                        // FIXME: ClassCastException here when input is integer or some stuff.
                         paramInputNode.setParameterValue(value);
                     }
                 });

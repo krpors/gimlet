@@ -6,13 +6,7 @@ import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.FileOpenedEvent;
 import cruft.wtf.gimlet.event.FileSavedEvent;
 import cruft.wtf.gimlet.event.LoadProjectEvent;
-import cruft.wtf.gimlet.ui.ConnectionTabPane;
-import cruft.wtf.gimlet.ui.Images;
-import cruft.wtf.gimlet.ui.LogTable;
-import cruft.wtf.gimlet.ui.MainMenuBar;
-import cruft.wtf.gimlet.ui.NavigationPane;
-import cruft.wtf.gimlet.ui.ProjectPropertiesPane;
-import cruft.wtf.gimlet.ui.StatusBar;
+import cruft.wtf.gimlet.ui.*;
 import cruft.wtf.gimlet.util.VersionInfo;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -24,11 +18,7 @@ import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
@@ -66,11 +56,6 @@ public class GimletApp extends Application {
     private Stage primaryStage;
 
     /**
-     * There is only one ConnectionTabPane throughout Gimlet. So once we created it, we can reference to it statically.
-     */
-    public static ConnectionTabPane connectionTabPane;
-
-    /**
      * This window is used to provide as a parent for multiple dialogs.
      */
     public static Window window;
@@ -103,7 +88,7 @@ public class GimletApp extends Application {
         logger.debug("Adding shutdown hook.");
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             logger.debug("Invoking shutdown hook.");
-            connectionTabPane.closeAllTabs();
+            ConnectionTabPane.instance.closeAllTabs();
 
             try {
                 Configuration c = Configuration.getInstance();
@@ -276,15 +261,13 @@ public class GimletApp extends Application {
     }
 
     private Parent createNavigationCenterBottom() {
-        connectionTabPane = new ConnectionTabPane();
-
         Node bottom = createBottom();
         SplitPane.setResizableWithParent(bottom, false);
 
         BorderPane paneNavigationConnections = new BorderPane();
         Node left = createLeft();
         paneNavigationConnections.setLeft(left);
-        paneNavigationConnections.setCenter(connectionTabPane);
+        paneNavigationConnections.setCenter(ConnectionTabPane.instance);
 
         // The splitpane, containing the upper borderpane (alias/query + connections)
         // and the bottom part, containing logging and project properties.

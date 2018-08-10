@@ -435,7 +435,7 @@ public class QueryTree extends TreeView<Query> {
 
             // Funky binding. We bind the 'disabled' property of the menu item, to the boolean property
             // of the editorTabViews's boolean value whether a tab is opened or not.
-            menuItemExecute.disableProperty().bind(GimletApp.connectionTabPane.tabSelectedProperty().not());
+            menuItemExecute.disableProperty().bind(ConnectionTabPane.instance.tabSelectedProperty().not());
 
             menuItemExecute.setOnAction(e -> executeSelectedQuery(getItem()));
             menuItemNewRoot.setOnAction(event -> openNewRootQueryDialog());
