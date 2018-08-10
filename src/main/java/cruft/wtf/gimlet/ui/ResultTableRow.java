@@ -19,7 +19,7 @@ import java.util.List;
  * and all that jazz.
  *
  * @see ResultTable
- * @see cruft.wtf.gimlet.ui.drilldown.DrillResultTable.DrillResultTableRow
+ * @see cruft.wtf.gimlet.ui.drilldown.DrillResultTableRow
  */
 public class ResultTableRow extends TableRow<ObservableList> {
 

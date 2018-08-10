@@ -62,6 +62,7 @@ class DrillResultTableRow extends ResultTableRow {
         // re-add the menu for copying table data.
         // TODO: find an more neat way to re-add the menuCopy instead of using a protected var.
         contextMenu.getItems().add(menuCopy);
+        contextMenu.getItems().add(new SeparatorMenuItem());
 
         // Create a context menu, containing the direct sub queries for the original query.
         for (Query subQuery : query.getSubQueries()) {
