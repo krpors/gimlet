@@ -42,6 +42,7 @@ public class DataConverterTest {
 
         String what = DataConverter.convertToText(colNames, data, opts);
 
+        what = what.replaceAll("\r\n", "\n");
         System.out.println(what);
 
         Assert.assertEquals(TestUtils.readFromClasspath("/exporter/case01.txt"), what);
@@ -57,6 +58,7 @@ public class DataConverterTest {
 
         String what = DataConverter.convertToText(colNames, data, opts);
 
+        what = what.replaceAll("\r\n", "\n");
         System.out.println(what);
 
         Assert.assertEquals(TestUtils.readFromClasspath("/exporter/case02.txt"), what);
@@ -71,6 +73,7 @@ public class DataConverterTest {
 
         String what = DataConverter.convertToText(colNames, data, opts);
 
+        what = what.replaceAll("\r\n", "\n");
         System.out.println(what);
 
         Assert.assertEquals(TestUtils.readFromClasspath("/exporter/case03.txt"), what);
