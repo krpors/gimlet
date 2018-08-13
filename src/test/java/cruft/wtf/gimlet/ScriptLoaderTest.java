@@ -6,7 +6,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class ScriptLoaderTest {
 
@@ -17,7 +20,7 @@ public class ScriptLoaderTest {
      */
     @Test
     public void loadScripts() throws Exception {
-        Path p = Paths.get(ScriptLoaderTest.class.getResource("/scripts/").getPath());
+        Path p = Paths.get(ScriptLoaderTest.class.getResource("/scripts/").toURI());
         List<Script> scripts = ScriptLoader.load(p.toString(), false);
         scripts.forEach(System.out::println);
 
