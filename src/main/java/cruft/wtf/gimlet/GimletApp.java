@@ -198,6 +198,7 @@ public class GimletApp extends Application {
      */
     private Node createBottom() {
         BorderPane pane = new BorderPane();
+        pane.setPrefHeight(100);
 
         TabPane tabPane = new TabPane();
         tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
@@ -264,14 +265,14 @@ public class GimletApp extends Application {
         Node bottom = createBottom();
         SplitPane.setResizableWithParent(bottom, false);
 
-        BorderPane paneNavigationConnections = new BorderPane();
+        // The navigation and the work content, split up using a veritcal SplitPane.
         Node left = createLeft();
-        paneNavigationConnections.setLeft(left);
-        paneNavigationConnections.setCenter(ConnectionTabPane.instance);
+        SplitPane topSplitPane = new SplitPane(left, ConnectionTabPane.instance);
+        SplitPane.setResizableWithParent(left, false);
 
         // The splitpane, containing the upper borderpane (alias/query + connections)
         // and the bottom part, containing logging and project properties.
-        SplitPane splitPane = new SplitPane(paneNavigationConnections, bottom);
+        SplitPane splitPane = new SplitPane(topSplitPane, bottom);
         splitPane.setOrientation(Orientation.VERTICAL);
         splitPane.setDividerPosition(0, 0.6);
 

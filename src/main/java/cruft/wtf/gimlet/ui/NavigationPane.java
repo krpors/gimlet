@@ -28,9 +28,5 @@ public class NavigationPane extends BorderPane {
         tabQueries.setClosable(false);
         TabPane tabPane = new TabPane(tabAliases, tabQueries);
         setCenter(tabPane);
-
-        Separator sep = new Separator(Orientation.VERTICAL);
-        sep.setPadding(new Insets(0, 0, 0, 5));
-        setRight(sep);
     }
 }
