@@ -1,5 +1,6 @@
 package cruft.wtf.gimlet.ui;
 
+import cruft.wtf.gimlet.ui.dialog.CopyAsDialog;
 import cruft.wtf.gimlet.util.DataConverter;
 import javafx.collections.ObservableList;
 import javafx.scene.control.ContextMenu;
@@ -13,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * This is a generic row for any result table. It contains a basic context menu with copy/paste actions
@@ -32,9 +34,9 @@ public class ResultTableRow extends TableRow<ObservableList> {
     public ResultTableRow() {
         menuCopy = new Menu("Copy");
 
-        MenuItem itemCopy = new MenuItem("Copy as plain text", Images.COPY.imageView());
-        MenuItem itemCopyAsPlainHtml = new MenuItem("Copy as plain HTML text", Images.CODE.imageView());
-        MenuItem itemCopyAsHtml = new MenuItem("Copy as HTML", Images.SPREADSHEET.imageView());
+        MenuItem itemCopy = new MenuItem("As plain text...", Images.COPY.imageView());
+        MenuItem itemCopyAsPlainHtml = new MenuItem("As plain HTML", Images.CODE.imageView());
+        MenuItem itemCopyAsHtml = new MenuItem("As HTML", Images.SPREADSHEET.imageView());
 
         menuCopy.getItems().addAll(
                 itemCopy,
@@ -46,16 +48,13 @@ public class ResultTableRow extends TableRow<ObservableList> {
         final ClipboardContent clipboardContent = new ClipboardContent();
 
         itemCopy.setOnAction(event -> {
-            DataConverter.Options opts = new DataConverter.Options();
-            opts.columnSeparator = " | ";
-            opts.includeColNames = true;
-            opts.fitWidth = true;
+            CopyAsDialog dlg = new CopyAsDialog(getColumnNames(), getTableData());
+            Optional<String> result = dlg.showAndWait();
 
-            // Export string here.
-            String yo = DataConverter.convertToText(getColumnNames(), getTableData(), opts);
-
-            clipboardContent.putString(yo);
-            Clipboard.getSystemClipboard().setContent(clipboardContent);
+            result.ifPresent(s -> {
+                clipboardContent.putString(s);
+                Clipboard.getSystemClipboard().setContent(clipboardContent);
+            });
         });
 
         itemCopyAsPlainHtml.setOnAction(event -> {

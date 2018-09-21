@@ -6,6 +6,7 @@ import cruft.wtf.gimlet.jdbc.Column;
 import cruft.wtf.gimlet.jdbc.ParseResult;
 import cruft.wtf.gimlet.ui.*;
 import cruft.wtf.gimlet.ui.controls.DateTimePicker;
+import cruft.wtf.gimlet.ui.dialog.CopyAsDialog;
 import cruft.wtf.gimlet.ui.dialog.ParamInputDialog;
 import cruft.wtf.gimlet.ui.dialog.QueryDialog;
 import cruft.wtf.gimlet.ui.dialog.QueryReferenceDialog;
@@ -33,6 +34,18 @@ import java.util.*;
  * Simple tester main to quickly test UI elements. Also: http://fxexperience.com/scenic-view/
  */
 public class Tester extends Application {
+
+    private void openCopyAsDialog() {
+        List<String> cols = Arrays.asList("FIRST_WITH_UNDERSCORE", "SECOND", "THIRD", "FOURTH");
+        ObservableList<ObservableList> rowData = FXCollections.observableArrayList();
+        rowData.add(FXCollections.observableArrayList("0", "Alice", "Obama", "144"));
+        rowData.add(FXCollections.observableArrayList("1", "Bob", "Obama", "1231"));
+        rowData.add(FXCollections.observableArrayList("2", "Quux", "Quuz", "89271"));
+        rowData.add(FXCollections.observableArrayList("3", "Gimlet", "Application", "17676"));
+
+        CopyAsDialog dlg = new CopyAsDialog(cols, rowData);
+        dlg.showAndWait();
+    }
 
     private void openQueryRefDialog() {
         List<Query> ql = new ArrayList<>();
@@ -107,19 +120,22 @@ public class Tester extends Application {
         Button btnQueryEditDialog = new Button("Query editor");
         Button btnParamInputDialog = new Button("Param input");
         Button btnQueryRefDialog = new Button("Query ref");
+        Button btnCopyAsDialog = new Button("Copy as");
         DateTimePicker dateTimePicker = new DateTimePicker();
 
         btnOpenSettings.setOnAction(event -> openSettingsDialog());
         btnQueryEditDialog.setOnAction(event -> openQueryEditDialog());
         btnParamInputDialog.setOnAction(event -> openParamInputDialog());
         btnQueryRefDialog.setOnAction(event -> openQueryRefDialog());
+        btnCopyAsDialog.setOnAction(event -> openCopyAsDialog());
 
         FlowPane pane = new FlowPane(
                 btnOpenSettings,
                 btnQueryEditDialog,
                 btnParamInputDialog,
                 dateTimePicker,
-                btnQueryRefDialog
+                btnQueryRefDialog,
+                btnCopyAsDialog
         );
         pane.setHgap(5.0);
         pane.setPadding(new Insets(10));

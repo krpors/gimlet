@@ -2,13 +2,17 @@ package cruft.wtf.gimlet.util;
 
 import com.google.common.escape.Escaper;
 import com.google.common.html.HtmlEscapers;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.ObservableList;
 
 import java.util.Arrays;
 import java.util.List;
 
 /**
- * This class is responsible for exporting generic {@link javax.swing.text.TableView} data
+ * This class is responsible for exporting generic {@link javafx.scene.control.TableView} data
  * (stored as an ObservableList of ObservableLists) to copy/paste format. Whatever, we'll see.
  */
 public class DataConverter {
@@ -25,8 +29,13 @@ public class DataConverter {
      */
     public static String convertToText(
             final List<String> columnNames,
-            final ObservableList<ObservableList> tableData,
+            final List<ObservableList> tableData,
             final Options opts) {
+
+        boolean includeColNames = opts.isIncludeColNames();
+        boolean fitWidth = opts.isFitWidth();
+        String columnSeparator = opts.getColumnSeparator();
+        columnSeparator = columnSeparator.replaceAll("\\\\t", "\t");
 
         int[] colWidths = new int[columnNames.size()];
         Arrays.fill(colWidths, 0);
@@ -37,7 +46,7 @@ public class DataConverter {
         // maximum amount of characters which are used per column, so we can pad the
         // data in the output to get a nice looking table. If it's set to false however,
         // no padding will be done in the second pass.
-        if (opts.fitWidth) {
+        if (fitWidth) {
             // Iterate over the column names. They may be longer than the actual content.
             for (int colIdx = 0; colIdx < columnNames.size(); colIdx++) {
                 colWidths[colIdx] = columnNames.get(colIdx).length();
@@ -48,27 +57,24 @@ public class DataConverter {
                 // Then check each column, determine the maximum size.
                 for (int col = 0; col < row.size(); col++) {
                     String colData = String.valueOf(row.get(col));
-                    colWidths[col] = Math.max(colWidths[col], colData.length());
+
+                    // Don't append extra spaces at the last column
+                    if (col == row.size() - 1) {
+                        colWidths[col] = 0;
+                    } else {
+                        colWidths[col] = Math.max(colWidths[col], colData.length());
+                    }
                 }
             }
         }
 
-        // Calculate the total length of a row, by adding all column widths.
-        // This int is used to write a separator between the column names and
-        // the actual data.
-        int totalRowLength = 0;
-        for (int w : colWidths) {
-            totalRowLength += w;
-            totalRowLength += opts.columnSeparator.length();
-        }
-
-        if (opts.includeColNames) {
+        if (includeColNames) {
             for (int col = 0; col < columnNames.size(); col++) {
                 b.append(padString(columnNames.get(col), colWidths[col], ' '));
-                b.append(opts.columnSeparator);
+                if (col < columnNames.size() - 1) {
+                    b.append(columnSeparator);
+                }
             }
-            b.append(SEP);
-            b.append(padString("", totalRowLength, opts.columnAndDataSeparator));
             b.append(SEP);
         }
 
@@ -82,7 +88,9 @@ public class DataConverter {
                 colData = colData.replace('\t', ' ');
                 colData = colData.replace('\r', ' ');
                 b.append(padString(colData, colWidths[col], ' '));
-                b.append(opts.columnSeparator);
+                if (col < row.size() - 1) {
+                    b.append(columnSeparator);
+                }
             }
             b.append(SEP);
         }
@@ -146,14 +154,46 @@ public class DataConverter {
     }
 
     public static class Options {
-        public boolean includeColNames = true;
+        private BooleanProperty includeColNames = new SimpleBooleanProperty(true);
 
-        public boolean fitWidth = false;
+        private BooleanProperty fitWidth = new SimpleBooleanProperty(false);
 
-        public String replaceChars = "\n\r";
+        private StringProperty columnSeparator = new SimpleStringProperty(" ");
 
-        public String columnSeparator = " ";
+        public boolean isIncludeColNames() {
+            return includeColNames.get();
+        }
 
-        public char columnAndDataSeparator = '=';
+        public BooleanProperty includeColNamesProperty() {
+            return includeColNames;
+        }
+
+        public void setIncludeColNames(boolean includeColNames) {
+            this.includeColNames.set(includeColNames);
+        }
+
+        public boolean isFitWidth() {
+            return fitWidth.get();
+        }
+
+        public BooleanProperty fitWidthProperty() {
+            return fitWidth;
+        }
+
+        public void setFitWidth(boolean fitWidth) {
+            this.fitWidth.set(fitWidth);
+        }
+
+        public String getColumnSeparator() {
+            return columnSeparator.get();
+        }
+
+        public StringProperty columnSeparatorProperty() {
+            return columnSeparator;
+        }
+
+        public void setColumnSeparator(String columnSeparator) {
+            this.columnSeparator.set(columnSeparator);
+        }
     }
 }

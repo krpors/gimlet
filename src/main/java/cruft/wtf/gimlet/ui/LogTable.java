@@ -29,8 +29,6 @@ public class LogTable extends TableView<ILoggingEvent> {
     public LogTable() {
         EventDispatcher.getInstance().register(this);
 
-        setStyle("-fx-font-size: 8pt");
-
         setEditable(false);
         setTableMenuButtonVisible(true);
         setColumnResizePolicy(CONSTRAINED_RESIZE_POLICY);
@@ -65,8 +63,10 @@ public class LogTable extends TableView<ILoggingEvent> {
      */
     @Subscribe
     public void onLoggingEvent(final ILoggingEvent event) {
-        getItems().add(event);
-        Platform.runLater(this::scrollToEnd);
+        Platform.runLater(() -> {
+            getItems().add(event);
+            scrollToEnd();
+        });
     }
 
     public void scrollToEnd() {

@@ -26,6 +26,7 @@ public class DataConverterTest {
         data.add(FXCollections.observableArrayList("Cruft and all", "Jazzy newsflash"));
         data.add(FXCollections.observableArrayList("Ozzy", "Bozzy <b>something</b>"));
         data.add(FXCollections.observableArrayList("This col", "The other column, contains\na newline!!"));
+
     }
 
     /**
@@ -35,10 +36,9 @@ public class DataConverterTest {
     @Test
     public void case01() {
         DataConverter.Options opts = new DataConverter.Options();
-        opts.fitWidth = true;
-        opts.includeColNames = true;
-        opts.columnSeparator = " |";
-        opts.columnAndDataSeparator = '=';
+        opts.setFitWidth(true);
+        opts.setIncludeColNames(true);
+        opts.setColumnSeparator(" |");
 
         String what = DataConverter.convertToText(colNames, data, opts);
 
@@ -51,10 +51,9 @@ public class DataConverterTest {
     @Test
     public void case02() {
         DataConverter.Options opts = new DataConverter.Options();
-        opts.fitWidth = false;
-        opts.includeColNames = true;
-        opts.columnSeparator = "|";
-        opts.columnAndDataSeparator = '*';
+        opts.setFitWidth(false);
+        opts.setIncludeColNames(true);
+        opts.setColumnSeparator("|");
 
         String what = DataConverter.convertToText(colNames, data, opts);
 
@@ -67,9 +66,9 @@ public class DataConverterTest {
     @Test
     public void case03() {
         DataConverter.Options opts = new DataConverter.Options();
-        opts.fitWidth = false;
-        opts.includeColNames = false;
-        opts.columnSeparator = ";";
+        opts.setFitWidth(false);
+        opts.setIncludeColNames(false);
+        opts.setColumnSeparator(";");
 
         String what = DataConverter.convertToText(colNames, data, opts);
 
@@ -83,6 +82,7 @@ public class DataConverterTest {
     public void html() {
         String yo = DataConverter.convertToHtml(colNames, data);
         System.out.println(yo);
+        Assert.assertEquals(TestUtils.readFromClasspath("/exporter/html.html"), yo);
     }
 
 }

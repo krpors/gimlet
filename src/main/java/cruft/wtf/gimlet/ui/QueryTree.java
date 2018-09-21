@@ -54,10 +54,7 @@ public class QueryTree extends TreeView<Query> {
     private GimletProject project;
 
     private ChangeListener<String> listener = (observable, oldValue, newValue) -> {
-        System.out.println("Changed to " + newValue);
         project.updateQueryReference(oldValue, newValue);
-
-
     };
 
     public QueryTree() {
@@ -504,7 +501,6 @@ public class QueryTree extends TreeView<Query> {
 
             if (item.getParentQuery() == null) {
                 setStyle("-fx-base: #c0c0c0");
-                setGraphic(Images.MAGNIFYING_GLASS.imageView());
             }
             setTooltip(new Tooltip(item.getDescription()));
             if (!isEditing() && !item.isReference()) {
