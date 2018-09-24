@@ -39,14 +39,14 @@ public final class VersionInfo {
             all = Utils.class.getClassLoader().getResources(JarFile.MANIFEST_NAME);
         } catch (IOException e) {
             logger.error("Unable to load an enumeration of manifest files from the classpath", e);
-            setVersion("Unknown (error while enumerating classpath)");
-            setBuildTimestamp("Unknown timestamp");
+            version = "Unknown (error while enumerating classpath)";
+            buildTimestamp = "Unknown timestamp";
             return;
         }
 
         // Start by setting unknown information first.
-        setVersion("Unknown version");
-        setBuildTimestamp("Unknown timestamp");
+        version = "Unknown version";
+        buildTimestamp = "Unknown timestamp";
 
         while (all.hasMoreElements()) {
             URL next = all.nextElement();
@@ -59,10 +59,10 @@ public final class VersionInfo {
                 String v = attrs.getValue("Gimlet-Version");
                 String bt = attrs.getValue("Gimlet-Build-Timestamp");
                 if (v != null) {
-                    setVersion(v);
+                    version = v;
                 }
                 if (bt != null) {
-                    setBuildTimestamp(bt);
+                    buildTimestamp = bt;
                 }
             } catch (IOException e) {
                 logger.error("Unable to open JAR file from classpath for manifest information: '{}'. Skipping...", next);
@@ -70,28 +70,12 @@ public final class VersionInfo {
         }
     }
 
-    public String getBuildTimestamp() {
-        return buildTimestamp;
+    public static String getBuildTimestamp() {
+        return versionInfo.buildTimestamp;
     }
 
-    private void setBuildTimestamp(String buildTimestamp) {
-        this.buildTimestamp = buildTimestamp;
-    }
-
-    public String getVersion() {
-        return version;
-    }
-
-    private void setVersion(String version) {
-        this.version = version;
-    }
-
-    /**
-     * Retrieves version information of the application by reading the MANIFEST.MF files
-     * of all JARs on the classpath. The {@code Gimlet-Version} key is looked up and returned.
-     */
-    public static VersionInfo get() {
-        return versionInfo;
+    public static String getVersion() {
+        return versionInfo.version;
     }
 
     /**
@@ -100,6 +84,6 @@ public final class VersionInfo {
      * @return The version String.
      */
     public static String getVersionString() {
-        return "Gimlet (" + versionInfo.getVersion() + ")";
+        return "Gimlet (" + VersionInfo.getVersion() + ")";
     }
 }

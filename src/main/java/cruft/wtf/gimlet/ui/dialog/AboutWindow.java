@@ -23,15 +23,15 @@ public class AboutWindow extends Stage {
         initStyle(StageStyle.UNDECORATED);
         setWidth(640);
         setHeight(400);
-        setTitle("About Gimlet version " + VersionInfo.get().getVersion());
+        setTitle("About Gimlet version " + VersionInfo.getVersion());
         setAlwaysOnTop(true);
         centerOnScreen();
 
 
         ImageView imageView = new ImageView("/splash.png");
 
-        String v = "Version: " + VersionInfo.get().getVersion() + "\n";
-        v += "Build time: " + VersionInfo.get().getBuildTimestamp();
+        String v = "Version: " + VersionInfo.getVersion() + "\n";
+        v += "Build time: " + VersionInfo.getBuildTimestamp();
         Label version = new Label(v);
         version.setStyle("-fx-text-fill: white");
         version.setLayoutX(250);
