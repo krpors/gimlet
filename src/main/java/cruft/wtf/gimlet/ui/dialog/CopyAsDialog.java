@@ -5,6 +5,7 @@ import cruft.wtf.gimlet.ui.FormPane;
 import cruft.wtf.gimlet.util.DataConverter;
 import javafx.collections.ObservableList;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Dialog;
@@ -62,6 +63,9 @@ public class CopyAsDialog extends Dialog<String> {
             }
             return null;
         });
+
+        Button btnOk = (Button) getDialogPane().lookupButton(ButtonType.OK);
+        btnOk.setText("Copy");
     }
 
     private Node createContent() {

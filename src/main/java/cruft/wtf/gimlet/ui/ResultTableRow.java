@@ -54,6 +54,7 @@ public class ResultTableRow extends TableRow<ObservableList> {
             result.ifPresent(s -> {
                 clipboardContent.putString(s);
                 Clipboard.getSystemClipboard().setContent(clipboardContent);
+                logger.info("Copied {} rows to the system clipboard", getTableData().size());
             });
         });
 

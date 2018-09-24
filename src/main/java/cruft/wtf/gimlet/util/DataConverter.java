@@ -48,8 +48,10 @@ public class DataConverter {
         // no padding will be done in the second pass.
         if (fitWidth) {
             // Iterate over the column names. They may be longer than the actual content.
-            for (int colIdx = 0; colIdx < columnNames.size(); colIdx++) {
-                colWidths[colIdx] = columnNames.get(colIdx).length();
+            if (includeColNames) {
+                for (int colIdx = 0; colIdx < columnNames.size(); colIdx++) {
+                    colWidths[colIdx] = columnNames.get(colIdx).length();
+                }
             }
 
             // Iterate over each row first.
