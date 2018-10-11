@@ -28,7 +28,7 @@ public class QueryDialog extends Dialog<Query> {
 
     private TextField txtName;
 
-    private TextField txtDescription;
+    private TextArea txtDescription;
 
     private TextArea txtQuery;
 
@@ -84,7 +84,8 @@ public class QueryDialog extends Dialog<Query> {
         txtName = new TextField();
         formPane.add("Name:", txtName);
 
-        txtDescription = new TextField();
+        txtDescription = new TextArea();
+        txtDescription.setPrefRowCount(3);
         formPane.add("Description:", txtDescription);
 
         txtQuery = new TextArea();

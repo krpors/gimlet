@@ -97,7 +97,7 @@ public class DrillDownExecutionTab extends Tab {
             uniqueParams.forEach(s -> prevValues.put(s.getName(), this.columnMap.get(s.getName())));
 
             // Open dialog with the previous entered values.
-            ParamInputDialog dlg = new ParamInputDialog(uniqueParams);
+            ParamInputDialog dlg = new ParamInputDialog(query.getDescription(), uniqueParams);
             dlg.prefill(prevValues);
             Optional<Map<String, Object>> opt = dlg.showAndWait();
             opt.ifPresent(stringObjectMap -> {

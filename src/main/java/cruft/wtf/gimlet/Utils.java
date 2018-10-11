@@ -30,7 +30,6 @@ public final class Utils {
 
     private static Logger logger = LoggerFactory.getLogger(Utils.class);
 
-
     /**
      * Text formatter to allow numbers only. Used in text fields to only accept numbers.
      */
@@ -43,8 +42,6 @@ public final class Utils {
             return null;
         });
     }
-
-
 
     /**
      * Creates and displays a dialog with {@link Exception} details.

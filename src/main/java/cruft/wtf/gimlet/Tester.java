@@ -99,7 +99,7 @@ public class Tester extends Application {
         set.add(new ParseResult.Param("NUM", ParseResult.Type.NUMBER));
         set.add(new ParseResult.Param("NONE", ParseResult.Type.NONE));
 
-        ParamInputDialog dlg = new ParamInputDialog(set);
+        ParamInputDialog dlg = new ParamInputDialog("Some description. And it is very long. Blah blah blah yo yo yo", set);
         Map<String, Object> prefill = new HashMap<>();
         prefill.put("ID", 123);
         prefill.put("NAME", "Some name");

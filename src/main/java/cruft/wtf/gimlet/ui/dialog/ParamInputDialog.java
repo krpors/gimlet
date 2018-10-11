@@ -1,6 +1,7 @@
 package cruft.wtf.gimlet.ui.dialog;
 
 
+import com.google.common.base.Strings;
 import cruft.wtf.gimlet.GimletApp;
 import cruft.wtf.gimlet.jdbc.ParseResult;
 import cruft.wtf.gimlet.ui.FormPane;
@@ -11,9 +12,19 @@ import cruft.wtf.gimlet.ui.controls.NumberTextField;
 import cruft.wtf.gimlet.ui.controls.ParamInput;
 import cruft.wtf.gimlet.ui.controls.StringTextField;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
+import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
+import javafx.scene.control.Separator;
+import javafx.scene.control.TextArea;
+import javafx.scene.layout.Border;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 
 import java.util.Map;
 import java.util.Set;
@@ -28,18 +39,42 @@ import java.util.TreeMap;
  */
 public class ParamInputDialog extends Dialog<Map<String, Object>> {
 
-    private FormPane pane;
+    /**
+     * The input pane for the parameters.
+     */
+    private FormPane inputPane;
 
-    public ParamInputDialog(Set<ParseResult.Param> paramNames) {
+    // TODO: constructor parameter can be a Query instead?
+    /**
+     * Creates a new dialog.
+     *
+     * @param description The description of the query where input is required.
+     * @param paramNames  The unique parameter names.
+     */
+    public ParamInputDialog(String description, Set<ParseResult.Param> paramNames) {
         initOwner(GimletApp.window);
         setTitle("Input for query");
         setHeaderText("Specify input for the query:");
         setGraphic(Images.MAGNIFYING_GLASS.imageView());
 
-        pane = new FormPane();
-        paramNames.forEach(k -> addNode(pane, k));
+        if (Strings.isNullOrEmpty(description)) {
+            description = "No query description given.";
+        }
 
-        getDialogPane().setContent(pane);
+        Label lblDescription = new Label(description);
+
+        Separator sep = new Separator(Orientation.HORIZONTAL);
+        sep.setPadding(new Insets(5));
+
+        inputPane = new FormPane();
+        paramNames.forEach(k -> addNode(inputPane, k));
+
+        VBox box = new VBox(
+                lblDescription,
+                sep,
+                inputPane);
+
+        getDialogPane().setContent(box);
         getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
         setWidth(320);
         setHeight(240);
@@ -48,7 +83,7 @@ public class ParamInputDialog extends Dialog<Map<String, Object>> {
             if (btnType == ButtonType.OK) {
                 // convert cruft to hashmap.
                 Map<String, Object> map = new TreeMap<>();
-                pane.getChildren()
+                inputPane.getChildren()
                         .stream()
                         .filter(node -> node instanceof ParamInput)
                         .map(node -> (ParamInput) node)
@@ -60,7 +95,7 @@ public class ParamInputDialog extends Dialog<Map<String, Object>> {
             return null;
         });
 
-        Platform.runLater(() -> pane.getChildren().get(1).requestFocus());
+        Platform.runLater(() -> inputPane.getChildren().get(1).requestFocus());
     }
 
     /**
@@ -73,7 +108,7 @@ public class ParamInputDialog extends Dialog<Map<String, Object>> {
      */
     @SuppressWarnings("unchecked")
     public void prefill(final Map<String, Object> values) {
-        pane.getChildren()
+        inputPane.getChildren()
                 .stream()
                 // Only act on Nodes which are TextFields.
                 .filter(node -> node instanceof ParamInput)
@@ -96,7 +131,7 @@ public class ParamInputDialog extends Dialog<Map<String, Object>> {
      * Adds a node based on the {@link ParseResult.Param}. Based on the parameter type, a different {@link Node} will be
      * rendered.
      *
-     * @param parent The parent form pane.
+     * @param parent The parent form inputPane.
      * @param param  The parameter to create a node for.
      */
     private void addNode(final FormPane parent, final ParseResult.Param param) {

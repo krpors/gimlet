@@ -138,7 +138,7 @@ public class QueryTree extends TreeView<Query> {
             return Optional.of(Collections.emptyMap());
         }
 
-        ParamInputDialog dlg = new ParamInputDialog(result.getUniqueParameters());
+        ParamInputDialog dlg = new ParamInputDialog(query.getDescription(), result.getUniqueParameters());
         return dlg.showAndWait();
     }
 
