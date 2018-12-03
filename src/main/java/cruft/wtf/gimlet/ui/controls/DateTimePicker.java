@@ -23,7 +23,7 @@ to the Apache License Version 2.0, January 2004.
  *
  * It also implements the {@link ParamInput} interface for usage in the {@link cruft.wtf.gimlet.ui.dialog.ParamInputDialog}.
  */
-public class DateTimePicker extends DatePicker implements ParamInput<Timestamp> {
+public class DateTimePicker extends DatePicker implements ParamInput {
 
     private static final String defaultFormat = "yyyy-MM-dd HH:mm";
 
@@ -119,14 +119,19 @@ public class DateTimePicker extends DatePicker implements ParamInput<Timestamp> 
     }
 
     @Override
-    public Timestamp getParameterValue() {
+    public Object getParameterValue() {
         return Timestamp.from(getDateTimeValue().atZone(ZoneId.systemDefault()).toInstant());
     }
 
     @Override
-    public void setParameterValue(Timestamp o) {
-        LocalDateTime ldt = LocalDateTime.ofInstant(o.toInstant(), ZoneId.systemDefault());
-        setDateTimeValue(ldt);
+    public void setParameterValue(Object stamp) {
+        if (stamp instanceof Timestamp) {
+            Timestamp o = (Timestamp) stamp;
+            LocalDateTime ldt = LocalDateTime.ofInstant(o.toInstant(), ZoneId.systemDefault());
+            setDateTimeValue(ldt);
+        } else {
+            throw new ClassCastException("The given parameter is not a java.sql.Timestamp and is a bug!");
+        }
     }
 
     class InternalConverter extends StringConverter<LocalDate> {

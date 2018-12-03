@@ -10,7 +10,7 @@ import java.util.Optional;
  * A simple extension to the {@link TextField}, which contains some logic to parse a number.
  * When parsing fails, the user gets visual notification that it cannot be parsed correctly.
  */
-public class NumberTextField extends TextField implements ParamInput<Number> {
+public class NumberTextField extends TextField implements ParamInput {
     private DecimalFormat decimalFormat = new DecimalFormat("#");
 
     private Number number = 0;
@@ -65,12 +65,17 @@ public class NumberTextField extends TextField implements ParamInput<Number> {
     }
 
     @Override
-    public Number getParameterValue() {
+    public Object getParameterValue() {
         return number;
     }
 
     @Override
-    public void setParameterValue(Number o) {
-        this.number = o;
+    public void setParameterValue(Object o) {
+        if (o instanceof Number) {
+            Number n = (Number) o;
+            this.number = n;
+        } else {
+            throw new ClassCastException("The given parameter is not a java.lang.Number and is a bug!");
+        }
     }
 }

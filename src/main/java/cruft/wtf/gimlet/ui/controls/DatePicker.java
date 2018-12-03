@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter;
  * Specialization of JavaFX's {@link javafx.scene.control.DatePicker}. It implements the {@link ParamInput} interface
  * so it can be used in the {@link cruft.wtf.gimlet.ui.dialog.ParamInputDialog}.
  */
-public class DatePicker extends javafx.scene.control.DatePicker implements ParamInput<Date> {
+public class DatePicker extends javafx.scene.control.DatePicker implements ParamInput {
 
     private static final String defaultFormat = "yyyy-MM-dd";
 
@@ -27,13 +27,18 @@ public class DatePicker extends javafx.scene.control.DatePicker implements Param
     }
 
     @Override
-    public Date getParameterValue() {
+    public Object getParameterValue() {
         return Date.valueOf(getValue());
     }
 
     @Override
-    public void setParameterValue(Date o) {
-        setValue(o.toLocalDate());
+    public void setParameterValue(Object o) {
+        if (o instanceof Date) {
+            Date o1 = (Date) o;
+            setValue(o1.toLocalDate());
+        } else {
+            throw new ClassCastException("The given parameter is not a java.sql.Date and is a bug!");
+        }
     }
 
     class InternalConverter extends StringConverter<LocalDate> {
