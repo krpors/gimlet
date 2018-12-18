@@ -1,7 +1,6 @@
 package cruft.wtf.gimlet.ui.drilldown;
 
 
-import com.sun.javafx.scene.control.behavior.TabPaneBehavior;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.ui.ConnectionTab;
 import cruft.wtf.gimlet.ui.Images;
@@ -12,7 +11,6 @@ import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.control.skin.TabPaneSkin;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import org.slf4j.Logger;
