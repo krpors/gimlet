@@ -17,6 +17,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
 
+import java.net.URL;
 import java.util.Optional;
 
 /**
@@ -44,7 +45,8 @@ public class QueryDialog extends Dialog<Query> {
 
         getDialogPane().setPrefWidth(640);
         getDialogPane().setPrefHeight(480);
-        getDialogPane().getStylesheets().add("/css/style.css");
+        URL url = getClass().getResource("/css/style.css");
+        getDialogPane().getStylesheets().add(url.toString());
         getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
         setResultConverter(param -> {

@@ -30,6 +30,7 @@ import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.URL;
 import java.util.Optional;
 
 // TODO: this class is getting too big I suppose. Needs refactoring?
@@ -334,7 +335,8 @@ public class GimletApp extends Application {
         addShutdownHook();
 
         Scene scene = new Scene(createMainContent());
-        scene.getStylesheets().add("/css/style.css");
+        URL url = getClass().getResource("/css/style.css");
+        scene.getStylesheets().add(url.toString());
 
         primaryStage.setTitle(VersionInfo.getVersionString());
         primaryStage.setScene(scene);
