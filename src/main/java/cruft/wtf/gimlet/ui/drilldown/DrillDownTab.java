@@ -2,15 +2,17 @@ package cruft.wtf.gimlet.ui.drilldown;
 
 
 import com.sun.javafx.scene.control.behavior.TabPaneBehavior;
-import com.sun.javafx.scene.control.skin.TabPaneSkin;
 import cruft.wtf.gimlet.conf.Query;
 import cruft.wtf.gimlet.ui.ConnectionTab;
 import cruft.wtf.gimlet.ui.Images;
 import javafx.collections.ListChangeListener;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.scene.Node;
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.control.skin.TabPaneSkin;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import org.slf4j.Logger;
@@ -87,8 +89,12 @@ public class DrillDownTab extends Tab {
         // TODO: Extend TabPane with this behaviour, and use that one as the TabPaneResultSets?
         Tab selected = tabPaneResultSets.getSelectionModel().getSelectedItem();
         if (selected != null) {
-            TabPaneBehavior b = ((TabPaneSkin) (tabPaneResultSets.getSkin())).getBehavior();
-            b.closeTab(selected);
+            EventHandler<Event> handler = selected.getOnClosed();
+            if (handler != null) {
+                handler.handle(null);
+            } else {
+                tabPaneResultSets.getTabs().removeAll(selected);
+            }
         }
     }
 

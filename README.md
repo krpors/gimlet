@@ -71,6 +71,27 @@ The `:ID` is crucial here: this is input from the column `ID` from the previous 
 
 # Compiling and packaging
 
+## Java 11
+
+To compile with Java 11, be sure to check out the `jdk11` branch. Since JDK 8 and 11 differ
+in many aspects (module system, deprecated and removed APIs such as JAXB, JavaFX), I made
+a branch explicitly to test out the features and stuff.
+
+In any case, be sure to have JDK 11 installed, and Maven 3.5+.
+
+After cloning the repository, just run
+
+    mvn clean install
+
+To run the application in IntelliJ IDEA, some trickery was required (I was using 2018.3 at
+the time). I had to add the following VM options to my run configuration:
+
+    --module-path "$M2_HOME/repository/org/openjfx/javafx-base/11/:$M2_HOME/repository/org/openjfx/javafx-controls/11/:$M2_HOME/repository/org/openjfx/javafx-graphics/11/" --add-modules javafx.controls
+
+or else I couldn't run it inside IDEA.
+
+## Java 8 and older
+
 Java 8 is required. Maven must be used to build the sources and optionally build a
 distribution (work in progress):
 
@@ -115,8 +136,8 @@ To directly run from within Maven, just run:
 
 The only thing required is that the necessary JARs are to be put on the classpath.
 If you have a driver JAR, for example `ojdbc6.jar`, just drop it in the `./lib/`
-folder. When Gimlet is run the next time (using the run scripts), all JARs are
-added to the classpath, thus loading the JDBC driver automatically.
+or `./drivers/` folder. When Gimlet is run the next time (using the run scripts),
+all JARs are added to the classpath, thus loading the JDBC driver automatically.
 In the Alias editor dialog, the combobox *should* then list all available drivers.
 
 # Parameter formatting

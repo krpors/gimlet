@@ -1,24 +1,18 @@
 package cruft.wtf.gimlet.ui;
 
 
-import com.sun.javafx.scene.control.behavior.TabPaneBehavior;
-import com.sun.javafx.scene.control.skin.TabPaneSkin;
-import cruft.wtf.gimlet.jdbc.Column;
 import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.QueryExecutedEvent;
 import cruft.wtf.gimlet.jdbc.CachedRowSetTransformer;
+import cruft.wtf.gimlet.jdbc.Column;
 import cruft.wtf.gimlet.jdbc.task.SimpleQueryTask;
 import javafx.collections.ObservableList;
+import javafx.event.Event;
+import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
-import javafx.scene.control.Button;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.ToolBar;
-import javafx.scene.control.Tooltip;
+import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import org.slf4j.Logger;
@@ -179,8 +173,12 @@ public class SQLTab extends Tab {
         // TODO: Extend TabPane with this behaviour, and use that one as the TabPaneResultSets?
         Tab selected = tabPaneResultSets.getSelectionModel().getSelectedItem();
         if (selected != null) {
-            TabPaneBehavior b = ((TabPaneSkin) (tabPaneResultSets.getSkin())).getBehavior();
-            b.closeTab(selected);
+            EventHandler<Event> handler = selected.getOnClosed();
+            if (handler != null) {
+                handler.handle(null);
+            } else {
+                tabPaneResultSets.getTabs().removeAll(selected);
+            }
         }
     }
 }
