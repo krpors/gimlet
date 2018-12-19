@@ -6,10 +6,10 @@ module gimlet {
     requires java.sql;
     requires java.sql.rowset;
 
-    requires guava;
-    requires logback.classic;
-    requires logback.core;
-    requires slf4j.api;
+    requires com.google.common;
+    requires ch.qos.logback.classic;
+    requires ch.qos.logback.core;
+    requires org.slf4j;
     requires com.sun.xml.bind;
 
     requires javafx.base;
@@ -24,4 +24,6 @@ module gimlet {
     // Some opens directives for Guava as well.
     opens cruft.wtf.gimlet;
     opens cruft.wtf.gimlet.conf to java.xml.bind;
+
+
 }
