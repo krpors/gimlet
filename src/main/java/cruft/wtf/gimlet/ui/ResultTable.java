@@ -77,6 +77,9 @@ public class ResultTable extends TableView<ObservableList> {
      */
     @SuppressWarnings("unchecked")
     private void setColumns(List<Column> columnList) {
+        // First remove them all to allow us to possibly reuse an instance.
+        getColumns().clear();
+
         this.columnList = columnList;
 
         for (int i = 0; i < columnList.size(); i++) {

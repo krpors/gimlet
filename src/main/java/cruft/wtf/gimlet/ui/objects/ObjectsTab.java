@@ -1,12 +1,13 @@
 package cruft.wtf.gimlet.ui.objects;
 
-import cruft.wtf.gimlet.jdbc.SqlType;
+import cruft.wtf.gimlet.jdbc.CachedRowSetTransformer;
+import cruft.wtf.gimlet.jdbc.Column;
 import cruft.wtf.gimlet.jdbc.task.ObjectLoaderTask;
+import cruft.wtf.gimlet.jdbc.task.SimpleQueryTask;
+import cruft.wtf.gimlet.jdbc.task.TableColumnMetaDataTask;
 import cruft.wtf.gimlet.ui.Images;
+import cruft.wtf.gimlet.ui.ResultTable;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
@@ -15,6 +16,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ProgressIndicator;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.control.ToolBar;
 import javafx.scene.control.Tooltip;
 import javafx.scene.control.TreeItem;
@@ -25,13 +27,10 @@ import javafx.scene.layout.VBox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.sql.rowset.CachedRowSet;
 import java.sql.Connection;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -54,7 +53,11 @@ public class ObjectsTab extends Tab {
 
     private TreeView<DatabaseObject> objectTree = new TreeView<>();
 
+    private TabPane tabPane;
+
     private ObjectsTable table;
+
+    private ResultTable resultTable;
 
     private BorderPane borderPane;
 
@@ -133,58 +136,24 @@ public class ObjectsTab extends Tab {
 
         // When selecting a TABLE display something.
         // TODO: this is not done in a task on the background, and may therefore hang the
-        objectTree.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if (newValue == null) {
-                return;
-            }
-
-            table.getItems().clear();
-
-            DatabaseObject obj = newValue.getValue();
-            if (obj.getType() == DatabaseObject.TABLE) {
-                DatabaseObject parent = newValue.getParent().getValue();
-
-                try {
-                    DatabaseMetaData dmd = connection.getMetaData();
-                    ResultSet rs = dmd.getColumns(null, parent.getName(), obj.getName(), "%");
-
-                    // Get primary keys of the table.
-                    ResultSet pks = dmd.getPrimaryKeys(null, parent.getName(), obj.getName());
-                    Set<String> setColumnPks = new HashSet<>();
-                    while (pks.next()) {
-                        setColumnPks.add(pks.getString("COLUMN_NAME"));
-                    }
-                    pks.close();
-
-                    ObservableList<ObjectsTableData> derp = FXCollections.observableArrayList();
-
-                    int ordinal = 0;
-                    while (rs.next()) {
-                        ObjectsTableData data = new ObjectsTableData();
-                        data.setOrdinalPosition(ordinal++);
-                        data.setColumnName(rs.getString("COLUMN_NAME"));
-                        data.setDataType(SqlType.getType(rs.getInt("DATA_TYPE")));
-                        data.setTypeName(rs.getString("TYPE_NAME"));
-                        data.setColumnSize(rs.getInt("COLUMN_SIZE"));
-                        data.setNullable(rs.getInt("NULLABLE") != 0);
-                        data.setRemarks(rs.getString("REMARKS"));
-                        data.setPrimaryKey(setColumnPks.contains(rs.getString("COLUMN_NAME")));
-                        derp.add(data);
-                    }
-
-                    table.setItems(derp);
-
-                    rs.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
+        objectTree.getSelectionModel().selectedItemProperty().addListener((o, oldVal, newVal) -> {
+            fetchTableMetaData(newVal);
+            fetchTablePreviewData(newVal);
         });
 
         table = new ObjectsTable();
         table.setPlaceholder(null);
 
-        SplitPane splitPaneObjects = new SplitPane(objectTree, table);
+        resultTable = new ResultTable();
+        resultTable.setPlaceholder(null);
+
+        Tab tabObjectsTable = new Tab("Objects", table);
+        Tab tabTableContents = new Tab("Contents", resultTable);
+
+        tabPane = new TabPane(tabObjectsTable, tabTableContents);
+        tabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+
+        SplitPane splitPaneObjects = new SplitPane(objectTree, tabPane);
         SplitPane.setResizableWithParent(objectTree, false);
         splitPaneObjects.setDividerPosition(0, 0.4);
         return splitPaneObjects;
@@ -200,8 +169,60 @@ public class ObjectsTab extends Tab {
     }
 
     /**
+     * This methods will fetch table data: column meta-data and a preview of the data in the table.
+     */
+    private void fetchTableMetaData(final TreeItem<DatabaseObject> newValue) {
+        if (newValue == null || newValue.getValue().getType() != DatabaseObject.TABLE) {
+            return;
+        }
+
+        TableColumnMetaDataTask task = new TableColumnMetaDataTask(this.connection, newValue.getParent().getValue().getName(), newValue.getValue(), 50);
+        task.setOnFailed(event -> {
+            System.out.println("failed");
+        });
+        task.setOnRunning(event -> {
+            System.out.println("Running.");
+        });
+        task.setOnSucceeded(event -> {
+            table.getItems().clear();
+            System.out.println("Success!");
+            table.setItems(task.getValue());
+        });
+
+        Thread t = new Thread(task, "Table MetaData Thread");
+        t.setDaemon(true);
+        t.start();
+    }
+
+    private void fetchTablePreviewData(final TreeItem<DatabaseObject> newValue) {
+        if (newValue == null || newValue.getValue().getType() != DatabaseObject.TABLE) {
+            return;
+        }
+
+        logger.debug("Fetching table data for " + newValue.getValue().getName());
+
+        // FIXME: HIGHLY unlikely I guess, but SQL injection *may* occur...
+        SimpleQueryTask sqt = new SimpleQueryTask(connection, "select * from " + newValue.getValue().getName(), 100);
+        sqt.setOnSucceeded(event -> {
+            try (CachedRowSet rowset = sqt.getValue()) {
+                List<Column> columnList = CachedRowSetTransformer.getColumns(rowset);
+                ObservableList<ObservableList> data = CachedRowSetTransformer.getData(rowset);
+                resultTable.setItems(columnList, data);
+
+
+            } catch (SQLException ex) {
+                logger.error("Error", ex);
+            }
+        });
+        Thread t = new Thread(sqt, "Table Preview Data Thread");
+        t.setDaemon(true);
+        t.start();
+    }
+
+
+    /**
      * Populates the tree by kicking off an {@link ObjectLoaderTask}. The UI is updated with an indeterminate
-     * spinner and labels are updates when things are loaded.
+     * spinner and labels are updated when things are loaded.
      */
     private void populateTree() {
         this.taskLoadObjects = new ObjectLoaderTask(connection);
