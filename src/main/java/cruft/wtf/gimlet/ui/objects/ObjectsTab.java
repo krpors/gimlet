@@ -1,5 +1,6 @@
 package cruft.wtf.gimlet.ui.objects;
 
+import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.jdbc.CachedRowSetTransformer;
 import cruft.wtf.gimlet.jdbc.Column;
 import cruft.wtf.gimlet.jdbc.task.ObjectLoaderTask;
@@ -202,7 +203,9 @@ public class ObjectsTab extends Tab {
         logger.debug("Fetching table data for " + newValue.getValue().getName());
 
         // FIXME: HIGHLY unlikely I guess, but SQL injection *may* occur...
-        SimpleQueryTask sqt = new SimpleQueryTask(connection, "select * from " + newValue.getValue().getName(), 100);
+        String schema = newValue.getParent().getValue().getName();
+        String table = newValue.getValue().getName();
+        SimpleQueryTask sqt = new SimpleQueryTask(connection, String.format("select * from \"%s\".\"%s\"", schema, table), 100);
         sqt.setOnSucceeded(event -> {
             try (CachedRowSet rowset = sqt.getValue()) {
                 List<Column> columnList = CachedRowSetTransformer.getColumns(rowset);
@@ -212,6 +215,7 @@ public class ObjectsTab extends Tab {
 
             } catch (SQLException ex) {
                 logger.error("Error", ex);
+                Utils.showExceptionDialog(ex, "Unable to fetch preview data!", "This is probably a bug.");
             }
         });
         Thread t = new Thread(sqt, "Table Preview Data Thread");
