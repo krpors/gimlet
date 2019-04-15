@@ -3,6 +3,7 @@ package cruft.wtf.gimlet.util;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * This class limits the size of the elements by evicting the last element if the size exceeds {@link #maxSize}.
@@ -53,6 +54,10 @@ public class LimitedSizePriorityQueue<E> {
 
     public E pop() {
         return backingQueue.pop();
+    }
+
+    public boolean removeIf(Predicate<? super E> filter) {
+        return backingQueue.removeIf(filter);
     }
 
     public void forEach(Consumer<? super E> action) {

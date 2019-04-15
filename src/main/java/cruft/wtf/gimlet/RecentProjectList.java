@@ -32,6 +32,10 @@ public class RecentProjectList {
         backingQueue.push(project);
     }
 
+    public void remove(String project) {
+        backingQueue.removeIf(s -> s.equals(project));
+    }
+
     public void load() throws IOException {
         if (!filename.exists()) {
             log.info("Recent projects file '{}' does not exist; creating empty one", filename);

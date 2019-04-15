@@ -175,6 +175,14 @@ public class MainMenuBar extends MenuBar {
             menuRecentProjects.getItems().add(item);
             item.setOnAction(event -> {
                 // Emit a new event when clicked.
+                File f = new File(s);
+                if (!f.exists()) {
+                    Utils.showError("File does not exist", "The file does not exist");
+                    this.recentProjectList.remove(s);
+                    updateRecentProjects();
+                    return;
+                }
+
                 LoadProjectEvent lpe = new LoadProjectEvent(new File(s));
                 EventDispatcher.getInstance().post(lpe);
             });
