@@ -36,14 +36,9 @@ public final class Configuration extends Properties {
     private Configuration() {
         configFile = Xdg.getConfigHome().resolve("config").toFile();
         logger.debug("Gimlet configuration file is '{}'", configFile);
-
     }
 
-    public static Configuration getInstance() {
-        return instance;
-    }
-
-    File getConfigFile() {
+    public static File getConfigFile() {
         return configFile;
     }
 
@@ -53,8 +48,8 @@ public final class Configuration extends Properties {
      * @param key The key to look up.
      * @return {@link Optional#empty()} when the key cannot be found or parsed as an integer.
      */
-    public Optional<Integer> getIntegerProperty(Key key) {
-        String property = getProperty(key);
+    public static Optional<Integer> getIntegerProperty(Key key) {
+        String property = instance.getProperty(key);
         if (property == null) {
             return Optional.empty();
         }
@@ -72,8 +67,8 @@ public final class Configuration extends Properties {
      * @param key The key to look up.
      * @return {@link Optional#empty()} when the key cannot be found.
      */
-    public Optional<Boolean> getBooleanProperty(Key key) {
-        String property = getProperty(key);
+    public static Optional<Boolean> getBooleanProperty(Key key) {
+        String property = instance.getProperty(key);
         if (property == null) {
             return Optional.empty();
         }
@@ -87,8 +82,8 @@ public final class Configuration extends Properties {
      * @param key The key to look up.
      * @return {@link Optional#empty()} when the key cannot be found or parsed as a double.
      */
-    public Optional<Double> getDoubleProperty(Key key) {
-        String property = getProperty(key);
+    public static Optional<Double> getDoubleProperty(Key key) {
+        String property = instance.getProperty(key);
         if (property == null) {
             return Optional.empty();
         }
@@ -106,8 +101,8 @@ public final class Configuration extends Properties {
      * @param key The key to look up.
      * @return {@link Optional#empty()} when the key cannot be found.
      */
-    public Optional<String> getStringProperty(Key key) {
-        String property = getProperty(key);
+    public static Optional<String> getStringProperty(Key key) {
+        String property = instance.getProperty(key);
         if (property == null) {
             return Optional.empty();
         }
@@ -115,18 +110,18 @@ public final class Configuration extends Properties {
         return Optional.of(property);
     }
 
-    public String getProperty(Key key) {
-        return getProperty(key.getName());
+    public static String getProperty(Key key) {
+        return instance.getProperty(key.getName());
     }
 
-    public void setProperty(Key key, Object value) {
-        setProperty(key.getName(), value.toString());
+    public static void setProperty(Key key, Object value) {
+        instance.setProperty(key.getName(), value.toString());
     }
 
     /**
      * Sets the default values for the configuration.
      */
-    public void setDefaults() {
+    public static void setDefaults() {
         setProperty(Key.TRUNCATE_SIZE, 32);
         setProperty(Key.WINDOW_MAXIMIZED, false);
     }
@@ -136,15 +131,16 @@ public final class Configuration extends Properties {
      *
      * @throws IOException When the file cannot be read.
      */
-    public void load() throws IOException {
+    public static void load() throws IOException {
         if (!configFile.exists()) {
             logger.info("Configuration file '{}' does not exist; setting default values", configFile);
             setDefaults();
             return;
         }
-        FileInputStream fis = new FileInputStream(configFile);
-        load(fis);
-        fis.close();
+
+        try (FileInputStream fis = new FileInputStream(configFile)) {
+            instance.load(fis);
+        }
     }
 
     /**
@@ -152,10 +148,10 @@ public final class Configuration extends Properties {
      *
      * @throws IOException When the file could not be written.
      */
-    public void write() throws IOException {
+    public static void write() throws IOException {
         Files.createParentDirs(configFile);
         FileOutputStream fos = new FileOutputStream(configFile);
-        store(fos, "Gimlet config");
+        instance.store(fos, "Gimlet config");
         logger.info("Written configuration file '{}'", configFile);
         fos.close();
     }
@@ -165,8 +161,8 @@ public final class Configuration extends Properties {
      *
      * @param key The key to remove.
      */
-    public void remove(Key key) {
-        remove(key.getName());
+    public static void remove(Key key) {
+        instance.remove(key.getName());
     }
 
     /**

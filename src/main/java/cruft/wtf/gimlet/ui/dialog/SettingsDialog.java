@@ -37,19 +37,17 @@ public class SettingsDialog extends Dialog<String> {
 
         FormPane pane = new FormPane();
 
-        Configuration c = Configuration.getInstance();
-
-        txtTruncateSize = new TextField(c.getProperty(Configuration.Key.TRUNCATE_SIZE));
+        txtTruncateSize = new TextField(Configuration.getProperty(Configuration.Key.TRUNCATE_SIZE));
         txtTruncateSize.setTextFormatter(Utils.createFormatter());
         txtTruncateSize.setTooltip(new Tooltip("The amount of characters to display in columns until they are truncated."));
         pane.add("Column truncate length", txtTruncateSize);
 
         chkSaveOnExit = new CheckBox();
-        chkSaveOnExit.setSelected(c.getBooleanProperty(Configuration.Key.SAVE_ON_EXIT).orElse(false));
+        chkSaveOnExit.setSelected(Configuration.getBooleanProperty(Configuration.Key.SAVE_ON_EXIT).orElse(false));
         pane.add("Save project automatically on exit", chkSaveOnExit);
 
         chkConfirmAppExit = new CheckBox();
-        chkConfirmAppExit.setSelected(c.getBooleanProperty(Configuration.Key.CONFIRM_APPLICATION_EXIT).orElse(true));
+        chkConfirmAppExit.setSelected(Configuration.getBooleanProperty(Configuration.Key.CONFIRM_APPLICATION_EXIT).orElse(true));
         chkConfirmAppExit.setTooltip(new Tooltip("Check this box to confirm to exit the application"));
         pane.add("Confirm application exit", chkConfirmAppExit);
 
@@ -66,12 +64,11 @@ public class SettingsDialog extends Dialog<String> {
     }
 
     private void apply() {
-        Configuration c = Configuration.getInstance();
         try {
-            c.setProperty(Configuration.Key.TRUNCATE_SIZE, txtTruncateSize.getText());
-            c.setProperty(Configuration.Key.SAVE_ON_EXIT, chkSaveOnExit.isSelected());
-            c.setProperty(Configuration.Key.CONFIRM_APPLICATION_EXIT, chkConfirmAppExit.isSelected());
-            c.write();
+            Configuration.setProperty(Configuration.Key.TRUNCATE_SIZE, txtTruncateSize.getText());
+            Configuration.setProperty(Configuration.Key.SAVE_ON_EXIT, chkSaveOnExit.isSelected());
+            Configuration.setProperty(Configuration.Key.CONFIRM_APPLICATION_EXIT, chkConfirmAppExit.isSelected());
+            Configuration.write();
         } catch (IOException e) {
             logger.error("Unable to write configuration file", e);
             Utils.showExceptionDialog(e, "Unable to write properties", "CAN'T!");

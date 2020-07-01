@@ -92,9 +92,8 @@ public class GimletApp extends Application {
             ConnectionTabPane.instance.closeAllTabs();
 
             try {
-                Configuration c = Configuration.getInstance();
-                c.setProperty(Configuration.Key.WINDOW_MAXIMIZED, primaryStage.isMaximized());
-                c.write();
+                Configuration.setProperty(Configuration.Key.WINDOW_MAXIMIZED, primaryStage.isMaximized());
+                Configuration.write();
             } catch (Exception e) {
                 System.err.println("Unable to write the properties file at JVM exit!");
                 e.printStackTrace();
@@ -108,10 +107,9 @@ public class GimletApp extends Application {
     private void initConfigs() {
         try {
             logger.debug("Loading Gimlet configuration");
-            Configuration c = Configuration.getInstance();
-            c.load();
+            Configuration.load();
 
-            Optional<String> lastProject = c.getStringProperty(Configuration.Key.LAST_PROJECT_FILE);
+            Optional<String> lastProject = Configuration.getStringProperty(Configuration.Key.LAST_PROJECT_FILE);
             if (lastProject.isPresent()) {
                 logger.info("Loading up most recent project file '{}'", lastProject.get());
                 loadProjectFile(new File(lastProject.get()));
@@ -119,7 +117,7 @@ public class GimletApp extends Application {
         } catch (IOException e) {
             Utils.showExceptionDialog(
                     e, "Error!",
-                    "Could not load properties file '%s'", Configuration.getInstance().getConfigFile());
+                    "Could not load properties file '%s'", Configuration.getConfigFile());
         }
     }
 
@@ -133,14 +131,12 @@ public class GimletApp extends Application {
      * @param file The file to (attempt) to open. When it fails, the user is notified.
      */
     public void loadProjectFile(final File file) {
-        Configuration config = Configuration.getInstance();
-
         try {
             this.gimletProjectObjectProperty.setValue(GimletProject.read(file));
             GimletProject gimletProject = gimletProjectObjectProperty.get();
             logger.info("Successfully read '{}'", file);
 
-            config.setProperty(Configuration.Key.LAST_PROJECT_FILE, file.getAbsolutePath());
+            Configuration.setProperty(Configuration.Key.LAST_PROJECT_FILE, file.getAbsolutePath());
 
             this.primaryStage.titleProperty().bind(Bindings.concat(VersionInfo.getVersionString() + " - ", gimletProject.nameProperty()));
 
@@ -155,7 +151,7 @@ public class GimletApp extends Application {
         } catch (FileNotFoundException e) {
             logger.error("Could not load Gimlet project file", e);
             Utils.showExceptionDialog(e, "File could not be found", "The file could not be found.");
-            config.remove(Configuration.Key.LAST_PROJECT_FILE);
+            Configuration.remove(Configuration.Key.LAST_PROJECT_FILE);
         }
     }
 
@@ -226,10 +222,8 @@ public class GimletApp extends Application {
      * @return The result of the confirmation dialog.
      */
     public Optional<ButtonType> askForClosing() {
-        Configuration c = Configuration.getInstance();
-
         // Check if we are supposed to ask the user to exit the application.
-        if (c.getBooleanProperty(Configuration.Key.CONFIRM_APPLICATION_EXIT).orElse(true)) {
+        if (Configuration.getBooleanProperty(Configuration.Key.CONFIRM_APPLICATION_EXIT).orElse(true)) {
             return Utils.showConfirm(
                     "Are you sure you want to exit?",
                     "Close Gimlet",
@@ -245,8 +239,7 @@ public class GimletApp extends Application {
      */
     public void exit() {
         // TODO: also!! The configuration API is ugly as hell!
-        Configuration c = Configuration.getInstance();
-        c.getBooleanProperty(Configuration.Key.SAVE_ON_EXIT).ifPresent(aBoolean -> {
+        Configuration.getBooleanProperty(Configuration.Key.SAVE_ON_EXIT).ifPresent(aBoolean -> {
             GimletProject gimletProject = gimletProjectObjectProperty.get();
             if (aBoolean && gimletProject != null && gimletProject.getFile() != null) {
                 try {
@@ -347,8 +340,7 @@ public class GimletApp extends Application {
         initConfigs();
 
         // Read some properties from the user configuration file.
-        Configuration config = Configuration.getInstance();
-        config.getBooleanProperty(Configuration.Key.WINDOW_MAXIMIZED).ifPresent(primaryStage::setMaximized);
+        Configuration.getBooleanProperty(Configuration.Key.WINDOW_MAXIMIZED).ifPresent(primaryStage::setMaximized);
 
         // Show the stage after possibly reading and setting window properties.
         primaryStage.show();

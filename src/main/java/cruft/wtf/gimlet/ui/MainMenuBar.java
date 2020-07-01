@@ -1,22 +1,31 @@
 package cruft.wtf.gimlet.ui;
 
+import com.google.common.eventbus.Subscribe;
 import cruft.wtf.gimlet.GimletApp;
+import cruft.wtf.gimlet.RecentProjectList;
 import cruft.wtf.gimlet.Script;
 import cruft.wtf.gimlet.ScriptLoader;
 import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.event.EventDispatcher;
+import cruft.wtf.gimlet.event.FileOpenedEvent;
+import cruft.wtf.gimlet.event.LoadProjectEvent;
 import cruft.wtf.gimlet.event.ScriptExecutedEvent;
 import cruft.wtf.gimlet.ui.dialog.AboutWindow;
 import cruft.wtf.gimlet.ui.dialog.FileDialogs;
 import cruft.wtf.gimlet.ui.dialog.SettingsDialog;
 import cruft.wtf.gimlet.util.Xdg;
 import javafx.beans.binding.Bindings;
-import javafx.scene.control.*;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuBar;
+import javafx.scene.control.MenuItem;
+import javafx.scene.control.SeparatorMenuItem;
 import javafx.scene.input.KeyCombination;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.script.ScriptException;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
@@ -32,10 +41,17 @@ public class MainMenuBar extends MenuBar {
 
     private final GimletApp gimletApp;
 
+    private RecentProjectList recentProjectList;
+
+    private Menu menuRecentProjects;
+
     private Menu menuScripts;
 
     public MainMenuBar(final GimletApp gimletApp) {
+        EventDispatcher.getInstance().register(this);
+
         this.gimletApp = gimletApp;
+        this.recentProjectList = new RecentProjectList();
 
         Menu menuFile = new Menu("File");
 
@@ -46,6 +62,14 @@ public class MainMenuBar extends MenuBar {
         MenuItem fileItemOpen = new MenuItem("Open...");
         fileItemOpen.setAccelerator(KeyCombination.keyCombination("Ctrl+O"));
         fileItemOpen.setOnAction(event -> FileDialogs.showOpenProjectDialog());
+
+        menuRecentProjects = new Menu("Open recent");
+        try {
+            this.recentProjectList.load();
+            updateRecentProjects();
+        } catch (IOException e) {
+            logger.error("Unable to load recent project list", e);
+        }
 
         MenuItem fileItemSave = new MenuItem("Save", Images.SAVE.imageView());
         fileItemSave.setAccelerator(KeyCombination.keyCombination("Ctrl+S"));
@@ -76,6 +100,7 @@ public class MainMenuBar extends MenuBar {
 
         menuFile.getItems().add(fileItemNew);
         menuFile.getItems().add(fileItemOpen);
+        menuFile.getItems().add(menuRecentProjects);
         menuFile.getItems().add(fileItemSave);
         menuFile.getItems().add(fileItemSaveAs);
         menuFile.getItems().add(new SeparatorMenuItem());
@@ -135,6 +160,51 @@ public class MainMenuBar extends MenuBar {
         } catch (ScriptException e) {
             logger.error("Error while executing script", e);
             Utils.showExceptionDialog(e, "Error in script.", "There was an error while executing the script.");
+        }
+    }
+
+    /**
+     * Updates the menu with recent projects.
+     */
+    private void updateRecentProjects() {
+        // Clear the most recent list, re-add them based on the RecentProjectList instance.
+        menuRecentProjects.getItems().clear();
+        // Add new menu items.
+        this.recentProjectList.forEach(s -> {
+            MenuItem item = new MenuItem(s);
+            menuRecentProjects.getItems().add(item);
+            item.setOnAction(event -> {
+                // Emit a new event when clicked.
+                File f = new File(s);
+                if (!f.exists()) {
+                    Utils.showError("File does not exist", "The file does not exist");
+                    this.recentProjectList.remove(s);
+                    updateRecentProjects();
+                    return;
+                }
+
+                LoadProjectEvent lpe = new LoadProjectEvent(new File(s));
+                EventDispatcher.getInstance().post(lpe);
+            });
+        });
+    }
+
+    /**
+     * Subscribe on this event. When this happens, the most-recent filelist is changed accordingly.
+     *
+     * @param event The event when a file is opened.
+     */
+    @Subscribe
+    public void fileOpened(FileOpenedEvent event) {
+        // File is opened, add it to the recent project list thing.
+        recentProjectList.add(event.getFile().getAbsolutePath());
+
+        updateRecentProjects();
+
+        try {
+            recentProjectList.save();
+        } catch (IOException e) {
+            logger.error("Unable to save recent project list", e);
         }
     }
 }
