@@ -5,6 +5,12 @@ import cruft.wtf.gimlet.Utils;
 import cruft.wtf.gimlet.conf.Alias;
 import cruft.wtf.gimlet.ui.FormPane;
 import cruft.wtf.gimlet.ui.JdbcPropertiesTab;
+import java.sql.Connection;
+import java.sql.Driver;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.util.Enumeration;
+import java.util.Optional;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.geometry.Pos;
@@ -23,15 +29,9 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
+import javafx.stage.Modality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.util.Enumeration;
-import java.util.Optional;
 
 /**
  * The dialog to add/edit an alias in.
@@ -65,6 +65,7 @@ public class AliasDialog extends Dialog<Alias> {
     public AliasDialog() {
         initOwner(GimletApp.window);
         setTitle("Add alias");
+        setResizable(true); // TODO: quick fix for i3wm. SettingsDialog works properly?
         setHeaderText("Specify the values for the alias.");
         getDialogPane().setContent(createContent());
 
