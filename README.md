@@ -71,35 +71,13 @@ The `:ID` is crucial here: this is input from the column `ID` from the previous 
 
 # Compiling and packaging
 
-## Java 11
-
-To compile with Java 11, be sure to check out the `jdk11` branch. Since JDK 8 and 11 differ
-in many aspects (module system, deprecated and removed APIs such as JAXB, JavaFX), I made
-a branch explicitly to test out the features and stuff.
-
-In any case, be sure to have JDK 11 installed, and Maven 3.5+.
+This codebase is targeted from Java 11 and onwards, and can be compiled with Maven 3.5+.
 
 After cloning the repository, just run
 
     mvn clean install
 
-To run the application in IntelliJ IDEA, some trickery was required (I was using 2018.3 at
-the time). I had to add the following VM options to my run configuration:
-
-    --module-path "$M2_HOME/repository/org/openjfx/javafx-base/11/:$M2_HOME/repository/org/openjfx/javafx-controls/11/:$M2_HOME/repository/org/openjfx/javafx-graphics/11/" --add-modules javafx.controls
-
-or else I couldn't run it inside IDEA.
-
-## Java 8 and older
-
-Java 8 is required. Maven must be used to build the sources and optionally build a
-distribution (work in progress):
-
-Just compile:
-
-    mvn clean install
-
-Create `.tar.gz` and `.zip` distribution:
+to compile the code. To create `.tar.gz` and `.zip` distribution:
 
     mvn clean package assembly:single
 
@@ -113,18 +91,10 @@ The contents are as follows:
 			gimlet.sh   <-- shell script for Linux
 			gimlet.bat  <-- batch file for Windows
 			gimletw.bat <-- batch file for Windows, without console
+		/drivers/
+		    (drop any JDBC driver JARs here)
 		/lib/
-			error_prone_annotations-2.0.18.jar
-			hsqldb-2.4.0.jar
-			animal-sniffer-annotations-1.14.jar
-			j2objc-annotations-1.1.jar
-			gimlet-1.0-SNAPSHOT.jar
-			jsr305-1.3.9.jar
-			slf4j-api-1.7.25.jar
-			logback-core-1.2.3.jar
-			guava-22.0.jar
-			logback-classic-1.2.3.jar
-			... drop any JDBC driver JARs here ...
+			(all libraries requires to run the application)
 
 # Running from Maven
 
