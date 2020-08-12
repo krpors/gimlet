@@ -162,6 +162,16 @@
                 </dependency>
             </dependencies>
         </profile>
+        <profile>
+            <id>with-postgresql</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.postgresql</groupId>
+                    <artifactId>postgresql</artifactId>
+                    <version>42.2.14.jre7</version>
+                </dependency>
+            </dependencies>
+        </profile>
     </profiles>
 
 </project>
