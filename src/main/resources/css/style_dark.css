@@ -1,0 +1,108 @@
+.root {
+    -fx-accent: #6b6b6b;
+    -fx-focus-color: -fx-accent;
+    -fx-base: #2b2b2b;
+    -fx-control-inner-background: derive(-fx-base, 10%);
+    -fx-control-inner-background-alt: -fx-control-inner-background ;
+
+}
+
+.label {
+    -fx-text-fill: #cbcbcb;
+}
+
+.text-field {
+    -fx-text-fill: #cbcbcb;
+}
+
+.tab-pane .tab .tab-label {
+    -fx-text-fill: #cbcbcb;
+}
+
+.list-view .label {
+    -fx-text-fill: red;
+}
+
+.button {
+    -fx-text-fill: #cbcbcb;
+}
+
+.text-area {
+    -fx-text-fill: #cbcbcb;
+}
+
+.context-menu {
+    -fx-font-family: sans-serif;
+}
+
+.scroll-bar{
+    -fx-background-color: derive(-fx-base,45%)
+}
+
+.button:default {
+    -fx-base: -fx-accent ;
+}
+
+.error-text {
+    -fx-font-family: "Monospace";
+    -fx-text-fill: #FF4444;
+}
+
+.query-editor {
+    -fx-font-family: "Monospace";
+}
+
+.table-view {
+    -fx-font-family: "Monospace";
+}
+
+.value-label {
+    -fx-font-weight: bold;
+}
+
+.table-column {
+    -fx-alignment: center-left;
+    /*-fx-font-size: smaller;*/
+}
+/*
+.table-row-cell {
+    -fx-cell-size: 20px;
+}*/
+
+.table-row-cell .null {
+    -fx-background-color: lightgray;
+    -fx-alignment: center;
+}
+
+.table-row-cell:selected .null {
+    -fx-background-color: -fx-table-cell-border-color;
+    -fx-text-fill: black;
+}
+
+.table-row-cell .truncate {
+    -fx-background-color: #c9c984;
+    -fx-text-fill: black;
+}
+
+.table-row-cell:selected .truncate {
+    -fx-background-color: -fx-table-cell-border-color;
+    -fx-text-fill: black;
+}
+
+.primary-key {
+    -fx-base: #670000;
+}
+
+.query-reference {
+    -fx-base: gray;
+}
+
+/**
+ * This menu item is used for the custom menu item. TODO: docs
+ */
+ .labeledMenuItem, labeledMenuItem:hover {
+    -fx-font-weight: bolder;
+    -fx-font-size: smaller;
+    -fx-background-color: transparent;
+    -fx-text-fill: black;
+ }
