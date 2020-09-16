@@ -108,12 +108,6 @@ public class GimletApp extends Application {
         try {
             logger.debug("Loading Gimlet configuration");
             Configuration.load();
-
-            Optional<String> lastProject = Configuration.getStringProperty(Configuration.Key.LAST_PROJECT_FILE);
-            if (lastProject.isPresent()) {
-                logger.info("Loading up most recent project file '{}'", lastProject.get());
-                loadProjectFile(new File(lastProject.get()));
-            }
         } catch (IOException e) {
             Utils.showExceptionDialog(
                     e, "Error!",
@@ -322,22 +316,20 @@ public class GimletApp extends Application {
     @Override
     public void start(Stage primaryStage) {
         logger.info("Starting up Gimlet");
+        initConfigs();
 
         this.primaryStage = primaryStage;
 
         addShutdownHook();
 
         Scene scene = new Scene(createMainContent());
-        URL url = getClass().getResource("/css/style.css");
-        scene.getStylesheets().add(url.toString());
 
         primaryStage.setTitle(VersionInfo.getVersionString());
         primaryStage.setScene(scene);
         primaryStage.setWidth(1024);
         primaryStage.setHeight(768);
 
-        // After all controls are created, read the configuration file (if any).
-        initConfigs();
+        setTheme(scene);
 
         // Read some properties from the user configuration file.
         Configuration.getBooleanProperty(Configuration.Key.WINDOW_MAXIMIZED).ifPresent(primaryStage::setMaximized);
@@ -358,6 +350,28 @@ public class GimletApp extends Application {
             });
         });
 
+        loadLastOpenedProject();
+
         logger.info("{} started and ready", VersionInfo.getVersionString());
+    }
+
+    private void loadLastOpenedProject() {
+        Optional<String> lastProject = Configuration.getStringProperty(Configuration.Key.LAST_PROJECT_FILE);
+        if (lastProject.isPresent()) {
+            logger.info("Loading up most recent project file '{}'", lastProject.get());
+            loadProjectFile(new File(lastProject.get()));
+        }
+    }
+
+    private void setTheme(final Scene scene) {
+        if (Configuration.getBooleanProperty(Configuration.Key.ENABLE_DARK_THEME).orElse(false)) {
+            logger.debug("Using dark theme");
+            URL url = getClass().getResource("/css/style_dark.css");
+            scene.getStylesheets().add(url.toString());
+        } else {
+            logger.debug("Using light theme");
+            URL url = getClass().getResource("/css/style.css");
+            scene.getStylesheets().add(url.toString());
+        }
     }
 }

@@ -68,7 +68,7 @@ public final class Configuration extends Properties {
      * @return {@link Optional#empty()} when the key cannot be found.
      */
     public static Optional<Boolean> getBooleanProperty(Key key) {
-        String property = instance.getProperty(key);
+        String property = getProperty(key);
         if (property == null) {
             return Optional.empty();
         }
@@ -110,7 +110,7 @@ public final class Configuration extends Properties {
         return Optional.of(property);
     }
 
-    public static String getProperty(Key key) {
+    private static String getProperty(Key key) {
         return instance.getProperty(key.getName());
     }
 
@@ -121,9 +121,10 @@ public final class Configuration extends Properties {
     /**
      * Sets the default values for the configuration.
      */
-    public static void setDefaults() {
+    private static void setDefaults() {
         setProperty(Key.TRUNCATE_SIZE, 32);
         setProperty(Key.WINDOW_MAXIMIZED, false);
+        setProperty(Key.ENABLE_DARK_THEME, false);
     }
 
     /**
@@ -173,7 +174,9 @@ public final class Configuration extends Properties {
         LAST_PROJECT_FILE,
         SAVE_ON_EXIT,
         TRUNCATE_SIZE,
-        WINDOW_MAXIMIZED,;
+        WINDOW_MAXIMIZED,
+        ENABLE_DARK_THEME,
+        ;
 
         public String getName() {
             return name().toLowerCase().replace('_', '.');

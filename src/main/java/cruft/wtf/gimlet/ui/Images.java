@@ -1,9 +1,8 @@
 package cruft.wtf.gimlet.ui;
 
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
+import cruft.wtf.gimlet.Configuration;
+import javafx.scene.image.*;
+import javafx.scene.paint.Color;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,7 +50,7 @@ public enum Images {
     DIALOG_ERROR("/icons/dialog-error.png", false),
     LOCK_LOCKED_4X("/icons/lock-48px.png", false);
 
-    private String  path;
+    private String path;
     private boolean resize;
 
     private static Logger logger = LoggerFactory.getLogger(Images.class);
@@ -61,10 +60,12 @@ public enum Images {
         this.resize = resize;
     }
 
-    private static Map<Images, Image> imageCache;
+    private static Map<Images, Image> imageCache = new HashMap<>();
+
+    private static Map<Images, Image> imageCacheInverted = new HashMap<>();
 
     static {
-        imageCache = new HashMap<>();
+        logger.debug("Initializing images");
         for (Images img : Images.values()) {
             InputStream is = Images.class.getResourceAsStream(img.path);
             if (is == null) {
@@ -73,11 +74,42 @@ public enum Images {
             }
             Image image = new Image(Images.class.getResourceAsStream(img.path));
             imageCache.put(img, image);
+            imageCacheInverted.put(img, createInvertedImage(image));
         }
     }
 
+    /**
+     * Creates a view of the icons where the colors are inverted. This is helpful when
+     * using a dark theme so the colors oo not blend in the background.
+     *
+     * @param view
+     * @return
+     */
+    private static Image createInvertedImage(Image view) {
+
+        int w = (int) view.getWidth();
+        int h = (int) view.getHeight();
+        PixelReader reader = view.getPixelReader();
+        WritableImage image = new WritableImage(w, h);
+        PixelWriter writer = image.getPixelWriter();
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                Color color = reader.getColor(x, y);
+                writer.setColor(x, y, color.invert());
+            }
+        }
+
+        return image;
+    }
+
     public ImageView imageView() {
-        ImageView view = new ImageView(imageCache.get(this));
+        ImageView view;
+        if (Configuration.getBooleanProperty(Configuration.Key.ENABLE_DARK_THEME).orElse(false)) {
+            view = new ImageView(imageCacheInverted.get(this));
+        } else {
+            view = new ImageView(imageCache.get(this));
+        }
+
         if (resize) {
             view.setFitHeight(16);
             view.setPreserveRatio(true);
