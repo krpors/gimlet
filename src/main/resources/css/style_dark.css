@@ -70,7 +70,8 @@
 }*/
 
 .table-row-cell .null {
-    -fx-background-color: lightgray;
+    -fx-background-color: -fx-base;
+    -fx-color: -fx-accent;
     -fx-alignment: center;
 }
 
@@ -80,7 +81,7 @@
 }
 
 .table-row-cell .truncate {
-    -fx-background-color: #c9c984;
+    -fx-background-color: #c69959;
     -fx-text-fill: black;
 }
 
@@ -90,11 +91,17 @@
 }
 
 .primary-key {
-    -fx-base: #670000;
+    -fx-base: #d8635d;
 }
 
 .query-reference {
     -fx-base: gray;
+}
+
+.parent-query {
+    -fx-border-insets: 1 0 1 0;
+    -fx-border-color: -fx-accent transparent -fx-accent transparent;
+    -fx-font-weight: bold;
 }
 
 /**

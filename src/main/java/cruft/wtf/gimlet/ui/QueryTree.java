@@ -101,7 +101,7 @@ public class QueryTree extends TreeView<Query> {
      * @param queryList The queryList source.
      */
     private void addQuery(final TreeItem<Query> root, List<Query> queryList) {
-        if (queryList == null || queryList.size() == 0) {
+        if (queryList == null || queryList.isEmpty()) {
             return;
         }
 
@@ -475,10 +475,10 @@ public class QueryTree extends TreeView<Query> {
             // super call is required, see documentation.
             super.updateItem(item, empty);
 
+            getStyleClass().removeAll("query-reference", "parent-query");
             setStyle(""); // reset style, always
 
             if (empty || item == null) {
-                getStyleClass().remove("query-reference");
                 setText(null);
                 setGraphic(null);
                 setTooltip(null);
@@ -500,9 +500,15 @@ public class QueryTree extends TreeView<Query> {
             }
 
             if (item.getParentQuery() == null) {
-                setStyle("-fx-base: #c0c0c0");
+                getStyleClass().add("parent-query");
             }
-            setTooltip(new Tooltip(item.getDescription()));
+
+            if (item.getDescription().isEmpty()) {
+                setTooltip(new Tooltip("No query description given."));
+            } else {
+                setTooltip(new Tooltip(item.getDescription()));
+            }
+
             if (!isEditing() && !item.isReference()) {
                 this.setContextMenu(menu);
             }

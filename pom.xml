@@ -172,6 +172,16 @@
                 </dependency>
             </dependencies>
         </profile>
+        <profile>
+            <id>with-mssql</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.microsoft.sqlserver</groupId>
+                    <artifactId>mssql-jdbc</artifactId>
+                    <version>8.4.1.jre11</version>
+                </dependency>
+            </dependencies>
+        </profile>
     </profiles>
 
 </project>

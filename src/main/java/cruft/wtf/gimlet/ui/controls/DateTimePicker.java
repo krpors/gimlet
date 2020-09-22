@@ -31,7 +31,7 @@ public class DateTimePicker extends DatePicker implements ParamInput {
 
     private ObjectProperty<LocalDateTime> dateTimeValue = new SimpleObjectProperty<>(LocalDateTime.now());
 
-    private ObjectProperty<String> format = new SimpleObjectProperty<String>() {
+    private ObjectProperty<String> format = new SimpleObjectProperty<>() {
         public void set(String newValue) {
             super.set(newValue);
             formatter = DateTimeFormatter.ofPattern(newValue);
