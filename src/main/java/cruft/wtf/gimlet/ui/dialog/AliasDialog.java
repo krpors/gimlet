@@ -10,6 +10,8 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -29,7 +31,6 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.paint.Color;
-import javafx.stage.Modality;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,6 +62,18 @@ public class AliasDialog extends Dialog<Alias> {
     private CheckBox chkReadOnly;
 
     private JdbcPropertiesTab jdbcPropertiesTab;
+
+    /**
+     * Driver map with URL examples when a driver is chosen.
+     */
+    private static final Map<String, String> DRIVER_URL_MAP = new HashMap<>();
+
+    static {
+        DRIVER_URL_MAP.put("org.hsqldb.jdbc.JDBCDriver", "jdbc:hsqldb:hsql://<hostname>:<port>/<database>");
+        DRIVER_URL_MAP.put("org.postgresql.Driver", "jdbc:postgresql://<hostname>:<port>/<database>");
+        DRIVER_URL_MAP.put("com.microsoft.sqlserver.jdbc.SQLServerDriver", "jdbc:sqlserver://<hostname><\\instanceName>:<portNumber>>");
+        DRIVER_URL_MAP.put("oracle.jdbc.driver.OracleDriver", "jdbc:oracle:thin:@//<hostname>:<port>/<service>");
+    }
 
     public AliasDialog() {
         initOwner(GimletApp.window);
@@ -145,18 +158,20 @@ public class AliasDialog extends Dialog<Alias> {
         txtDescription.setPromptText("Description of this alias (optional)");
         pane.add("Description:", txtDescription);
 
-        txtJdbcUrl = new TextField();
-        txtJdbcUrl.setPromptText("JDBC URL, differs per driver");
-        pane.add("JDBC URL:", txtJdbcUrl);
-
         comboDriverClass = new ComboBox<>();
         comboDriverClass.setEditable(true);
+        comboDriverClass.getSelectionModel().selectedItemProperty().addListener((observableValue, oldVal, newVal) -> {
+            txtJdbcUrl.setText(DRIVER_URL_MAP.getOrDefault(newVal, ""));
+        });
         Enumeration<Driver> ez = DriverManager.getDrivers();
         while (ez.hasMoreElements()) {
             comboDriverClass.getItems().add(ez.nextElement().getClass().getName());
         }
-
         pane.add("JDBC driver:", comboDriverClass);
+
+        txtJdbcUrl = new TextField();
+        txtJdbcUrl.setPromptText("JDBC URL, differs per driver");
+        pane.add("JDBC URL:", txtJdbcUrl);
 
         txtUsername = new TextField();
         txtUsername.setPromptText("The username to authenticate with");
@@ -261,6 +276,5 @@ public class AliasDialog extends Dialog<Alias> {
         chkReadOnly.setSelected(alias.isReadOnly());
         return showAndWait();
     }
-
 }
 
