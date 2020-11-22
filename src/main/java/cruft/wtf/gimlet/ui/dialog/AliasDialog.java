@@ -160,13 +160,12 @@ public class AliasDialog extends Dialog<Alias> {
 
         comboDriverClass = new ComboBox<>();
         comboDriverClass.setEditable(true);
-        comboDriverClass.getSelectionModel().selectedItemProperty().addListener((observableValue, oldVal, newVal) -> {
-            txtJdbcUrl.setText(DRIVER_URL_MAP.getOrDefault(newVal, ""));
-        });
         Enumeration<Driver> ez = DriverManager.getDrivers();
         while (ez.hasMoreElements()) {
             comboDriverClass.getItems().add(ez.nextElement().getClass().getName());
         }
+        comboDriverClass.setOnAction(actionEvent ->
+            txtJdbcUrl.setText(DRIVER_URL_MAP.getOrDefault(comboDriverClass.getSelectionModel().getSelectedItem(), "")));
         pane.add("JDBC driver:", comboDriverClass);
 
         txtJdbcUrl = new TextField();
