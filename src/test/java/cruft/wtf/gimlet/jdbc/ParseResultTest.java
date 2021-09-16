@@ -1,13 +1,44 @@
 package cruft.wtf.gimlet.jdbc;
 
-import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
 public class ParseResultTest {
+
+    @Test
+    public void parseComplete() throws IOException {
+        String actual = new String(ParseResultTest.class.getResourceAsStream("/sql/complete-actual.sql").readAllBytes());
+        String expected = new String(ParseResultTest.class.getResourceAsStream("/sql/complete-expected.sql").readAllBytes());
+
+        ParseResult prs = ParseResult.parse(actual);
+
+        assertEquals(expected, prs.getSql());
+
+        assertEquals(6, prs.getParameters().size());
+        assertEquals(5, prs.getUniqueParameters().size());
+
+        assertEquals(ParseResult.Type.NONE, prs.getParameters().get(0).getDataType());
+        assertEquals("id", prs.getParameters().get(0).getName());
+
+        assertEquals(ParseResult.Type.STRING, prs.getParameters().get(1).getDataType());
+        assertEquals("name", prs.getParameters().get(1).getName());
+
+        assertEquals(ParseResult.Type.DATE, prs.getParameters().get(2).getDataType());
+        assertEquals("other", prs.getParameters().get(2).getName());
+
+        assertEquals(ParseResult.Type.DATETIME, prs.getParameters().get(3).getDataType());
+        assertEquals("bla", prs.getParameters().get(3).getName());
+
+        assertEquals(ParseResult.Type.NUMBER, prs.getParameters().get(4).getDataType());
+        assertEquals("num", prs.getParameters().get(4).getName());
+
+        assertEquals(ParseResult.Type.NONE, prs.getParameters().get(5).getDataType());
+        assertEquals("id", prs.getParameters().get(5).getName());
+    }
 
     @Test
     public void parseWithDataTypes() {
@@ -33,6 +64,13 @@ public class ParseResultTest {
 
         assertEquals("num", prs.getParameters().get(1).getName());
         assertEquals(ParseResult.Type.NONE, prs.getParameters().get(1).getDataType());
+    }
+
+    @Test
+    public void parsePostgreSQLCasting() {
+        ParseResult prs = ParseResult.parse("SELECT '100'::INTEGER, '01-OCT-2015'::DATE;");
+        assertEquals("SELECT '100'::INTEGER, '01-OCT-2015'::DATE;", prs.getSql());
+        assertEquals(0, prs.getParameters().size());
     }
 
 

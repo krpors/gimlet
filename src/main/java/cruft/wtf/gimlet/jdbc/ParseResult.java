@@ -95,12 +95,15 @@ public final class ParseResult {
                     inMultiLineComment = true;
                 } else if (c == '-' && query.charAt(i + 1) == '-') {
                     inSingleLineComment = true;
-                } else if (c == ':' && i + 1 < length && Character.isJavaIdentifierStart(query.charAt(i + 1))) {
+                } else if (i + 1 < length
+                        && Character.isWhitespace(c)
+                        && query.charAt(i + 1) == ':'
+                        && Character.isJavaIdentifierStart(query.charAt(i + 2))) {
                     int j = i + 2;
                     while (j < length && Character.isJavaIdentifierPart(query.charAt(j))) {
                         j++;
                     }
-                    String name = query.substring(i + 1, j);
+                    String name = query.substring(i + 2, j);
                     StringBuilder type = new StringBuilder();
 
                     // This next part tries to read the input data type. This data type takes the form of
@@ -108,7 +111,7 @@ public final class ParseResult {
                     // interpreted as the data type.
 
                     // Amount of characters to skip after parsing the [...] part (bracket inclusive)
-                    int skip = 0;
+                    int skip = 1;
                     // The last index found of the [ character.
                     int lastIndexOfOpenBracket = -1;
                     // Whether a bracket has been closed.
@@ -141,6 +144,7 @@ public final class ParseResult {
                     }
 
                     parameters.add(new Param(name, dataType));
+                    parsedQuery.append(' ');
                     c = '?'; // replaceChars the parameter with a question mark
                     i += name.length() + skip; // skip past the end of the parameter
                 }
