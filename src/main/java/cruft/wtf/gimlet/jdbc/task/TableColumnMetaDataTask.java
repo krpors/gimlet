@@ -46,10 +46,10 @@ public class TableColumnMetaDataTask extends Task<ObservableList<ObjectsTableDat
         }
 
         DatabaseMetaData dmd = connection.getMetaData();
-        ResultSet rs = dmd.getColumns(null, schemaName, dbObject.getName(), "%");
+        ResultSet rs = dmd.getColumns(null, schemaName, dbObject.getTable(), "%");
 
         // Get primary keys of the table.
-        ResultSet pks = dmd.getPrimaryKeys(null, schemaName, dbObject.getName());
+        ResultSet pks = dmd.getPrimaryKeys(null, schemaName, dbObject.getTable());
         Set<String> setColumnPks = new HashSet<>();
         while (pks.next()) {
             setColumnPks.add(pks.getString("COLUMN_NAME"));

@@ -177,7 +177,7 @@ public class ObjectsTab extends Tab {
             return;
         }
 
-        TableColumnMetaDataTask task = new TableColumnMetaDataTask(this.connection, newValue.getParent().getValue().getName(), newValue.getValue(), 50);
+        TableColumnMetaDataTask task = new TableColumnMetaDataTask(this.connection, newValue.getParent().getValue().getTable(), newValue.getValue(), 50);
         task.setOnFailed(event -> {
             System.out.println("failed");
         });
@@ -200,18 +200,23 @@ public class ObjectsTab extends Tab {
             return;
         }
 
-        logger.debug("Fetching table data for " + newValue.getValue().getName());
+        logger.debug("Fetching table data for {}", newValue.getValue().getTable());
 
         // FIXME: HIGHLY unlikely I guess, but SQL injection *may* occur...
-        String schema = newValue.getParent().getValue().getName();
-        String table = newValue.getValue().getName();
-        SimpleQueryTask sqt = new SimpleQueryTask(connection, String.format("select * from \"%s\".\"%s\"", schema, table), 100);
+        String schema = newValue.getValue().getSchema();
+        String table = newValue.getValue().getTable();
+
+        String query = String.format("select * from \"%s\".\"%s\"", schema, table);
+        if (schema == null) {
+            query = String.format("select * from \"%s\"", table);
+        }
+
+        SimpleQueryTask sqt = new SimpleQueryTask(connection, query, 100);
         sqt.setOnSucceeded(event -> {
             try (CachedRowSet rowset = sqt.getValue()) {
                 List<Column> columnList = CachedRowSetTransformer.getColumns(rowset);
                 ObservableList<ObservableList> data = CachedRowSetTransformer.getData(rowset);
                 resultTable.setItems(columnList, data);
-
 
             } catch (SQLException ex) {
                 logger.error("Error", ex);
@@ -280,7 +285,7 @@ public class ObjectsTab extends Tab {
             super.updateItem(item, empty);
 
             if (item != null && !empty) {
-                setText(item.getName());
+                setText(item.getDisplayName());
                 switch (item.getType()) {
                     case DatabaseObject.ROOT:
                         setGraphic(Images.FOLDER.imageView());

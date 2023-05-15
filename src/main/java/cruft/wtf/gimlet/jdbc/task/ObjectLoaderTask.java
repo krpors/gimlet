@@ -63,10 +63,17 @@ public class ObjectLoaderTask extends Task<TreeItem<DatabaseObject>> {
      */
     @Override
     protected TreeItem<DatabaseObject> call() throws Exception {
-        TreeItem<DatabaseObject> root = new TreeItem<>(new DatabaseObject(DatabaseObject.ROOT, "Schemas"));
+        TreeItem<DatabaseObject> root = new TreeItem<>(new DatabaseObject(DatabaseObject.ROOT, "Root", null));
         root.setExpanded(true);
 
-        findSchemas(root);
+        TreeItem<DatabaseObject> schemas = new TreeItem<>(new DatabaseObject(DatabaseObject.ROOT, "Schemas", null));
+        findSchemas(schemas);
+
+        TreeItem<DatabaseObject> schemaless = new TreeItem<>(new DatabaseObject(DatabaseObject.ROOT, "Schemaless", null));
+        findTables(schemaless, null);
+
+        root.getChildren().add(schemas);
+        root.getChildren().add(schemaless);
 
         return root;
     }
@@ -82,18 +89,18 @@ public class ObjectLoaderTask extends Task<TreeItem<DatabaseObject>> {
 
             String schema = rs.getString("TABLE_SCHEM");
             loadingSchemaProperty.set("Loading schema " + schema);
-            logger.debug("  Found schema '{}'", schema);
+            logger.debug("Found schema '{}'", schema);
 
-            TreeItem<DatabaseObject> item = new TreeItem<>(new DatabaseObject(DatabaseObject.SCHEMA, schema));
+            TreeItem<DatabaseObject> item = new TreeItem<>(new DatabaseObject(DatabaseObject.SCHEMA, schema, null));
             root.getChildren().add(item);
 
             findTables(item, schema);
         }
-
         rs.close();
     }
 
     private void findTables(final TreeItem<DatabaseObject> root, String schemaName) throws SQLException {
+        logger.info("Finding tables for schema '{}'", schemaName);
         DatabaseMetaData dmd = connection.getMetaData();
         ResultSet tables = dmd.getTables(null, schemaName, "%", null);
         while (tables.next()) {
@@ -105,9 +112,9 @@ public class ObjectLoaderTask extends Task<TreeItem<DatabaseObject>> {
             if ("TABLE".equals(tableType)) {
                 String tableName = tables.getString("TABLE_NAME");
                 loadingTableProperty.set("Loading table " + tableName);
-                logger.debug("    Found table '{}'", tableName);
+                logger.debug("Found table '{}' for schema '{}'", tableName, schemaName);
 
-                TreeItem<DatabaseObject> treeItemTable = new TreeItem<>(new DatabaseObject(DatabaseObject.TABLE, tableName));
+                TreeItem<DatabaseObject> treeItemTable = new TreeItem<>(new DatabaseObject(DatabaseObject.TABLE, schemaName, tableName));
                 root.getChildren().add(treeItemTable);
             }
         }

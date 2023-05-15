@@ -12,11 +12,14 @@ public class DatabaseObject {
 
     private int type;
 
-    private String name;
+    private String schema;
 
-    public DatabaseObject(int type, String name) {
+    private String table;
+
+    public DatabaseObject(int type, String schema, String table) {
         this.type = type;
-        this.name = name;
+        this.schema = schema;
+        this.table = table;
     }
 
     public int getType() {
@@ -27,11 +30,29 @@ public class DatabaseObject {
         this.type = type;
     }
 
-    public String getName() {
-        return name;
+    public String getTable() {
+        return table;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTable(String table) {
+        this.table = table;
+    }
+
+    public String getSchema() {
+        return schema;
+    }
+
+    public void setSchema(String schema) {
+        this.schema = schema;
+    }
+
+    public String getDisplayName() {
+        if (table != null) {
+            return table;
+        } else if  (schema != null) {
+            return schema;
+        } else {
+            return "!NO NAME!";
+        }
     }
 }
