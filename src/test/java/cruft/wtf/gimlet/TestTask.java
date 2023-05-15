@@ -1,7 +1,7 @@
 package cruft.wtf.gimlet;
 
 import cruft.wtf.gimlet.jdbc.SqlUtil;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import javax.sql.rowset.CachedRowSet;
 import javax.sql.rowset.RowSetProvider;

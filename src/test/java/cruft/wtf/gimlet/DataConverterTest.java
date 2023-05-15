@@ -3,9 +3,9 @@ package cruft.wtf.gimlet;
 import cruft.wtf.gimlet.util.DataConverter;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,7 +16,7 @@ public class DataConverterTest {
 
     private ObservableList<ObservableList> data;
 
-    @Before
+    @BeforeEach
     public void init() {
         colNames = Arrays.asList("LARGE_FIRST_COLUMN_NAME", "Two");
 
@@ -45,7 +45,7 @@ public class DataConverterTest {
         what = what.replaceAll("\r\n", "\n");
         System.out.println(what);
 
-        Assert.assertEquals(TestUtils.readFromClasspath("/exporter/case01.txt"), what);
+        Assertions.assertEquals(TestUtils.readFromClasspath("/exporter/case01.txt"), what);
     }
 
     @Test
@@ -60,7 +60,7 @@ public class DataConverterTest {
         what = what.replaceAll("\r\n", "\n");
         System.out.println(what);
 
-        Assert.assertEquals(TestUtils.readFromClasspath("/exporter/case02.txt"), what);
+        Assertions.assertEquals(TestUtils.readFromClasspath("/exporter/case02.txt"), what);
     }
 
     @Test
@@ -75,14 +75,14 @@ public class DataConverterTest {
         what = what.replaceAll("\r\n", "\n");
         System.out.println(what);
 
-        Assert.assertEquals(TestUtils.readFromClasspath("/exporter/case03.txt"), what);
+        Assertions.assertEquals(TestUtils.readFromClasspath("/exporter/case03.txt"), what);
     }
 
     @Test
     public void html() {
         String yo = DataConverter.convertToHtml(colNames, data);
         System.out.println(yo);
-        Assert.assertEquals(TestUtils.readFromClasspath("/exporter/html.html"), yo);
+        Assertions.assertEquals(TestUtils.readFromClasspath("/exporter/html.html"), yo);
     }
 
 }

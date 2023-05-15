@@ -1,9 +1,9 @@
 package cruft.wtf.gimlet.jdbc.task;
 
 import cruft.wtf.gimlet.jdbc.SqlUtil;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.sql.*;
 import java.util.List;
@@ -12,13 +12,13 @@ public class SimpleQueryTaskTest {
 
     private static Connection connection;
 
-    @BeforeClass
+    @BeforeAll
     public static void setup() throws SQLException {
         connection = DriverManager.getConnection("jdbc:hsqldb:mem:simplequerytasktest;shutdown=true");
         System.out.println("Created connection");
     }
 
-    @AfterClass
+    @AfterAll
     public static void teardown() throws SQLException {
         connection.close();
         System.out.println("Closed connection");
