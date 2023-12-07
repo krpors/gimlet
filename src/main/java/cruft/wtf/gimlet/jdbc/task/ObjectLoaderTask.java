@@ -69,11 +69,11 @@ public class ObjectLoaderTask extends Task<TreeItem<DatabaseObject>> {
         TreeItem<DatabaseObject> schemas = new TreeItem<>(new DatabaseObject(DatabaseObject.ROOT, "Schemas", null));
         findSchemas(schemas);
 
-        TreeItem<DatabaseObject> schemaless = new TreeItem<>(new DatabaseObject(DatabaseObject.ROOT, "Schemaless", null));
-        findTables(schemaless, null);
+        TreeItem<DatabaseObject> noSchemas = new TreeItem<>(new DatabaseObject(DatabaseObject.ROOT, "No schema", null));
+        findTables(noSchemas, null);
 
         root.getChildren().add(schemas);
-        root.getChildren().add(schemaless);
+        root.getChildren().add(noSchemas);
 
         return root;
     }
