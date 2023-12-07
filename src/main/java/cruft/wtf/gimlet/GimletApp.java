@@ -8,6 +8,7 @@ import cruft.wtf.gimlet.event.FileSavedEvent;
 import cruft.wtf.gimlet.event.LoadProjectEvent;
 import cruft.wtf.gimlet.ui.*;
 import cruft.wtf.gimlet.util.VersionInfo;
+import jakarta.xml.bind.JAXBException;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -26,7 +27,6 @@ import javafx.stage.Window;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.JAXBException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;

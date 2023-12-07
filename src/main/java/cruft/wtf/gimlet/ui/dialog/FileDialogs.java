@@ -5,11 +5,11 @@ import cruft.wtf.gimlet.conf.GimletProject;
 import cruft.wtf.gimlet.event.EventDispatcher;
 import cruft.wtf.gimlet.event.FileSavedEvent;
 import cruft.wtf.gimlet.event.LoadProjectEvent;
+import jakarta.xml.bind.JAXBException;
 import javafx.stage.FileChooser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.xml.bind.JAXBException;
 import java.io.File;
 
 /**

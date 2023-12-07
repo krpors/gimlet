@@ -1,10 +1,9 @@
 package cruft.wtf.gimlet.conf;
 
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Marshaller;
 import org.junit.jupiter.api.Test;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 
 public class AliasTest {
 

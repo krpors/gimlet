@@ -1,11 +1,11 @@
 package cruft.wtf.gimlet.conf;
 
+import jakarta.xml.bind.annotation.XmlType;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
-import javax.xml.bind.annotation.XmlType;
 
 /**
  * A configuration item which holds some common properties.

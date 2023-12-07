@@ -2,7 +2,6 @@ module gimlet {
     requires java.base;
     requires java.scripting;
     requires java.xml;
-    requires java.xml.bind;
     requires java.sql;
     requires java.sql.rowset;
 
@@ -10,7 +9,8 @@ module gimlet {
     requires ch.qos.logback.classic;
     requires ch.qos.logback.core;
     requires org.slf4j;
-    requires com.sun.xml.bind;
+    requires jakarta.activation;
+    requires jakarta.xml.bind;
 
     requires javafx.base;
     requires javafx.controls;
@@ -23,7 +23,7 @@ module gimlet {
 
     // Some opens directives for Guava as well.
     opens cruft.wtf.gimlet;
-    opens cruft.wtf.gimlet.conf to java.xml.bind;
+    opens cruft.wtf.gimlet.conf to jakarta.xml.bind;
 
 
 }
